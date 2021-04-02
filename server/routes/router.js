@@ -7,7 +7,8 @@ const verify = require('./verifyToken');
 const ownerController = require('../controller/ownerController');
 const driverController = require('../controller/driverController');
 const passengerController = require('../controller/passengerController');
-const rideHistoryController = require('../controller/riderHistoryController');
+const vehicleController = require('../controller/vehicleController');
+const rideController = require('../controller/rideController');
 
 
 // API
