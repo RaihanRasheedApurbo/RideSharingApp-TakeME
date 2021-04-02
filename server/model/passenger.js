@@ -21,8 +21,23 @@ var PassengerSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    address : {
+    gender : {
         type : String,
+        required: true,
+    },
+    address : {
+        type : Object,
+        street : {
+            type: String
+        },
+        city : {
+            type: String,
+            require: true
+        },
+        country : {
+            type: String,
+            require: true
+        },
         required: true
     },
     nid : {

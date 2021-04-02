@@ -21,20 +21,35 @@ var DriverSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    gender : {
+        type : String,
+        required: true,
+    },
     address : {
         type : Object,
+        street : {
+            type: String
+        },
+        city : {
+            type: String,
+            require: true
+        },
+        country : {
+            type: String,
+            require: true
+        },
         required: true
     },
     nid : {
         type : String,
         required: true
     },
-    licenseNo : {
-        type : String,
-        required: true
-    },
     rating : {
         type : Number,
+        required: true
+    },
+    licenseNo : {
+        type : String,
         required: true
     },
     vehicleID : {
