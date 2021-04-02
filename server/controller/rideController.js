@@ -9,12 +9,13 @@ exports.addRide = (req, res) => {
     
     // new Ride
     const ride = new Ride({
-        model : req.body.model,
-        type : req.body.type,
-        regNo : req.body.regNo,
-        ownerID : req.body.ownerID,
         driverID : req.body.driverID,
-        capacity : req.body.capacity
+        passengerID : req.body.passengerID,
+        vehicleID : req.body.vehicleID,
+        duration : req.body.duration,
+        fare : req.body.fare,
+        source : req.body.source,
+        destination : req.body.destination
     });
 
     // save ride in the database
