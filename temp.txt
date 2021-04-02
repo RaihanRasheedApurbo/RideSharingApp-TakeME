@@ -1,0 +1,14 @@
+{
+    "name": "Wayne",
+    "email": "Wayne@gmail.com",
+    "password": "IamBatman",
+    "phone": "888",
+    "gender": "Male",
+    "address": {
+        "street": "2/Wayne Street",
+        "city": "Gotham City",
+        "country": "USA"
+    },
+    "nid": "0000",
+    "vehicleList": []
+}
