@@ -4,8 +4,7 @@ const jwt = require('jsonwebtoken');
 exports.register = (req, res) => {
     // validate request
     if(!req.body){
-        res.status(400).send({ message : "Content can not be emtpy!"});
-        return;
+        return res.status(400).send({ message : "Content can not be emtpy!"});
     }
     
     Passenger.findOne({ email: req.body.email })
@@ -13,7 +12,7 @@ exports.register = (req, res) => {
             if(data) {
                 //Email already Exists
                 console.log(data);
-                return res.status(400).send({ message: "Email already Exists", data: data});
+                return res.status(400).send({ message: "Email already Exists"});
             }
             else {
                 // new Passenger

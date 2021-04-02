@@ -4,8 +4,7 @@ const jwt = require('jsonwebtoken');
 exports.register = (req, res) => {
     // validate request
     if(!req.body){
-        res.status(400).send({ message : "Content can not be emtpy!"});
-        return;
+        return res.status(400).send({ message : "Content can not be emtpy!"});
     }
     
     Driver.findOne({ email: req.body.email })
