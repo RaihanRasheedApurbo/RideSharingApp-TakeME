@@ -20,12 +20,25 @@ route.get('/api/owner/dashboard', verify, ownerController.showDashboard);
 route.post('/api/driver/register', driverController.register);
 route.post('/api/driver/login', driverController.login);
 route.get('/api/driver/dashboard', verify, driverController.showDashboard);
+route.get('/api/driver/vehicleID', driverController.findByVehicleID);
 
 
 route.post('/api/passenger/register', passengerController.register);
 route.post('/api/passenger/login', passengerController.login);
 route.get('/api/passenger/dashboard', verify, passengerController.showDashboard);
 
+
+route.post('/api/vehicle/register', verify, vehicleController.addVehicle);
+route.get('/api/vehicle/id/', vehicleController.find);
+route.get('/api/vehicle/ownerID/', vehicleController.findByOwnerID);
+route.get('/api/vehicle/driverID/', vehicleController.findByDriverID);
+
+
+route.post('api/ride/add', rideController.addRide);
+route.get('/api/ride/id/', rideController.find);
+route.get('/api/ride/passengerID/', rideController.findByPassengerID);
+route.get('/api/ride/driverID/', rideController.findByDriverID);
+route.get('/api/ride/vehicleID/', rideController.findByVehicleID);
 
 
 module.exports = route;

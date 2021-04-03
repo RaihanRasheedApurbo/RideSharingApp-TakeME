@@ -24,7 +24,6 @@ exports.register = (req, res) => {
                     gender: req.body.gender,
                     address : req.body.address,
                     nid : req.body.nid,
-                    rating : req.body.rating,
                     licenseNo : req.body.licenseNo,
                     vehicleID : req.body.vehicleID
                 });
@@ -79,4 +78,21 @@ exports.showDashboard = (req, res) => {
     .catch(err =>{
         res.status(500).send({ message: err.message || "Error retrieving driver with id " + id})
     })
+}
+
+
+//find Driver using vehicleID
+exports.findByVehicleID = (req, res) => {
+    Driver.find({ 'vehicleID': req.body._id })
+    .then(data =>{
+        if(data.length <= 0){
+            res.status(404).send({ message : "No Driver with vehicleID: " + req.body._id });
+        }else{
+            //console.log(data)
+            res.send(data);    
+        }
+    })
+    .catch(err =>{
+        res.status(500).send({ message: err.message || "Error retrieving Driver with vehicleID: " + req.body._id});
+    });
 }

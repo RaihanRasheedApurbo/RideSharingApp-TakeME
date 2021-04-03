@@ -1,6 +1,10 @@
 const Owner = require('../model/owner');
 const jwt = require('jsonwebtoken');
 
+const driverController = require('../controller/driverController');
+const vehicleController = require('./vehicleController');
+const rideController = require('./rideController'); 
+
 exports.register = (req, res) => {
     // validate request
     if(!req.body){
@@ -76,5 +80,16 @@ exports.showDashboard = (req, res) => {
     })
     .catch(err =>{
         res.status(500).send({ message: err.message || "Error retrieving owner with id " + id})
-    })
+    });
+}
+
+//vehicleInfoFunction
+exports.showVehicleDetails = (req, res) => {
+    const vehicleID = req.body._id;
+    const driverData = driverController.findByVehicleID();
+
+    const rideData = rideController.findByVehicleID();
+
+    console.log(driverData, rideData);
+
 }

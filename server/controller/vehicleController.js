@@ -1,5 +1,5 @@
 const Vehicle = require('../model/vehicle');
-const jwt = require('jsonwebtoken');
+const Owner = require('../model/owner');
 
 exports.addVehicle = (req, res) => {
     // validate request
@@ -20,16 +20,22 @@ exports.addVehicle = (req, res) => {
                     model : req.body.model,
                     type : req.body.type,
                     regNo : req.body.regNo,
-                    ownerID : req.body.ownerID,
+                    ownerID : req.data._id,
                     driverID : req.body.driverID,
                     capacity : req.body.capacity
                 });
 
                 // save vehicle in the database
                 vehicle.save()
-                    .then(data => {
-                        res.send(data)
-                        //res.redirect('/add-user');
+                    .then(vehicleData => {
+                        Owner.findByIdAndUpdate(req.data._id, {$addToSet :{ "vehicleList": vehicleData }}, { useFindAndModify: false, new: true })
+                        .then(ownerData => {
+                            res.send({vehicleData, ownerData});
+                            //res.redirect('/add-user');
+                        })
+                        .catch( err => {
+                            res.status(500).send({ message : err.message });
+                        });
                     })
                     .catch(err =>{
                         res.status(500).send({
@@ -42,6 +48,7 @@ exports.addVehicle = (req, res) => {
             res.status(500).send({ message : err.message });
         });
 }
+
 
 //find
 exports.find = (req, res) => {
@@ -60,7 +67,6 @@ exports.find = (req, res) => {
 }
 
 
-
 //find vehicle using ownerID
 exports.findByOwnerID = (req, res) => {
     Vehicle.find({ 'ownerID': req.body._id })
@@ -76,6 +82,7 @@ exports.findByOwnerID = (req, res) => {
         res.status(500).send({ message: err.message || "Error retrieving vehicle with ownerID " + req.body._id});
     });
 }
+
 
 //find vehicle using driverID
 exports.findByDriverID = (req, res) => {

@@ -46,6 +46,7 @@ var DriverSchema = new mongoose.Schema({
     },
     rating : {
         type : Number,
+        default: 5,
         required: true
     },
     licenseNo : {
@@ -53,8 +54,7 @@ var DriverSchema = new mongoose.Schema({
         required: true
     },
     vehicleID : {
-        type : String,
-        required: true
+        type : String
     }
 })
 

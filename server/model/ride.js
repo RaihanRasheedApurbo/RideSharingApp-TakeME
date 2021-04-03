@@ -27,6 +27,10 @@ var RideSchema = new mongoose.Schema({
     },
     source : {
         type : Object,
+        name : {
+            type: String,
+            required: true
+        },
         latitude: {
             type: Number,
             required: true
@@ -39,6 +43,10 @@ var RideSchema = new mongoose.Schema({
     },
     destination : {
         type : Object,
+        name : {
+            type: String,
+            required: true
+        },
         latitude: {
             type: Number,
             required: true
