@@ -42,7 +42,8 @@ var PassengerSchema = new mongoose.Schema({
     },
     nid : {
         type : String,
-        required: true
+        required: true,
+        unique: true
     },
     instID : {
         type : String

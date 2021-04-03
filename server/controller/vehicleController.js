@@ -20,9 +20,9 @@ exports.addVehicle = (req, res) => {
                     model : req.body.model,
                     type : req.body.type,
                     regNo : req.body.regNo,
+                    capacity : req.body.capacity,
                     ownerID : req.data._id,
-                    driverID : req.body.driverID,
-                    capacity : req.body.capacity
+                    driverID : req.body.driverID
                 });
 
                 // save vehicle in the database

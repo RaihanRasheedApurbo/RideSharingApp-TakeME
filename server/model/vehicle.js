@@ -9,6 +9,10 @@ var VehicleSchema = new mongoose.Schema({
         type : String,
         required: true
     },
+    capacity : {
+        type : Number,
+        required: true
+    },
     regNo : {
         type: String,
         required: true,
@@ -19,12 +23,7 @@ var VehicleSchema = new mongoose.Schema({
         required: true
     },
     driverID : {
-        type: String,
-        required: true
-    },
-    capacity : {
-        type : Number,
-        required: true
+        type: String
     }
 })
 

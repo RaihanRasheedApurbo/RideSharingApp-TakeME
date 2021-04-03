@@ -42,7 +42,8 @@ var DriverSchema = new mongoose.Schema({
     },
     nid : {
         type : String,
-        required: true
+        required: true,
+        unique: true
     },
     rating : {
         type : Number,

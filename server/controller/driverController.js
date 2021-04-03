@@ -15,6 +15,8 @@ exports.register = (req, res) => {
                 return res.status(400).send({ message: "Email already Exists", data: data});
             }
             else {
+                console.log('req.body');
+                console.log(req.body);
                 // new Driver
                 const driver = new Driver({
                     name : req.body.name,
@@ -24,8 +26,7 @@ exports.register = (req, res) => {
                     gender: req.body.gender,
                     address : req.body.address,
                     nid : req.body.nid,
-                    licenseNo : req.body.licenseNo,
-                    vehicleID : req.body.vehicleID
+                    licenseNo : req.body.licenseNo
                 });
 
                 // save driver in the database
@@ -35,6 +36,7 @@ exports.register = (req, res) => {
                         //res.redirect('/add-user');
                     })
                     .catch(err =>{
+                        console.log(driver);
                         res.status(500).send({
                             message : err.message || "Some error occurred while creating a create operation"
                         });

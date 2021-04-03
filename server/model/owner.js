@@ -42,7 +42,8 @@ var OwnerSchema = new mongoose.Schema({
     },
     nid : {
         type : String,
-        required: true
+        required: true,
+        unique: true
     },
     vehicleList : {
         type : Array,
