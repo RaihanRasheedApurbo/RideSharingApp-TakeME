@@ -5,7 +5,6 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/cardview_dark_background"
     android:fitsSystemWindows="true"
     tools:context=".MainActivity"
     tools:openDrawer="start">
@@ -57,25 +56,41 @@
                 android:layout_width="match_parent"
                 android:layout_height="450dp"
                 android:layout_alignParentBottom="true"
-                android:background="#000000"
+                android:background="#FFFFFF"
                 mapbox:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    >
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="Add Here"
-                    android:textSize="28dp" />
+<!--                    <TextView-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:layout_gravity="center"-->
+<!--                        android:text="Add Here"-->
+<!--                        android:textSize="28dp" />-->
 
-                <ImageButton
-                    android:layout_marginTop="20dp"
-                    android:id="@+id/imageButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@color/black"
-                    android:layout_gravity="center|top"
-                    mapbox:srcCompat="@android:drawable/button_onoff_indicator_off" />
+                    <ImageButton
+                        android:layout_marginTop="12dp"
+                        android:id="@+id/imageButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@color/white"
+                        android:layout_centerHorizontal="true"
+                        mapbox:srcCompat="@android:drawable/button_onoff_indicator_off" />
+
+                    <include
+                        android:id="@+id/bottom_slider"
+                        layout="@layout/bottom_profile"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_below="@id/imageButton"
+                        />
+
+
+                </RelativeLayout>
+
 
             </FrameLayout>
 
