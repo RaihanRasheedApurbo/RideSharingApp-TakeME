@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Take-me</string>
+    <string name="access_token">pk.eyJ1IjoicmFpaGFucmFzaGVlZGFwdXJibyIsImEiOiJja214NjlnMWIwNWd4Mm9wN3NjYzdtcjU1In0.LLP5xs_kPAFMSfVIMZJgkQ</string>
+    <string name="navigation_drawer_open">Open Navigation Drawer</string>
+    <string name="navigation_drawer_close">Close Navigation Drawer</string>
+
+
+</resources>
