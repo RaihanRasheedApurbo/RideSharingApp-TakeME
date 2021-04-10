@@ -15,10 +15,6 @@ exports.addVehicle = (req, res) => {
                 return res.status(400).send({ message: "Vehicle already Exists"});
             }
             else {
-                console.log('req.body');
-                console.log(req.body);
-                console.log('req.data');
-                console.log(req.data);
                 // new Vehicle
                 const vehicle = new Vehicle({
                     model : req.body.model,

@@ -23,7 +23,9 @@ var VehicleSchema = new mongoose.Schema({
         required: true
     },
     driverID : {
-        type: String
+        type: String,
+        required: true,
+        default: "None"
     },
     location: {
         type : Object,

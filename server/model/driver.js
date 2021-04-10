@@ -55,7 +55,9 @@ var DriverSchema = new mongoose.Schema({
         required: true
     },
     vehicleID : {
-        type : String
+        type : String,
+        required: true,
+        default: "None"
     }
 })
 

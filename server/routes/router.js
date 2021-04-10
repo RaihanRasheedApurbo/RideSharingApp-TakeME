@@ -15,7 +15,8 @@ const rideController = require('../controller/rideController');
 route.post('/api/owner/register', ownerController.register);
 route.post('/api/owner/login', ownerController.login);
 route.get('/api/owner/dashboard', verify, ownerController.showDashboard);
-
+route.get('/api/owner/vehicles', verify, ownerController.showVehicleDetails);
+route.post('/api/owner/addDriver', verify, ownerController.addDriverToVehicle);
 
 route.post('/api/driver/register', driverController.register);
 route.post('/api/driver/login', driverController.login);

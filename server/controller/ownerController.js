@@ -1,5 +1,8 @@
 const Owner = require('../model/owner');
+const Driver = require('../model/driver');
+const Vehicle = require('../model/vehicle');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 const driverController = require('../controller/driverController');
 const vehicleController = require('./vehicleController');
@@ -34,7 +37,7 @@ exports.register = (req, res) => {
                 // save owner in the database
                 owner.save()
                     .then(data => {
-                        res.send(data)
+                        res.send(data);
                         //res.redirect('/add-user');
                     })
                     .catch(err =>{
@@ -58,7 +61,7 @@ exports.login = (req, res) => {
         }else{
             //console.log(data)
             const token = jwt.sign({_id: data._id}, process.env.TOKEN_SECRET);
-            res.header('auth-token', token).send({'token': token, '_id': data._id});
+            res.header('auth-token', token).send({ message: 'login successful' });
         }
     })
     .catch(err =>{
@@ -85,11 +88,58 @@ exports.showDashboard = (req, res) => {
 
 //vehicleInfoFunction
 exports.showVehicleDetails = (req, res) => {
-    const vehicleID = req.body._id;
+    /*const vehicleID = req.body._id;
     const driverData = driverController.findByVehicleID();
 
     const rideData = rideController.findByVehicleID();
 
-    console.log(driverData, rideData);
+    console.log(driverData, rideData);*/
 
+    const id = req.data._id;
+    Owner.findById(id)
+    .then(data =>{
+        if(!data){
+            res.status(404).send({ message : "Owner Not found with id" + id})
+        }else{
+            //console.log(data)
+            res.send(data.vehicleList);
+        }
+    })
+    .catch(err =>{
+        res.status(500).send({ message: err.message || "Error retrieving owner with id " + id})
+    });
+
+}
+
+//driverAddFunction
+exports.addDriverToVehicle = (req, res) => {
+    const vid = req.body.vehicleID;
+    const did = req.body.driverID;
+
+    const id = req.data._id;
+    Owner.findById(id)
+    .then(data =>{
+        if(!data){
+            res.status(404).send({ message : "Owner Not found with id" + id})
+        }else{
+            //console.log(data)
+            //res.send(data.vehicleList);
+            for (let index = 0; index < data.vehicleList.length; index++) {
+                const element = data.vehicleList[index];
+                if (element._id == vid) {
+                    Promise.all([Vehicle.findByIdAndUpdate(vid, {driverID: did}, { useFindAndModify: false, new: true }),
+                                Driver.findByIdAndUpdate(did, {vehicleID: vid}, { useFindAndModify: false, new: true }),
+                                Owner.findOneAndUpdate({_id: req.data._id, "vehicleList._id": mongoose.Types.ObjectId(vid)}, { $set: { "vehicleList.$.driverID": did} }, { useFindAndModify: false, new: true })
+                            ]).then(data => {
+                                res.send(data);
+                            }).catch( err => {
+                                res.send({message: err.message})
+                            });
+                }
+            }
+        }
+    })
+    .catch(err =>{
+        res.status(500).send({ message: err.message || "Error retrieving owner with id " + id})
+    });
 }
