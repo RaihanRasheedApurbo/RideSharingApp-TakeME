@@ -15,14 +15,17 @@ exports.addVehicle = (req, res) => {
                 return res.status(400).send({ message: "Vehicle already Exists"});
             }
             else {
+                console.log('req.body');
+                console.log(req.body);
+                console.log('req.data');
+                console.log(req.data);
                 // new Vehicle
                 const vehicle = new Vehicle({
                     model : req.body.model,
                     type : req.body.type,
                     regNo : req.body.regNo,
                     capacity : req.body.capacity,
-                    ownerID : req.data._id,
-                    driverID : req.body.driverID
+                    ownerID : req.data._id
                 });
 
                 // save vehicle in the database

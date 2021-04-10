@@ -1,6 +1,8 @@
 const Chance = require("chance");
 const axios = require("axios");
 
+const Owner = require('./model/owner');
+
 let chance = new Chance();
 const address = 'http://localhost:3000/api/';
 
@@ -22,11 +24,7 @@ function driverPopulate() {
     
     console.log(driverData);
     
-    axios({
-        method: 'post',
-        url: address+'driver/register',
-        data: driverData
-    })
+    axios.post(address+'driver/register', driverData)
     .then( res => {
         console.log(res.data);
     })
@@ -45,7 +43,7 @@ function ownerPopulate() {
         address: {
             street: chance.street(),
             city: chance.city(),
-            country: chance.country()
+            country: chance.country({ full: true })
         },
         nid: chance.ssn({ dashes: false }),
         vehicleList: []
@@ -53,11 +51,7 @@ function ownerPopulate() {
     
     console.log(ownerData);
     
-    axios({
-        method: 'post',
-        url: address+'owner/register',
-        data: ownerData
-    })
+    axios.post(address+'owner/register', ownerData)
     .then( res => {
         console.log(res.data);
     })
@@ -76,61 +70,63 @@ function passengerPopulate() {
         address: {
             street: chance.street(),
             city: chance.city(),
-            country: chance.country()
+            country: chance.country({ full: true })
         },
         nid: chance.ssn({ dashes: false })
     };
     
     console.log(passengerData);
     
-    axios({
-        method: 'post',
-        url: address+'passenger/register',
-        data: passengerData
-    })
+    axios.post(address+'passenger/register', passengerData)
     .then( res => {
         console.log(res.data);
     })
     .catch( err => {
-        console.log(err);
+        console.log(err.message);
     });   
 }
 
-function vehiclePopulate(oid, did) {
+function vehiclePopulate() {
     let vehicleData = {
         model: chance.pickone(['BMW', 'Toyota', 'Mercedes-benz', 'Audi', 'Mitshubishi']),
         type: chance.pickone(['Standard', 'Premium', 'Delux']),
         regNo: chance.ssn({ dashes: false }),
-        capacity: chance.pickone([2, 4, 7]),
-        ownerID: oid,
-        driverID: did        
+        capacity: chance.pickone([2, 4, 7])      
     };
     
     console.log(vehicleData);
     
-    axios({
-        method: 'post',
-        url: address+'vehicle/register',
-        header: {
-            'auth-token': eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDY4ZTUwYjA3Yzg3NzNhNjhiNDRkOTEiLCJpYXQiOjE2MTc0ODcyMzh9.Xf7AgHOgFLV0CLL6M-sexfdIB9fajWwMH-JNk0SucT4
-        },
-        data: vehicleData
-    })
+    axios.post(address+'vehicle/register', vehicleData, {headers: header_data})
     .then( res => {
-        console.log(res.data);
+        console.log("res: \n", res.data);
     })
     .catch( err => {
-        console.log(err);
+        console.log("err: \n", err.message);
+    });
+}
+
+
+function test() {
+    Owner.find({})
+    .then( data => {
+        console.log(data);
+        console.log("hello");
+        console.log(data.length);
+    })
+    .catch( err => {
+        console.log("err", err);
     });
 }
 
 //driverPopulate();
 //ownerPopulate();
+
 //passengerPopulate();
-//console.log('hello');
 
+const header_data = {
+    'auth-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDZkZWE5NTg3NDA1NTI0YjhkZjVlMDYiLCJpYXQiOjE2MTgwNzExNTZ9.j81iCN2-GLtL1PpKnZJUcVoLR8HFopCn0TWevP6yWAA'
+}
+//vehiclePopulate();
+//get a random driver to put on the vehicle
 
-//oid = "6068e50b07c8773a68b44d91"
-//did = "6068e3183e137d3570c920c6"
-//vehiclePopulate(oid, did);
-
+test();
