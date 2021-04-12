@@ -11,7 +11,7 @@ exports.register = (req, res) => {
         .then(data => {
             if(data) {
                 //Email already Exists
-                console.log(data);
+                //console.log(data);
                 return res.status(400).send({ message: "Email already Exists"});
             }
             else {
@@ -29,7 +29,8 @@ exports.register = (req, res) => {
                 // save passenger in the database
                 passenger.save()
                     .then(data => {
-                        res.send(data)
+                        res.send(data);
+                        //res.send({ message: "registration successful" });
                         //res.redirect('/add-user');
                     })
                     .catch(err =>{
@@ -53,7 +54,7 @@ exports.login = (req, res) => {
         }else{
             //console.log(data)
             const token = jwt.sign({_id: data._id}, process.env.TOKEN_SECRET);
-            res.header('auth-token', token).send({'token': token, '_id': data._id});
+            res.header('auth-token', token).send({ message: "login successful" });
         }
     })
     .catch(err =>{
@@ -76,4 +77,14 @@ exports.showDashboard = (req, res) => {
     .catch(err =>{
         res.status(500).send({ message: err.message || "Error retrieving passenger with id " + id})
     })
+}
+
+exports.getAllPassengers = (req, res) => {
+    Passenger.find({})
+    .then(data => {
+        res.send(data);
+    })
+    .catch(err => {
+        res.status(400).send(err);
+    });
 }

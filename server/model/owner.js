@@ -45,9 +45,10 @@ var OwnerSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    vehicleList : {
-        type : Array,
-    }
+    vehicleList : [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vehicle'
+    }]
 })
 
 module.exports = mongoose.model('owner', OwnerSchema);

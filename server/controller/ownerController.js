@@ -18,7 +18,7 @@ exports.register = (req, res) => {
         .then(data => {
             if(data) {
                 //Email already Exists
-                console.log(data);
+                //console.log(data);
                 return res.status(400).send({ message: "Email already Exists" });
             }
             else {
@@ -38,6 +38,7 @@ exports.register = (req, res) => {
                 owner.save()
                     .then(data => {
                         res.send(data);
+                        //res.send({ message: "registration successful" });
                         //res.redirect('/add-user');
                     })
                     .catch(err =>{
@@ -113,33 +114,41 @@ exports.showVehicleDetails = (req, res) => {
 
 //driverAddFunction
 exports.addDriverToVehicle = (req, res) => {
-    const vid = req.body.vehicleID;
-    const did = req.body.driverID;
+    const oid = mongoose.Types.ObjectId(req.data._id);
+    const vid = mongoose.Types.ObjectId(req.body.vehicleID);
+    const did = mongoose.Types.ObjectId(req.body.driverID);
 
-    const id = req.data._id;
-    Owner.findById(id)
-    .then(data =>{
-        if(!data){
-            res.status(404).send({ message : "Owner Not found with id" + id})
-        }else{
-            //console.log(data)
-            //res.send(data.vehicleList);
-            for (let index = 0; index < data.vehicleList.length; index++) {
-                const element = data.vehicleList[index];
-                if (element._id == vid) {
-                    Promise.all([Vehicle.findByIdAndUpdate(vid, {driverID: did}, { useFindAndModify: false, new: true }),
-                                Driver.findByIdAndUpdate(did, {vehicleID: vid}, { useFindAndModify: false, new: true }),
-                                Owner.findOneAndUpdate({_id: req.data._id, "vehicleList._id": mongoose.Types.ObjectId(vid)}, { $set: { "vehicleList.$.driverID": did} }, { useFindAndModify: false, new: true })
-                            ]).then(data => {
-                                res.send(data);
-                            }).catch( err => {
-                                res.send({message: err.message})
-                            });
-                }
-            }
+    Owner.findOne({_id: oid, vehicleList:  vid})
+    .then(data => {
+        if(data) {
+            //console.log(data);
+            
+            vehicleUpdate = Vehicle.findByIdAndUpdate(vid, {driverID: did}, { useFindAndModify: false, new: true });
+            driverUpdate = Driver.findByIdAndUpdate(did, {vehicleID: vid}, { useFindAndModify: false, new: true }); 
+
+            Promise.all([vehicleUpdate, driverUpdate])
+            .then(data => {
+                //console.log(data);
+                res.send(data);
+            }).catch( err => {
+                res.status(500).send({message: err.message});
+            });
         }
+        else {
+            res.status(404).send({ message : "Owner Not found with vehicleID " + vid});
+        } 
     })
-    .catch(err =>{
-        res.status(500).send({ message: err.message || "Error retrieving owner with id " + id})
+    .catch( err => {
+        res.status(500).send({ message: err.message });
+    });
+}
+
+exports.getAllOwners = (req, res) => {
+    Owner.find({})
+    .then(data => {
+        res.send(data);
+    })
+    .catch(err => {
+        res.status(400).send(err);
     });
 }

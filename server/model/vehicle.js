@@ -19,13 +19,13 @@ var VehicleSchema = new mongoose.Schema({
         unique: true
     },
     ownerID : {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Owner',
         required: true
     },
     driverID : {
-        type: String,
-        required: true,
-        default: "None"
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Driver'
     },
     location: {
         type : Object,

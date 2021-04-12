@@ -46,10 +46,12 @@ var PassengerSchema = new mongoose.Schema({
         unique: true
     },
     instID : {
-        type : String
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Institute'
     },
     couponID : {
-        type : String
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Coupon'
     }
 })
 

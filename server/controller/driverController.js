@@ -11,12 +11,10 @@ exports.register = (req, res) => {
         .then(data => {
             if(data) {
                 //Email already Exists
-                console.log(data);
+                //console.log(data);
                 return res.status(400).send({ message: "Email already Exists", data: data});
             }
             else {
-                console.log('req.body');
-                console.log(req.body);
                 // new Driver
                 const driver = new Driver({
                     name : req.body.name,
@@ -32,11 +30,11 @@ exports.register = (req, res) => {
                 // save driver in the database
                 driver.save()
                     .then(data => {
-                        res.send(data)
+                        res.send(data);
+                        //res.send({ message: "registration succesful" });
                         //res.redirect('/add-user');
                     })
                     .catch(err =>{
-                        console.log(driver);
                         res.status(500).send({
                             message : err.message || "Some error occurred while creating a create operation"
                         });
@@ -57,11 +55,21 @@ exports.login = (req, res) => {
         }else{
             //console.log(data)
             const token = jwt.sign({_id: data._id}, process.env.TOKEN_SECRET);
-            res.header('auth-token', token).send({'token': token, '_id': data._id});
+            res.header('auth-token', token).send({ message: "login successful" });
         }
     })
     .catch(err =>{
         res.status(500).send({ message: err.message || "Error retrieving driver with email " + req.body.email});
+    });
+}
+
+exports.getAllDrivers = (req, res) => {
+    Driver.find({})
+    .then( data => {
+        res.send(data);
+    })
+    .catch( err => {
+        res.status(400).send(err);
     });
 }
 

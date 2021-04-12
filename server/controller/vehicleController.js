@@ -44,6 +44,7 @@ exports.addVehicle = (req, res) => {
             }
         })
         .catch(err =>{
+            console.log("fjlsdldsj");
             res.status(500).send({ message : err.message });
         });
 }
@@ -96,5 +97,15 @@ exports.findByDriverID = (req, res) => {
     })
     .catch(err =>{
         res.status(500).send({ message: err.message || "Error retrieving vehicle with driverID " + req.body._id});
+    });
+}
+
+exports.getAllVehicles = (req, res) => {
+    Vehicle.find({})
+    .then(data => {
+        res.send(data);
+    })
+    .catch(err => {
+        res.status(400).send(err);
     });
 }

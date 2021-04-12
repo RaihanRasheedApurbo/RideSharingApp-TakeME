@@ -13,10 +13,10 @@ var InstituteSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    userList : {
-        type: Array,
-        required: true
-    }
+    userList : [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Passenger'
+    }]
 })
 
 module.exports = mongoose.model('institute', InstituteSchema);

@@ -55,9 +55,8 @@ var DriverSchema = new mongoose.Schema({
         required: true
     },
     vehicleID : {
-        type : String,
-        required: true,
-        default: "None"
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Vehicle'
     }
 })
 

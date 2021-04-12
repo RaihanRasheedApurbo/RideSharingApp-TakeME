@@ -95,3 +95,13 @@ exports.findByVehicleID = (req, res) => {
         res.status(500).send({ message: err.message || "Error retrieving ride with vehicleID " + req.body._id});
     });
 }
+
+exports.getAllRides = (req, res) => {
+    Ride.find({})
+    .then(data => {
+        res.send(data);
+    })
+    .catch(err => {
+        res.status(400).send(err);
+    });
+}
