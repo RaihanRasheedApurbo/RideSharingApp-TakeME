@@ -350,4 +350,12 @@ for (let index = 0; index < n; index++) {
 }*/
 
 //show();
-ridePopulate(18);
+//ridePopulate(1);
+
+let duration = 60;
+let d = new Date();
+let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
+let end = d.toISOString();
+
+console.log(start);
+console.log(end);

@@ -82,18 +82,39 @@ exports.findByPassengerID = (req, res) => {
 
 //find ride using vehicleID
 exports.findByVehicleID = (req, res) => {
-    Ride.find({ 'vehicleID': req.body._id })
-    .then(data =>{
-        if(data.length <= 0){
-            res.status(404).send({ message : "No ride to show" });
-        }else{
-            //console.log(data)
-            res.send(data);    
-        }
-    })
-    .catch(err =>{
-        res.status(500).send({ message: err.message || "Error retrieving ride with vehicleID " + req.body._id});
-    });
+    if(req.body.duration) {
+        let duration = req.body.duration;
+        
+        let d = new Date();
+        let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
+        let end = d.toISOString();
+        
+        Ride.find({ 'vehicleID': req.body._id, 'time': {$lt: end}, 'time': {$gt: start} })
+        .then(data =>{
+            if(data.length <= 0){
+                res.send({ message : "No ride to show" });
+            }else{
+                res.send(data);
+            }
+        })
+        .catch(err =>{
+            res.status(500).send({ message: err.message || "Error retrieving ride with vehicleID " + req.body._id});
+        });
+    }
+    else {
+        Ride.find({ 'vehicleID': req.body._id })
+        .then(data =>{
+            if(data.length <= 0){
+                res.status(404).send({ message : "No ride to show" });
+            }else{
+                //console.log(data)
+                res.send(data);    
+            }
+        })
+        .catch(err =>{
+            res.status(500).send({ message: err.message || "Error retrieving ride with vehicleID " + req.body._id});
+        });
+    }
 }
 
 exports.getAllRides = (req, res) => {
