@@ -1,5 +1,6 @@
 const Ride = require('../model/ride');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 exports.addRide = (req, res) => {
     // validate request
@@ -50,34 +51,78 @@ exports.find = (req, res) => {
 
 //find ride using driverID
 exports.findByDriverID = (req, res) => {
-    Ride.find({ 'driverID': req.body._id })
-    .then(data =>{
-        if(data.length <= 0){
-            res.status(404).send({ message : "No ride to show" });
-        }else{
+    const id = mongoose.Types.ObjectId(req.body._id);
+    //const id = mongoose.Types.ObjectId(req.data._id);
+    if(req.body.duration) {
+        let duration = req.body.duration;
+        
+        let d = new Date();
+        let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
+        let end = d.toISOString();
+        
+        const getRideInfo = Ride.find({ 'driverID': id, 'time': {$gte: start, $lte: end} });
+        const getTotalEarning = Ride.aggregate([
+            { $match : { 'driverID': id, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+            { $group: { '_id': '$driverID', 'total': {$sum: '$fare'}}}
+        ]);
+
+        Promise.all([getRideInfo, getTotalEarning])
+        .then(data => {
+            res.send(data);
+            //console.log(data);
+        })
+        .catch(err => {
+            res.status(500).send({ message: err.message });
+        })
+    }
+    else {
+        Ride.find({ 'driverID': id })
+        .then(data =>{
             //console.log(data)
-            res.send(data);    
-        }
-    })
-    .catch(err =>{
-        res.status(500).send({ message: err.message || "Error retrieving ride with driverID " + req.body._id});
-    });
+            res.send(data); 
+        })
+        .catch(err =>{
+            res.status(500).send({ message: err.message });
+        });
+    }
 }
 
 //find ride using passengerID
 exports.findByPassengerID = (req, res) => {
-    Ride.find({ 'passengerID': req.body._id })
-    .then(data =>{
-        if(data.length <= 0){
-            res.status(404).send({ message : "No ride to show" });
-        }else{
+    const id = mongoose.Types.ObjectId(req.body._id);
+    //const id = mongoose.Types.ObjectId(req.data._id);
+    if(req.body.duration) {
+        let duration = req.body.duration;
+        
+        let d = new Date();
+        let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
+        let end = d.toISOString();
+        
+        const getRideInfo = Ride.find({ 'passengerID': id, 'time': {$gte: start, $lte: end} });
+        const getTotalEarning = Ride.aggregate([
+            { $match : { 'passengerID': id, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+            { $group: { '_id': '$passengerID', 'total': {$sum: '$fare'}}}
+        ]);
+
+        Promise.all([getRideInfo, getTotalEarning])
+        .then(data => {
+            res.send(data);
+            //console.log(data);
+        })
+        .catch(err => {
+            res.status(500).send({ message: err.message });
+        })
+    }
+    else {
+        Ride.find({ 'passengerID': id })
+        .then(data =>{
             //console.log(data)
-            res.send(data);    
-        }
-    })
-    .catch(err =>{
-        res.status(500).send({ message: err.message || "Error retrieving ride with passengerID " + req.body._id});
-    });
+            res.send(data); 
+        })
+        .catch(err =>{
+            res.status(500).send({ message: err.message });
+        });
+    }
 }
 
 //find ride using vehicleID
@@ -89,17 +134,20 @@ exports.findByVehicleID = (req, res) => {
         let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
         let end = d.toISOString();
         
-        Ride.find({ 'vehicleID': req.body._id, 'time': {$lt: end}, 'time': {$gt: start} })
-        .then(data =>{
-            if(data.length <= 0){
-                res.send({ message : "No ride to show" });
-            }else{
-                res.send(data);
-            }
+        const getRideInfo = Ride.find({ 'vehicleID': mongoose.Types.ObjectId(req.body._id), 'time': {$gte: start, $lte: end} });
+        const getTotalEarning = Ride.aggregate([
+            { $match : { 'vehicleID': mongoose.Types.ObjectId(req.body._id), 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+            { $group: { '_id': '$vehicleID', 'total': {$sum: '$fare'}}}
+        ]);
+
+        Promise.all([getRideInfo, getTotalEarning])
+        .then(data => {
+            res.send(data);
+            //console.log(data);
         })
-        .catch(err =>{
-            res.status(500).send({ message: err.message || "Error retrieving ride with vehicleID " + req.body._id});
-        });
+        .catch(err => {
+            res.status(500).send({ message: err.message });
+        })
     }
     else {
         Ride.find({ 'vehicleID': req.body._id })

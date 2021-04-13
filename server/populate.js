@@ -267,9 +267,9 @@ function show() {
         .then(res => {
             console.log(res.headers['auth-token']);
             header_data['auth-token'] = res.headers['auth-token'];
-            axios.get(address+'owner/dashboard', {headers: header_data})
+            axios.get(address+'owner/vehicles', {headers: header_data})
             .then(res => {
-                console.log(res.data.vehicleList.length);
+                console.log(res.data);
             })
             .catch(err => {
                 console.log(err);
@@ -349,13 +349,13 @@ for (let index = 0; index < n; index++) {
     passengerPopulate();
 }*/
 
-//show();
+show();
 //ridePopulate(1);
 
-let duration = 60;
+/*let duration = 60;
 let d = new Date();
 let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
 let end = d.toISOString();
 
 console.log(start);
-console.log(end);
+console.log(end);*/

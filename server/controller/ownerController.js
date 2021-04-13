@@ -89,21 +89,21 @@ exports.showDashboard = (req, res) => {
 
 //vehicleInfoFunction
 exports.showVehicleDetails = (req, res) => {
-    /*const vehicleID = req.body._id;
-    const driverData = driverController.findByVehicleID();
-
-    const rideData = rideController.findByVehicleID();
-
-    console.log(driverData, rideData);*/
-
     const id = req.data._id;
     Owner.findById(id)
-    .then(data =>{
+    .then(data => {
         if(!data){
             res.status(404).send({ message : "Owner Not found with id" + id})
         }else{
             //console.log(data)
-            res.send(data.vehicleList);
+            Vehicle.find({ _id: data.vehicleList })
+            .then(data => {
+                res.send(data);
+                //console.log(data);
+            })
+            .catch(err => {
+                console.log(err);
+            })
         }
     })
     .catch(err =>{
@@ -130,7 +130,7 @@ exports.addDriverToVehicle = (req, res) => {
             .then(data => {
                 //console.log(data);
                 res.send(data);
-            }).catch( err => {
+            }).catch(err => {
                 res.status(500).send({message: err.message});
             });
         }
