@@ -62,7 +62,7 @@ function generatePassenger() {
     };
 }
 
-function generaterOwner() {
+function generateOwner() {
     return {
         name: chance.name(),
         email: chance.email(),
@@ -349,7 +349,7 @@ for (let index = 0; index < n; index++) {
     passengerPopulate();
 }*/
 
-show();
+//show();
 //ridePopulate(1);
 
 /*let duration = 60;
@@ -359,3 +359,4 @@ let end = d.toISOString();
 
 console.log(start);
 console.log(end);*/
+console.log(generateOwner());
