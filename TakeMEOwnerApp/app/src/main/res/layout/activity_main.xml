@@ -45,7 +45,7 @@
             mapbox:mapbox_cameraTargetLat="23.8223"
             mapbox:mapbox_cameraTargetLng="90.3654"
             mapbox:mapbox_cameraZoom="13"
-            mapbox:mapbox_styleUrl="mapbox://styles/mapbox/dark-v9" />
+            mapbox:mapbox_styleUrl="mapbox://styles/mapbox/streets-v10" />
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"

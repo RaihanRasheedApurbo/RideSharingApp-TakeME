@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">Take-me</string>
-    <string name="access_token">pk.eyJ1IjoicmFpaGFucmFzaGVlZGFwdXJibyIsImEiOiJja214NjlnMWIwNWd4Mm9wN3NjYzdtcjU1In0.LLP5xs_kPAFMSfVIMZJgkQ</string>
+
+    <!--    mapbox api token-->
+    <!--    <string name="access_token">pk.eyJ1IjoicmFpaGFucmFzaGVlZGFwdXJibyIsImEiOiJja214NjlnMWIwNWd4Mm9wN3NjYzdtcjU1In0.LLP5xs_kPAFMSfVIMZJgkQ</string>-->
+    <string name="access_token">pk.eyJ1IjoicmFpaGFucmFzaGVlZGFwdXJibyIsImEiOiJja25pYXYyZ3EwNW9pMnVtZ3lzZ2V2dWU1In0.jVxDj-iq57u_-F-SoafbdA</string>
+
     <string name="navigation_drawer_open">Open Navigation Drawer</string>
     <string name="navigation_drawer_close">Close Navigation Drawer</string>
 
