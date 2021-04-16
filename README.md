@@ -207,3 +207,34 @@ and you receive
 
 An **Array** of **One** object  
 only containing **Array** of complete ride history with `_id` `vehicleID`
+
+## Dummy API  
+
+**API** `/api/dummy/`  
+***This is a GET request***  
+I receive nothing haha  
+you receive  
+
+```javascript
+{
+    item : <object>
+}
+```
+
+**API** `/api/dummy/`  
+***This is a POST request***  
+I receive  
+
+```javascript
+{
+    <object>
+}
+```
+
+you receive  
+
+```javascript
+{
+    item : <object>
+}
+```

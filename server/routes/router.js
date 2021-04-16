@@ -9,6 +9,7 @@ const driverController = require('../controller/driverController');
 const passengerController = require('../controller/passengerController');
 const vehicleController = require('../controller/vehicleController');
 const rideController = require('../controller/rideController');
+const dummyController = require('../controller/dummyController');
 
 
 // API
@@ -40,12 +41,18 @@ route.get('/api/vehicle/driverID/', vehicleController.findByDriverID);
 route.get('/api/vehicle/getAll', vehicleController.getAllVehicles); //this will be removed afterwards
 
 
-route.post('api/ride/add', verify, rideController.addRide);
+route.post('/api/ride/add', verify, rideController.addRide);
 route.get('/api/ride/id/', rideController.find);
 route.get('/api/ride/passengerID/', rideController.findByPassengerID);
 route.get('/api/ride/driverID/', rideController.findByDriverID);
 route.get('/api/ride/vehicleID/', rideController.findByVehicleID);
 route.get('/api/ride/getAll', rideController.getAllRides); //this will be removed afterwards
+
+
+
+//dummy routes
+route.get('/api/dummy', dummyController.get);
+route.post('/api/dummy', dummyController.set);
 
 
 module.exports = route;
