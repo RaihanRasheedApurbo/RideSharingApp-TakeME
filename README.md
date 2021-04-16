@@ -217,7 +217,7 @@ you receive
 
 ```javascript
 {
-    item : <object>
+    <object>
 }
 ```
 
@@ -235,6 +235,6 @@ you receive
 
 ```javascript
 {
-    item : <object>
+    <object>
 }
 ```
