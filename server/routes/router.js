@@ -14,7 +14,7 @@ const dummyController = require('../controller/dummyController');
 
 route.get('/', (req, res) => {
     res.render('index');
-})
+});
 
 // API
 route.post('/api/owner/register', ownerController.register);

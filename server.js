@@ -30,9 +30,16 @@ app.use('/css', express.static(path.resolve(__dirname, "assets/css")));
 app.use('/img', express.static(path.resolve(__dirname, "assets/img")));
 app.use('/js', express.static(path.resolve(__dirname, "assets/js")));
 
-// load routers
-app.use('/', require('./server/routes/router'));
+// test start purpose
 
+app.get('/', (req, res) => {
+    res.render('home');
+});
+
+const ownerController = require('./server/controller/ownerController');
+app.get('/api/owner/getAll', ownerController.getAllOwners); //this will be removed afterwards
+
+// test end
 
 /*if (process.env.NODE_ENV === 'production') {
 	app.use(express.static('client/build'));
@@ -41,5 +48,9 @@ app.use('/', require('./server/routes/router'));
 app.get('*', (request, response) => {
 	response.sendFile(path.join(__dirname, 'index.html'));
 });*/
+
+
+// load routers
+app.use('/', require('./server/routes/router'));
 
 app.listen(PORT, ()=> { console.log(`Server is running on http://localhost:${PORT}`)});
