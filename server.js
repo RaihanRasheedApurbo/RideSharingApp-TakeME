@@ -30,17 +30,6 @@ app.use('/css', express.static(path.resolve(__dirname, "assets/css")));
 app.use('/img', express.static(path.resolve(__dirname, "assets/img")));
 app.use('/js', express.static(path.resolve(__dirname, "assets/js")));
 
-// test start purpose
-
-app.get('/', (req, res) => {
-    res.render('home');
-});
-
-const ownerController = require('./server/controller/ownerController');
-app.get('/api/owner/getAll', ownerController.getAllOwners); //this will be removed afterwards
-
-// test end
-
 /*if (process.env.NODE_ENV === 'production') {
 	app.use(express.static('client/build'));
 }
