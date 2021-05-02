@@ -34,12 +34,12 @@ app.use('/js', express.static(path.resolve(__dirname, "assets/js")));
 app.use('/', require('./server/routes/router'));
 
 
-if (process.env.NODE_ENV === 'production') {
+/*if (process.env.NODE_ENV === 'production') {
 	app.use(express.static('client/build'));
 }
 
 app.get('*', (request, response) => {
 	response.sendFile(path.join(__dirname, 'index.html'));
-});
+});*/
 
 app.listen(PORT, ()=> { console.log(`Server is running on http://localhost:${PORT}`)});
