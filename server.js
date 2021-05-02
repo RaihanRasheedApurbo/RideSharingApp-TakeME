@@ -33,4 +33,13 @@ app.use('/js', express.static(path.resolve(__dirname, "assets/js")));
 // load routers
 app.use('/', require('./server/routes/router'));
 
+
+if (process.env.NODE_ENV === 'production') {
+	app.use(express.static('client/build'));
+}
+
+app.get('*', (request, response) => {
+	response.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.listen(PORT, ()=> { console.log(`Server is running on http://localhost:${PORT}`)});

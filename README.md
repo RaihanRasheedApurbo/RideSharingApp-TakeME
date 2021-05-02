@@ -1,6 +1,9 @@
 # take-me-backend
 
-back-end server for Take Me App
+back-end server for Take Me App  
+[Heroku Link](http://take-me-backend.herokuapp.com "Take Me Homepage")  
+`http://take-me-backend.herokuapp.com`  
+
 
 ## Owner Register
 
@@ -42,7 +45,7 @@ I receive
 You receive  
 `{ message: "login successful" }`  
 and
-`{'auth-token', token}` inside **res.headers**  
+`{'auth-token': token}` inside **res.headers**  
 
 ## Owner dashboard
 
@@ -80,7 +83,7 @@ You receive
 **API** `/api/owner/vehicles`  
 ***This is a GET request***  
 I receive  
-`{'auth-token', token}` inside **req.headers**  
+`{'auth-token': token}` inside **req.headers**  
 
 You receive  
 
