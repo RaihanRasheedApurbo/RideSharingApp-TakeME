@@ -1,40 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     app:cardCornerRadius="15dp"
     android:elevation="50dp"
     android:clickable="true"
-    android:background="@color/white"
     android:layout_margin="20dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
+        android:padding="10dp"
         >
 
-        <TextView
-            android:id="@+id/text_view_driver_name"
-            android:layout_above="@+id/text_view_driver_id"
-            android:layout_centerHorizontal="true"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/rel1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nullll"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            android:textColor="@color/black"/>
 
-        <TextView
-            android:layout_centerInParent="true"
-            android:id="@+id/text_view_driver_id"
-            android:layout_width="wrap_content"
+            >
+
+            <ImageView
+                android:id="@+id/imageView_driver"
+                android:layout_width="85dp"
+                android:layout_height="85dp"
+                android:src="@drawable/driver" />
+
+            <TextView
+                android:id="@+id/text_view_driver_name"
+                android:layout_toRightOf="@+id/imageView_driver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Driver Name"
+                android:textSize="20dp"
+                android:padding="10dp"
+                android:textColor="@color/black"/>
+
+            <TextView
+                android:layout_below="@+id/text_view_driver_name"
+                android:layout_toRightOf="@+id/imageView_driver"
+                android:id="@+id/text_view_driver_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Driver ID"
+                android:textSize="15dp"
+                android:paddingLeft="10dp"
+                android:textColor="@color/black"/>
+
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/rel2"
+            android:layout_below="@+id/rel1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nullll"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            android:textColor="@color/black"/>
+            android:padding="15dp"
+            >
+
+            <TextView
+                android:id="@+id/text_view_car_model"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Vehicle Model:   "/>
+
+            <TextView
+                android:id="@+id/text_view_car_model_value"
+                android:layout_toRightOf="@+id/text_view_car_model"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="value"/>
+
+
+            <TextView
+                android:id="@+id/text_view_car_reg_no"
+                android:layout_below="@id/text_view_car_model"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="Vehicle Reg No: "/>
+
+            <TextView
+                android:id="@+id/text_view_car_reg_no_value"
+                android:layout_toRightOf="@+id/text_view_car_reg_no"
+                android:layout_below="@id/text_view_car_model"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:text="value"/>
+
+            <TextView
+                android:id="@+id/text_view_driver_earning"
+                android:layout_below="@+id/text_view_car_reg_no"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:textStyle="bold"
+                android:text="Total Earning:    "/>
+
+            <TextView
+                android:id="@+id/text_view_driver_earning_value"
+                android:layout_toRightOf="@+id/text_view_driver_earning"
+                android:layout_below="@+id/text_view_car_reg_no"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:textStyle="bold"
+                android:text="0.00"/>
+
+
+
+        </RelativeLayout>
 
 
     </RelativeLayout>

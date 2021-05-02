@@ -69,9 +69,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         recyclerView = findViewById(R.id.recyclerview_driver);
         drivers = new ArrayList<>();
-        drivers.add(new Driver_class("Fahad", "69"));
-        drivers.add(new Driver_class("Apurba", "62"));
-        drivers.add(new Driver_class("Rafi", "78"));
+        Driver_class a = new Driver_class("Abdur Rahman Fahad", "201605069");
+        Driver_class b = new Driver_class("Rayhan Rasheed Apurba", "201605062");
+        Driver_class c = new Driver_class("Mohib Hossain Rafi", "201605078");
+        a.income = 209.45;
+        b.income = 405.25;
+        c.income = 112.35;
+        Vehicle car = new Vehicle("6074779ae70efe2e", "Toyota Premium", 111503145);
+        a.vehicle = car;
+        b.vehicle = car;
+        c.vehicle = car;
+        drivers.add(a);
+        drivers.add(b);
+        drivers.add(c);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(MainActivity.this,
                 LinearLayoutManager.HORIZONTAL, false);
