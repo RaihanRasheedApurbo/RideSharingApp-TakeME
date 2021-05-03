@@ -19,11 +19,17 @@ import android.widget.FrameLayout;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -37,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     RecyclerViewAdapter recyclerViewAdapter;
 
     private MapView mapView;
+    private MapboxMap mapboxMap;
 
     public static int SPLASH_TIME_OUT = 2500;
 
@@ -52,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Mapbox.getInstance(this,getString(R.string.access_token));
         mapView = (MapView) findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
 
         frameLayout = findViewById(R.id.bottomsheet1);
         bottomSheetBehavior = BottomSheetBehavior.from(frameLayout);
@@ -116,6 +124,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     //mapbox overrides
     @Override
+    public void onMapReady(MapboxMap mapboxMap) {
+        this.mapboxMap = mapboxMap;
+//        mapboxMap.addMarker(new MarkerOptions()
+//                .position(new LatLng(48.85819, 2.29458))
+//                .title("Eiffel Tower"));
+//        setMarker(new LatLng(new LatLng(48.85819, 2.29458)),"Apurbo");
+    }
+
+    public void setMarker(LatLng location, String markerName)
+    {
+        mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location,13));
+        mapboxMap.addMarker(new MarkerOptions()
+                .position(location)
+                .title(markerName));
+    }
+
+    @Override
     protected void onStart(){
         super.onStart();
         mapView.onStart();
@@ -156,4 +181,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onDestroy();
         mapView.onDestroy();
     }
+
+
 }

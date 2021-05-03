@@ -10,6 +10,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.mapbox.mapboxsdk.geometry.LatLng;
+
 import java.util.ArrayList;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
@@ -38,6 +40,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 int itemPosition = recyclerView.getChildLayoutPosition(view);
                 String name = drivers.get(itemPosition).name;
                 // Go to new window instead of making toast
+                MainActivity activity = (MainActivity) context;
+                activity.setMarker(new LatLng(23.8223,90.3654),"Fahad");
+
                 Toast.makeText( parent.getContext(), "Hello " + name, Toast.LENGTH_SHORT).show();
             }
         });
