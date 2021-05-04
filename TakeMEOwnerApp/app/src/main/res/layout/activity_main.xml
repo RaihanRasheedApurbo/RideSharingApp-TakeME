@@ -29,15 +29,6 @@
             android:id="@+id/toolbar3"
             layout="@layout/mytoolbar" />
 
-
-<!--        <TextView-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_centerInParent="true"-->
-<!--            android:text="To where?"-->
-<!--            android:textSize="30dp" />-->
-<!--         mirpur  23.8223° N, 90.3654° E-->
-<!--        san fransisco  37.7749° N, -122.4194° E-->
         <com.mapbox.mapboxsdk.maps.MapView
             android:id="@+id/mapView"
             android:layout_width="match_parent"
@@ -54,22 +45,16 @@
             <FrameLayout
                 android:id="@+id/bottomsheet1"
                 android:layout_width="match_parent"
-                android:layout_height="450dp"
+                android:layout_height="340dp"
                 android:layout_alignParentBottom="true"
-                android:background="#FFFFFF"
+
+                android:background="@color/white"
                 mapbox:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     >
-
-<!--                    <TextView-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:layout_gravity="center"-->
-<!--                        android:text="Add Here"-->
-<!--                        android:textSize="28dp" />-->
 
                     <ImageButton
                         android:layout_marginTop="12dp"
@@ -87,7 +72,6 @@
                         android:layout_height="match_parent"
                         android:layout_below="@id/imageButton"
                         />
-
 
                 </RelativeLayout>
 
