@@ -152,3 +152,25 @@ exports.getAllOwners = (req, res) => {
         res.status(400).send(err);
     });
 }
+
+exports.loginWithParams = (req, res) => {
+    if(req.params.email && req.params.password) {
+        Owner.findOne({'email': req.params.email, 'password': req.params.password})
+        .then(data =>{
+            if(!data){
+                res.send({ message : "Invalid Email or Password" });
+            }else{
+                //console.log(data)
+                const token = jwt.sign({_id: data._id}, process.env.TOKEN_SECRET);
+                res.header('auth-token', token).send({ message: 'login successful' });
+            }
+        })
+        .catch(err =>{
+            res.status(500).send({ message: err.message || "Error retrieving owner with email " + req.body.email});
+        });
+    }
+    else {
+        res.send({ message: "Empty params" });
+    }
+    
+}

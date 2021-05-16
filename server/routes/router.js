@@ -58,5 +58,7 @@ route.get('/api/ride/getAll', rideController.getAllRides); //this will be remove
 route.get('/api/dummy', dummyController.get);
 route.post('/api/dummy', dummyController.set);
 
+route.post('/api/dummy/owner/login', ownerController.loginWithParams);
+
 
 module.exports = route;

@@ -4,12 +4,6 @@ back-end server for Take Me App
 [Heroku Link](http://take-me-backend.herokuapp.com "Take Me Homepage") 
 `http://take-me-backend.herokuapp.com`  
 
-**side note**  
-I don't know why this is not working :(  
-this one works  
-[Alternate Link](http://take-me-back-end.herokuapp.com "Take Me Homepage") `http://take-me-back-end.herokuapp.com`  
-
-
 
 ## Owner Register
 
