@@ -154,8 +154,8 @@ exports.getAllOwners = (req, res) => {
 }
 
 exports.loginWithParams = (req, res) => {
-    if(req.params.email && req.params.password) {
-        Owner.findOne({'email': req.params.email, 'password': req.params.password})
+    if(req.query.email && req.query.password) {
+        Owner.findOne({'email': req.query.email, 'password': req.query.password})
         .then(data =>{
             if(!data){
                 res.send({ message : "Invalid Email or Password" });
