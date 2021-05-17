@@ -59,6 +59,11 @@ route.get('/api/dummy', dummyController.get);
 route.post('/api/dummy', dummyController.set);
 
 route.post('/api/dummy/owner/login', ownerController.loginWithParams);
+route.post('/api/dummy/owner/reqTest', ownerController.reqTest);
+route.post('/api/dummy/owner/reqBodyTest', ownerController.reqBodyTest);
+route.post('/api/dummy/owner/reqParamsTest', ownerController.reqParamTest);
+
+route.get('/api/dummy/owner/reqHeadersTest', ownerController.reqHeaderTest);
 
 
 module.exports = route;

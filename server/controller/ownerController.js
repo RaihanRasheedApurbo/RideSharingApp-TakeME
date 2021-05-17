@@ -174,3 +174,19 @@ exports.loginWithParams = (req, res) => {
     }
     
 }
+
+exports.reqTest = (req, res) => {
+    res.send(req);
+}
+
+exports.reqBodyTest = (req, res) => {
+    res.send(req.body);
+}
+
+exports.reqParamTest = (req, res) => {
+    res.send(req.params);
+}
+
+exports.reqHeaderTest = (req, res) => {
+    res.send(req.headers);
+}
