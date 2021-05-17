@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FrameLayout frameLayout;
     BottomSheetBehavior bottomSheetBehavior;
     RecyclerView recyclerView;
+    TextView textView_username, textView_email;
 
     ArrayList<Driver_class> drivers;
 
@@ -45,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MapView mapView;
     private MapboxMap mapboxMap;
 
-    public static int SPLASH_TIME_OUT = 2500;
+    public static int SPLASH_TIME_OUT = 1500;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +72,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toolbar = findViewById(R.id.toolbar3);
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
-        
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        View header = navigationView.getHeaderView(0);
+
+        textView_username = header.findViewById(R.id.textView_owner_name);
+        textView_email = header.findViewById(R.id.textView_owner_email);
+
+        textView_username.setText("Owner Name");
+        textView_email.setText("fahad110490@gmail.com");
 
 
         //**************** Bottom Driver Info Slider**************************//
