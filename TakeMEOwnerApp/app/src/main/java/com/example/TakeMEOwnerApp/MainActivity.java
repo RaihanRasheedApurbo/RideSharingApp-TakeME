@@ -47,8 +47,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MapView mapView;
     private MapboxMap mapboxMap;
 
-    public static int SPLASH_TIME_OUT = 1500;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
