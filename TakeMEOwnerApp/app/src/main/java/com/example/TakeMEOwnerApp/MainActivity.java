@@ -28,9 +28,14 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
+
+    public static String main_token = "";
 
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -72,15 +77,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView = findViewById(R.id.nav_view);
 
         navigationView.setNavigationItemSelectedListener(this);
-
-        View header = navigationView.getHeaderView(0);
-
-        textView_username = header.findViewById(R.id.textView_owner_name);
-        textView_email = header.findViewById(R.id.textView_owner_email);
-
-        textView_username.setText("Fahad Rahman");
-        textView_email.setText("fahad110490@gmail.com");
-
+        System.out.println("xpxs " + main_token);
+        find_owner_data();
 
         //**************** Bottom Driver Info Slider**************************//
 
@@ -111,9 +109,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //**************** Bottom Driver Info Slider**************************//
 
-
-
-
         setSupportActionBar(toolbar);
 
         navigationView.bringToFront();
@@ -126,6 +121,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+
+    public void find_owner_data()
+    {
+        View header = navigationView.getHeaderView(0);
+
+        textView_username = header.findViewById(R.id.textView_owner_name);
+        textView_email = header.findViewById(R.id.textView_owner_email);
+
+        ApiDataService apiDataService = new ApiDataService(MainActivity.this);
+        final JSONObject[] responseData = new JSONObject[1];
+        final String[] owner_name = new String[1];
+        final String[] owner_email = new String[1];
+
+        apiDataService.getProfileData(main_token, new ApiDataService.VolleyResponseListener() {
+            @Override
+            public void onError(Object message) {
+                System.out.println("Error in Main Activity");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+                try {
+                    responseData[0] = new JSONObject(responseObject.toString());
+                    owner_name[0] = (String) responseData[0].get("name");
+                    owner_email[0] = (String) responseData[0].get("email");
+                    //System.out.println(responseData[0]);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        textView_username.setText(owner_name[0]);
+        textView_email.setText(owner_email[0]);
+
+    }
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         return true;
