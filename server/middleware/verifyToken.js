@@ -25,8 +25,7 @@ module.exports = function (req, res, next) {
         return res.status(401).send({ messsage: "Access Denied" });
     }
     try{
-        //const secret = process.env.TOKEN_SECRET || "TakeMeSecret";
-        const secret = "secretKey";
+        const secret = process.env.TOKEN_SECRET || "TakeMeSecret";
         const verified = jwt.verify(token, secret);
         req.data = verified;
         next();
