@@ -32,6 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
@@ -70,13 +71,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bottomSheetBehavior = BottomSheetBehavior.from(frameLayout);
         bottomSheetBehavior.setPeekHeight(200);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
-
         toolbar = findViewById(R.id.toolbar3);
         drawerLayout = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
-
         navigationView.setNavigationItemSelectedListener(this);
+
+
+        //Problem ........ need delay in Main Activity
         System.out.println("xpxs " + main_token);
         find_owner_data();
 
@@ -146,7 +147,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     responseData[0] = new JSONObject(responseObject.toString());
                     owner_name[0] = (String) responseData[0].get("name");
                     owner_email[0] = (String) responseData[0].get("email");
-                    //System.out.println(responseData[0]);
+                    System.out.println("hello" + owner_name[0]);
+                    System.out.println("hello" + owner_email[0]);
 
                 } catch (JSONException e) {
                     e.printStackTrace();

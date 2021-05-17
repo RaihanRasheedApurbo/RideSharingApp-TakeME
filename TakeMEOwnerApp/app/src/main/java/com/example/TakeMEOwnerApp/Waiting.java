@@ -15,7 +15,7 @@ import org.json.JSONObject;
 
 public class Waiting extends AppCompatActivity {
 
-    public static int SPLASH_TIME_OUT = 1500;
+    public static int SPLASH_TIME_OUT = 2500;
     JSONObject responseData, bodyData, headerData;
 
     @Override
@@ -24,13 +24,12 @@ public class Waiting extends AppCompatActivity {
         setContentView(R.layout.activity_waiting);
 
         login();
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                finish();
-            }
-        }, SPLASH_TIME_OUT);
+//        new Handler().postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                finish();
+//            }
+//        }, SPLASH_TIME_OUT);
 
 
     }
@@ -55,6 +54,8 @@ public class Waiting extends AppCompatActivity {
                     headerData = (JSONObject) responseData.get("headers");
 
                     MainActivity.main_token = (String) headerData.get("Auth-Token");
+                    System.out.println("xps " + MainActivity.main_token);
+                    finish();
 
                 } catch (JSONException e) {
                     e.printStackTrace();
