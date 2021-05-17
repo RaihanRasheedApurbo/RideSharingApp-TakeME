@@ -80,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         textView_username = header.findViewById(R.id.textView_owner_name);
         textView_email = header.findViewById(R.id.textView_owner_email);
 
-        textView_username.setText("Owner Name");
+        textView_username.setText("Fahad Rahman");
         textView_email.setText("fahad110490@gmail.com");
 
 
