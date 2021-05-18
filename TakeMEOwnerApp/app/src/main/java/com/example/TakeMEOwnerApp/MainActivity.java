@@ -46,6 +46,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     RecyclerView recyclerView;
     TextView textView_username, textView_email;
 
+    JSONObject responseData, bodyData, headerData;
+
     ArrayList<Driver_class> drivers;
 
     RecyclerViewAdapter recyclerViewAdapter;
@@ -79,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         //Problem ........ need delay in Main Activity
         System.out.println("xpxs " + main_token);
+
         find_owner_data();
 
         //**************** Bottom Driver Info Slider**************************//
@@ -130,12 +133,63 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         textView_username = header.findViewById(R.id.textView_owner_name);
         textView_email = header.findViewById(R.id.textView_owner_email);
 
+        login();
+
+        //textView_username.setText(owner_name[0]);
+        //textView_email.setText(owner_email[0]);
+
+    }
+
+
+
+    void login()
+    {
         ApiDataService apiDataService = new ApiDataService(MainActivity.this);
+
+        apiDataService.getData("bruce@wayne.com", "iAmBatman" , new ApiDataService.VolleyResponseListener() {
+            @Override
+            public void onError(Object message) {
+                System.out.println("xplication Error");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+
+                try {
+                    responseData = new JSONObject(responseObject.toString());
+
+                    bodyData = (JSONObject) responseData.get("body");
+                    headerData = (JSONObject) responseData.get("headers");
+
+                    MainActivity.main_token = (String) headerData.get("Auth-Token");
+                    System.out.println("xps " + MainActivity.main_token);
+
+
+                    // ********************************************************
+
+                    api_call2();
+
+                    // *********************************************************
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+    }
+
+
+    void api_call2()
+    {
+        ApiDataService apiDataService2 = new ApiDataService(MainActivity.this);
         final JSONObject[] responseData = new JSONObject[1];
         final String[] owner_name = new String[1];
         final String[] owner_email = new String[1];
 
-        apiDataService.getProfileData(main_token, new ApiDataService.VolleyResponseListener() {
+
+        apiDataService2.getProfileData(MainActivity.main_token, new ApiDataService.VolleyResponseListener() {
             @Override
             public void onError(Object message) {
                 System.out.println("Error in Main Activity");
@@ -149,6 +203,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     owner_email[0] = (String) responseData[0].get("email");
                     System.out.println("hello" + owner_name[0]);
                     System.out.println("hello" + owner_email[0]);
+                    textView_username.setText(owner_name[0]);
+                    textView_email.setText(owner_email[0]);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -156,10 +212,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        textView_username.setText(owner_name[0]);
-        textView_email.setText(owner_email[0]);
 
     }
+
+
+
+
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         return true;
