@@ -350,7 +350,7 @@ for (let index = 0; index < n; index++) {
 }*/
 
 //show();
-//ridePopulate(1);
+ridePopulate(10);
 
 /*let duration = 60;
 let d = new Date();
@@ -359,4 +359,4 @@ let end = d.toISOString();
 
 console.log(start);
 console.log(end);*/
-console.log(generateOwner());
+//console.log(generateOwner());

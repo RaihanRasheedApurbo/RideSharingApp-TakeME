@@ -141,10 +141,77 @@ you recieve
 
 replace  
 `{id}` by `vehicleID` of that vehicle  
-`{driverValue}` by `true` or `required` 
-`{id}` by and `int` like `1`, `7` or `30`   
+`{driverValue}` by `true` or `required`  
+`{duration}` by and `int` like `1`, `7` or `30`   
 
-the `data` portion of response will contain proper response for each of the query in `array`  
+the `data` portion of response will contain proper response for each of the query  
+***driverInfo*** will be returned as an object  
+***rideHistory*** will be returned as an array object  
+***driverInfo*** will be returned as an array object  
+
+**Example**
+```javascript
+{
+    "vehicleInfo": {
+        "_id": "6074779be70efe2e24c95ce5",
+        "model": "Audi",
+        "type": "Delux",
+        "regNo": "253512805",
+        "capacity": 2,
+        "ownerID": "6074779ae70efe2e24c95cd5",
+        "__v": 0,
+        "driverID": "607478178c29c1408cfad295"
+    },
+    "data": [
+        {
+            "rating": 5,
+            "_id": "607478178c29c1408cfad295",
+            "name": "Bryan Bass",
+            "email": "bisuca@tuprij.tg",
+            "password": "csbffihS@e53oN^]2",
+            "phone": "5374897507",
+            "gender": "Male",
+            "address": {
+                "street": "Mevawo Place",
+                "city": "Zutahohu",
+                "country": "Bangladesh"
+            },
+            "nid": "342866391",
+            "licenseNo": "258451589",
+            "__v": 0,
+            "vehicleID": "6074779be70efe2e24c95ce5"
+        },
+        [
+            {
+                "_id": "60a8098d2d450e379c956dfc",
+                "driverID": "607478178c29c1408cfad295",
+                "passengerID": "607478188c29c1408cfad2b5",
+                "vehicleID": "6074779be70efe2e24c95ce5",
+                "duration": 44,
+                "fare": 57.16,
+                "source": {
+                    "name": "652 Besvep Key",
+                    "latitude": 23.1217021,
+                    "longitude": 90.5235118
+                },
+                "destination": {
+                    "name": "360 Etocus Grove",
+                    "latitude": 23.5203627,
+                    "longitude": 90.8889861
+                },
+                "time": "2021-05-21T19:27:09.211Z",
+                "__v": 0
+            }
+        ],
+        [
+            {
+                "_id": "6074779be70efe2e24c95ce5",
+                "total": 57.16
+            }
+        ]
+    ]
+}
+```
 
 
 ## Vehicle Earning
