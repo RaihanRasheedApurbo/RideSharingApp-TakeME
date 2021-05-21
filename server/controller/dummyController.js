@@ -46,3 +46,16 @@ exports.get = (req, res) => {
         res.status(500).send( {message: err.message} );
     });
 }
+
+exports.reqTest = (req, res) => {
+    const reqData = {
+        "params": req.params,
+        "query": req.query,
+        "body": req.body,
+        "headers": req.headers
+    };
+
+    console.log(reqData);
+    console.log(req);
+    res.send(reqData);
+}

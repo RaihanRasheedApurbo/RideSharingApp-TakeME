@@ -1,6 +1,7 @@
 const Owner = require('../model/owner');
 const Driver = require('../model/driver');
 const Vehicle = require('../model/vehicle');
+const Ride = require('../model/ride');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
@@ -114,6 +115,56 @@ exports.showVehicleDetails = (req, res) => {
 
 }
 
+exports.showVehicleInfo = (req, res) => {
+    const ownerID = req.data._id;
+    const vehicleID = req.params.id;
+    
+    const driver = req.query.driver;
+    const duration = parseInt(req.query.duration);
+    
+    Vehicle.findOne({_id: vehicleID, ownerID: ownerID})
+    .then(data => {
+        const vehicleInfo = data;
+        
+        const promises = [];
+        if(driver !== undefined) {
+            //console.log("hello");
+            const getDriverInfo = Driver.findById(vehicleInfo.driverID);
+            promises.push(getDriverInfo);
+        }
+        if(!isNaN(duration)) {
+            //console.log("helloo");
+            let d = new Date();
+            let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
+            let end = d.toISOString();
+
+            console.log("start: ", start);
+            console.log("end: ", end);
+            
+            const getRideInfo = Ride.find({ 'vehicleID': vehicleInfo._id, 'time': {$gte: start, $lte: end} });
+            const getTotalEarning = Ride.aggregate([
+                { $match : { 'vehicleID': vehicleInfo._id, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+                { $group: { '_id': '$vehicleID', 'total': {$sum: '$fare'}}}
+            ]);
+
+            promises.push(getRideInfo, getTotalEarning);
+        }
+
+        Promise.all(promises)
+        .then(data => {
+            res.send({vehicleInfo, data});
+            //console.log({vehicleInfo, data});
+        })
+        .catch(err => {
+            res.status(500).send({ message: err.message });
+        });
+    })
+    .catch(err => {
+        //console.log(err);
+        res.status(500).send({ message: err.message});
+    });
+}
+
 //driverAddFunction
 exports.addDriverToVehicle = (req, res) => {
     const oid = mongoose.Types.ObjectId(req.data._id);
@@ -153,54 +204,4 @@ exports.getAllOwners = (req, res) => {
     .catch(err => {
         res.status(400).send(err);
     });
-}
-
-exports.loginWithParams = (req, res) => {
-    if(req.query.email && req.query.password) {
-        Owner.findOne({'email': req.query.email, 'password': req.query.password})
-        .then(data =>{
-            if(!data){
-                res.send({ message : "Invalid Email or Password" });
-            }else{
-                //console.log(data)
-                const token = jwt.sign({_id: data._id}, secret);
-                res.header('auth-token', token).send({ message: 'login successful' });
-            }
-        })
-        .catch(err =>{
-            res.status(500).send({ message: err.message || "Error retrieving owner with email " + req.body.email});
-        });
-    }
-    else {
-        res.send({ message: "Empty params" });
-    }
-    
-}
-
-exports.reqTest = (req, res) => {
-    const reqData = {
-        "params": req.params,
-        "query": req.query,
-        "body": req.body,
-        "headers": req.headers
-    };
-
-    console.log(reqData);
-    res.send(reqData);
-}
-
-exports.reqBodyTest = (req, res) => {
-    console.log(req);
-    res.send(req.body);
-}
-
-exports.reqParamTest = (req, res) => {
-    console.log(req);
-    res.send(req.query);
-}
-
-exports.reqHeaderTest = (req, res) => {
-    console.log(req);
-    headers = req.headers;
-    res.send({message: headers});
 }

@@ -114,9 +114,42 @@ You receive
 }
 ```
 
+## Vehicle Info  
+**API** ***GET*** `/api/owner/vehicle/id/{id}` where `{id}` should be replaced by `vehicleID` of that vehicle  
+you recieve  
+
+```javascript
+{
+    "vehicleInfo": {
+        "_id": "6074779be70efe2e24c95ce5",
+        "model": "Audi",
+        "type": "Delux",
+        "regNo": "253512805",
+        "capacity": 2,
+        "ownerID": "6074779ae70efe2e24c95cd5",
+        "__v": 0,
+        "driverID": "607478178c29c1408cfad295"
+    },
+    "data": []
+}  
+```  
+**Optional Parameter** `driver` and `duration`  
+**Example**  
+`/api/owner/vehicle/id/{id}?driver={driverValue}`  
+`api/owner/vehicle/id/{id}?duration={duration}`  
+`/api/owner/vehicle/id/{id}?driver=true&duration={duration}`  
+
+replace  
+`{id}` by `vehicleID` of that vehicle  
+`{driverValue}` by `true` or `required` 
+`{id}` by and `int` like `1`, `7` or `30`   
+
+the `data` portion of response will contain proper response for each of the query in `array`  
+
+
 ## Vehicle Earning
 
-***This part will slightly change based on jwt token and api***  
+***use the one above***  
 
 **API** `/api/ride/vehicleID`  
 I receive  

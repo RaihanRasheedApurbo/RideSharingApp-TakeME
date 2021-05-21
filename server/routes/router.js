@@ -21,6 +21,7 @@ route.post('/api/owner/register', ownerController.register);
 route.post('/api/owner/login', ownerController.login);
 route.get('/api/owner/dashboard', verify, ownerController.showDashboard);
 route.get('/api/owner/vehicles', verify, ownerController.showVehicleDetails);
+route.get('/api/owner/vehicle/id/:id', verify, ownerController.showVehicleInfo);
 route.post('/api/owner/addDriver', verify, ownerController.addDriverToVehicle);
 route.get('/api/owner/getAll', ownerController.getAllOwners); //this will be removed afterwards
 
@@ -58,12 +59,7 @@ route.get('/api/ride/getAll', rideController.getAllRides); //this will be remove
 route.get('/api/dummy', dummyController.get);
 route.post('/api/dummy', dummyController.set);
 
-route.post('/api/dummy/owner/login', ownerController.loginWithParams);
-route.post('/api/dummy/owner/reqTest', ownerController.reqTest);
-route.post('/api/dummy/owner/reqBodyTest', ownerController.reqBodyTest);
-route.post('/api/dummy/owner/reqParamsTest', ownerController.reqParamTest);
-
-route.get('/api/dummy/owner/reqHeadersTest', ownerController.reqHeaderTest);
+route.post('/api/dummy/owner/reqTest', dummyController.reqTest);
 
 
 module.exports = route;
