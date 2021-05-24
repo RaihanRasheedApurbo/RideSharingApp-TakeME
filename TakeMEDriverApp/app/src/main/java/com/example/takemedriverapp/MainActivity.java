@@ -61,6 +61,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private NavigationMapRoute navigationMapRoute;
     // variables needed to initialize navigation
     private Button button;
+    // boiler plate code of mapbox ended ... Apurbo's code starts from below...
+    // state management
+    enum DriverState {
+        RESTING,
+        FINDING,
+        PICKING,
+        RIDING
+    }
+    DriverState driverState;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +80,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+
+        // Apurbo's code here
+        driverState = DriverState.RESTING;
+        button = findViewById(R.id.startButton);
+        button.setText("Search Passenger");
+        button.setEnabled(true);
+
     }
 
     @Override
@@ -87,15 +104,43 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        boolean simulateRoute = true;
-                        NavigationLauncherOptions options = NavigationLauncherOptions.builder()
-                                .directionsRoute(currentRoute)
-                                .shouldSimulateRoute(simulateRoute)
-                                .build();
-                        // Call this method with Context from within an Activity
-                        NavigationLauncher.startNavigation(MainActivity.this, options);
+                        if(driverState==DriverState.PICKING)
+                        {
+                            boolean simulateRoute = true;
+                            NavigationLauncherOptions options = NavigationLauncherOptions.builder()
+                                    .directionsRoute(currentRoute)
+                                    .shouldSimulateRoute(simulateRoute)
+                                    .build();
+                            // Call this method with Context from within an Activity
+                            NavigationLauncher.startNavigation(MainActivity.this, options);
+                        }
+                        else if(driverState==DriverState.RESTING)
+                        {
+
+                            Toast.makeText(getApplicationContext(),"Hello Javatpoint",Toast.LENGTH_SHORT).show();
+                            // find passenger using loading screen and calling backend apis below...
+                            // Fahad code here.....................................
+                            // assuming passenger has been found his lat lang is (90.37609,23.83287)
+                            Point destinationPoint = Point.fromLngLat(90.37609,23.83287);
+                            Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                                    locationComponent.getLastKnownLocation().getLatitude());
+                            GeoJsonSource source = mapboxMap.getStyle().getSourceAs("destination-source-id");
+                            if (source != null) {
+                                source.setGeoJson(Feature.fromGeometry(destinationPoint));
+                            }
+
+                            getRoute(originPoint, destinationPoint);
+
+                            button.setText("Start Navigation");
+                            button.setEnabled(true);
+                            button.setBackgroundResource(R.color.mapboxBlue);
+
+                            driverState = DriverState.PICKING;
+                        }
+
                     }
                 });
+
             }
         });
     }
@@ -118,18 +163,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onMapClick(@NonNull LatLng point) {
 
-        Point destinationPoint = Point.fromLngLat(point.getLongitude(), point.getLatitude());
-        Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
-                locationComponent.getLastKnownLocation().getLatitude());
-
-        GeoJsonSource source = mapboxMap.getStyle().getSourceAs("destination-source-id");
-        if (source != null) {
-            source.setGeoJson(Feature.fromGeometry(destinationPoint));
-        }
-
-        getRoute(originPoint, destinationPoint);
-        button.setEnabled(true);
-        button.setBackgroundResource(R.color.mapboxBlue);
+//        Point destinationPoint = Point.fromLngLat(point.getLongitude(), point.getLatitude());
+//        String toastString = Double.toString(destinationPoint.latitude()) + "," + Double.toString(destinationPoint.longitude());
+//        Toast.makeText(getApplicationContext(),toastString,Toast.LENGTH_SHORT).show();
+//        Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+//                locationComponent.getLastKnownLocation().getLatitude());
+//
+//        GeoJsonSource source = mapboxMap.getStyle().getSourceAs("destination-source-id");
+//        if (source != null) {
+//            source.setGeoJson(Feature.fromGeometry(destinationPoint));
+//        }
+//
+//        getRoute(originPoint, destinationPoint);
+//        button.setEnabled(true);
+//        button.setBackgroundResource(R.color.mapboxBlue);
         return true;
     }
 
