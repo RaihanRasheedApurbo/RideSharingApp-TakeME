@@ -50,7 +50,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     JSONObject responseData, bodyData, headerData;
 
-    ArrayList<Driver_class> drivers;
+    ArrayList<Driver_class> drivers = new ArrayList<>();
+    ArrayList<Vehicle> vehicles = new ArrayList<>();
 
     RecyclerViewAdapter recyclerViewAdapter;
 
@@ -86,29 +87,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         //**************** Bottom Driver Info Slider**************************//
 
         recyclerView = findViewById(R.id.recyclerview_driver);
-        drivers = new ArrayList<>();
-        Driver_class a = new Driver_class("Abdur Rahman Fahad", "201605069");
-        Driver_class b = new Driver_class("Rayhan Rasheed Apurba", "201605062");
-        Driver_class c = new Driver_class("Mohib Hossain Rafi", "201605078");
-        a.income = 209.45;
-        b.income = 405.25;
-        c.income = 112.35;
-        Vehicle car = new Vehicle("6074779ae70efe2e", "Toyota Premium", 111503145);
-        a.vehicle = car;
-        b.vehicle = car;
-        c.vehicle = car;
-        drivers.add(a);
-        drivers.add(b);
-        drivers.add(c);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(MainActivity.this,
-                LinearLayoutManager.HORIZONTAL, false);
 
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        recyclerViewAdapter = new RecyclerViewAdapter( drivers,MainActivity.this, recyclerView);
-        recyclerView.setAdapter( recyclerViewAdapter);
+
 
         //**************** Bottom Driver Info Slider**************************//
 
@@ -140,6 +122,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         textView_email.setText(s2);
     }
 
+    public void add_vehicle(String id, String model, int regno)
+    {
+
+        Vehicle car = new Vehicle(id, model, regno);
+        vehicles.add(car);
+
+    }
+
+    public void add_driver(String id)
+    {
+        String driver_name = "Driver " + new Integer(drivers.size()+1).toString();
+        drivers.add(new Driver_class(driver_name, id));
+    }
+
+    public void update_bottom_slider()
+    {
+
+
+//        Driver_class a = new Driver_class("Abdur Rahman Fahad", "201605069");
+//        Driver_class b = new Driver_class("Rayhan Rasheed Apurba", "201605062");
+//        Driver_class c = new Driver_class("Mohib Hossain Rafi", "201605078");
+//        a.income = 209.45;
+//        b.income = 405.25;
+//        c.income = 112.35;
+
+        for (int i = 0; i < drivers.size(); i++) {
+            drivers.get(i).income = 125.69;
+            drivers.get(i).vehicle = vehicles.get(i);
+        }
+
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(MainActivity.this,
+                LinearLayoutManager.HORIZONTAL, false);
+
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        recyclerViewAdapter = new RecyclerViewAdapter( drivers,MainActivity.this, recyclerView);
+        recyclerView.setAdapter( recyclerViewAdapter);
+
+
+    }
 
 
     @Override

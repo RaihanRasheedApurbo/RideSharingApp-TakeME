@@ -125,15 +125,16 @@ public class Waiting extends AppCompatActivity {
 
                     responseData[0] = new JSONArray(responseObject.toString());
                     for (int i = 0; i < responseData[0].length(); i++) {
-                        System.out.println("uiui");
-                        System.out.print((String)new JSONObject(responseData[0].get(i).toString()).get("model"));
-                        System.out.print((String)new JSONObject(responseData[0].get(i).toString()).get("type"));
-                        System.out.println((String)new JSONObject(responseData[0].get(i).toString()).get("regNo"));
+                        String model = (String)new JSONObject(responseData[0].get(i).toString()).get("model");
+                        String type = model + " " + (String)new JSONObject(responseData[0].get(i).toString()).get("type");
+                        String regno = (String) new JSONObject(responseData[0].get(i).toString()).get("regNo");
+                        String id = (String)new JSONObject(responseData[0].get(i).toString()).get("_id");
+                        String driver_id = (String)new JSONObject(responseData[0].get(i).toString()).get("driverID");
+
+                        MainActivity.getInstance().add_vehicle(id,type, new Integer(regno).intValue());
+                        MainActivity.getInstance().add_driver(driver_id);
+                        MainActivity.getInstance().update_bottom_slider();
                     }
-
-                    //owner_name[0] = (String) responseData[0].get("name");
-                    //owner_email[0] = (String) responseData[0].get("email");
-
 
 
                     finish();
