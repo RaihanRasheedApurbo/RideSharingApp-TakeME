@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static MainActivity getInstance() {
         return instance;
     }
-    
+
     public void set_owner_data(String s1, String s2)
     {
         View header = navigationView.getHeaderView(0);
