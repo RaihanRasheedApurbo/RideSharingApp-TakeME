@@ -65,7 +65,7 @@ exports.login = (req, res) => {
         }else{
             //console.log(data)
             const token = jwt.sign({_id: data._id}, secret);
-            res.header('auth-token', token).send({ message: 'login successful' });
+            res.header('auth-token', token).send({ message: 'login successful', data });
         }
     })
     .catch(err =>{
@@ -163,6 +163,26 @@ exports.showVehicleInfo = (req, res) => {
         //console.log(err);
         res.status(500).send({ message: err.message});
     });
+}
+
+//vehicleUpdate
+exports.updateVehicleInfo =(req, res) => {
+    const ownerID = req.data._id;
+    const vehicleID = req.params.id;
+    
+    const filter = {
+        _id: mongoose.Types.ObjectId(vehicleID),
+        ownerID: mongoose.Types.ObjectId(ownerID)
+    }
+    const updateInfo = req.body;
+
+    Vehicle.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true })
+    .then(data => {
+        res.status(200).send(data);
+    })
+    .catch(err => {
+        res.status(500).send(err);
+    })
 }
 
 //driverAddFunction

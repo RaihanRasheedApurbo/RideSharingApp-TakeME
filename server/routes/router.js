@@ -22,12 +22,14 @@ route.post('/api/owner/login', ownerController.login);
 route.get('/api/owner/dashboard', verify, ownerController.showDashboard);
 route.get('/api/owner/vehicles', verify, ownerController.showVehicleDetails);
 route.get('/api/owner/vehicle/id/:id', verify, ownerController.showVehicleInfo);
+route.put('/api/owner/vehicle/id/:id', verify, ownerController.updateVehicleInfo);
 route.post('/api/owner/addDriver', verify, ownerController.addDriverToVehicle);
 route.get('/api/owner/getAll', ownerController.getAllOwners); //this will be removed afterwards
 
 route.post('/api/driver/register', driverController.register);
 route.post('/api/driver/login', driverController.login);
 route.get('/api/driver/dashboard', verify, driverController.showDashboard);
+route.get('/api/driver/search', verify, driverController.lookForPassenger);
 route.get('/api/driver/vehicleID', driverController.findByVehicleID);
 route.get('/api/driver/getAll', driverController.getAllDrivers); //this will be removed afterwards
 

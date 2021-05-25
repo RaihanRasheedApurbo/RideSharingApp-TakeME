@@ -3,6 +3,7 @@ const axios = require("axios");
 
 const Owner = require('./model/owner');
 const Driver = require('./model/driver');
+const Vehicle = require('./model/vehicle');
 
 let chance = new Chance();
 const address = 'http://localhost:3000/api/';
@@ -338,6 +339,52 @@ function driverAssign() {
     });
 }
 
+function vehicleLocationUpdate() {
+    let count = 0;
+    axios.get(address+'owner/getAll')
+    .then(data => {
+        owners = data.data;
+        //console.log(owners);
+        for (let index = 0; index < owners.length; index++) {
+            let owner = owners[index];
+            let ownerVehicleList = owner.vehicleList;
+    
+            let ownerCred = {
+                email: owner.email,
+                password: owner.password  
+            };
+    
+            for (let j = 0; j < ownerVehicleList.length; j++) {
+                const vehicleID = ownerVehicleList[j];
+                
+                //console.log(vehicleID, typeof(vehicleID));
+
+                const newLocation = {
+                    latitude: chance.floating({min: 23.1, max: 23.9, fixed: 7}),
+                    longitude: chance.floating({min: 90.1, max: 90.9, fixed: 7})
+                };
+                console.log(newLocation);
+    
+                axios.post(address+'owner/login', ownerCred)
+                .then(res => {
+                    header_data['auth-token'] = res.headers['auth-token'];
+        
+                    axios.put(address+'owner/vehicle/id/'+vehicleID, {location: newLocation}, {headers: header_data})
+                    .then( data => {
+                        console.log("success", count++);
+                    })
+                    .catch(err => {
+                        console.log("update error", err);
+                    })
+                });
+            }
+        }
+    })
+    .catch(err => {
+        console.log(err);
+    });
+}
+
 //driverAssign();
 
 
@@ -350,7 +397,9 @@ for (let index = 0; index < n; index++) {
 }*/
 
 //show();
-ridePopulate(10);
+//ridePopulate(10);
+
+vehicleLocationUpdate();
 
 /*let duration = 60;
 let d = new Date();

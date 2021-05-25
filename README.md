@@ -116,6 +116,8 @@ You receive
 
 ## Vehicle Info  
 **API** ***GET*** `/api/owner/vehicle/id/{id}` where `{id}` should be replaced by `vehicleID` of that vehicle  
+I receive  
+`{'auth-token': token}` inside **req.headers**  
 you recieve  
 
 ```javascript
