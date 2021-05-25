@@ -22,90 +22,88 @@ public class Waiting extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_waiting);
-        //login();
+        login();
 
-
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                finish();
-            }
-        }, SPLASH_TIME_OUT);
+        //MainActivity.getInstance().set_owner_data();
 
     }
 
-//    void login()
-//    {
-//        ApiDataService apiDataService = new ApiDataService(Waiting.this);
-//
-//        apiDataService.getData("bruce@wayne.com", "iAmBatman" , new ApiDataService.VolleyResponseListener() {
-//            @Override
-//            public void onError(Object message) {
-//                System.out.println("xplication Error");
-//            }
-//
-//            @Override
-//            public void onResponse(Object responseObject) {
-//
-//                try {
-//                    responseData = new JSONObject(responseObject.toString());
-//
-//                    bodyData = (JSONObject) responseData.get("body");
-//                    headerData = (JSONObject) responseData.get("headers");
-//
-//                    MainActivity.main_token = (String) headerData.get("Auth-Token");
-//                    System.out.println("xps " + MainActivity.main_token);
-//
-//
-//                    // ********************************************************
-//
-//                    api_call2();
-//
-//                    // *********************************************************
-//
-//
-//                    finish();
-//
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
-//
-//
-//    }
-//
-//
-//    void api_call2()
-//    {
-//        ApiDataService apiDataService2 = new ApiDataService(Waiting.this);
-//        final JSONObject[] responseData = new JSONObject[1];
-//        final String[] owner_name = new String[1];
-//        final String[] owner_email = new String[1];
-//
-//
-//        apiDataService2.getProfileData(MainActivity.main_token, new ApiDataService.VolleyResponseListener() {
-//            @Override
-//            public void onError(Object message) {
-//                System.out.println("Error in Main Activity");
-//            }
-//
-//            @Override
-//            public void onResponse(Object responseObject) {
-//                try {
-//                    responseData[0] = new JSONObject(responseObject.toString());
-//                    owner_name[0] = (String) responseData[0].get("name");
-//                    owner_email[0] = (String) responseData[0].get("email");
-//                    System.out.println("hello" + owner_name[0]);
-//                    System.out.println("hello" + owner_email[0]);
-//
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
-//
-//
-//    }
+    void login()
+    {
+        ApiDataService apiDataService = new ApiDataService(Waiting.this);
+
+        apiDataService.getData("bruce@wayne.com", "iAmBatman" , new ApiDataService.VolleyResponseListener() {
+            @Override
+            public void onError(Object message) {
+                System.out.println("xplication Error");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+
+                try {
+                    responseData = new JSONObject(responseObject.toString());
+
+                    bodyData = (JSONObject) responseData.get("body");
+                    headerData = (JSONObject) responseData.get("headers");
+
+                    MainActivity.main_token = (String) headerData.get("Auth-Token");
+                    System.out.println("xps " + MainActivity.main_token);
+
+
+                    // ********************************************************
+
+                    api_call2();
+
+                    // *********************************************************
+
+
+                    finish();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+    }
+
+
+    void api_call2()
+    {
+        ApiDataService apiDataService2 = new ApiDataService(Waiting.this);
+        final JSONObject[] responseData = new JSONObject[1];
+        final String[] owner_name = new String[1];
+        final String[] owner_email = new String[1];
+
+
+        apiDataService2.getProfileData(MainActivity.main_token, new ApiDataService.VolleyResponseListener() {
+            @Override
+            public void onError(Object message) {
+                System.out.println("Error in Main Activity");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+                try {
+                    responseData[0] = new JSONObject(responseObject.toString());
+                    owner_name[0] = (String) responseData[0].get("name");
+                    owner_email[0] = (String) responseData[0].get("email");
+                    System.out.println("hello" + owner_name[0]);
+                    System.out.println("hello" + owner_email[0]);
+
+                    MainActivity.getInstance().set_owner_data(owner_name[0], owner_email[0]);
+
+                    finish();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+    }
 
 }
