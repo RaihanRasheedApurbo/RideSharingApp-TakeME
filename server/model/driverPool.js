@@ -1,18 +1,24 @@
 const mongoose = require('mongoose');
-var DriverPoolSchema = new mongoose.Schema({
+const pointSchema = require('./point');
+
+const DriverPoolSchema = new mongoose.Schema({
     driverID : {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'Driver'
     },
-    vehicleInfo : {
-        type: Object,
-        required: true
-    },
     passengerID : {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Passenger'
+    },
+    location: {
+        type: pointSchema,
+        index: '2dsphere' // Create a special 2dsphere index on `location`
+    },
+    vehicleInfo : {
+        type: Object,
+        required: true
     }
-})
+});
 
 module.exports = mongoose.model('driverPool', DriverPoolSchema);

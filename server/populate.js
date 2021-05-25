@@ -4,6 +4,7 @@ const axios = require("axios");
 const Owner = require('./model/owner');
 const Driver = require('./model/driver');
 const Vehicle = require('./model/vehicle');
+const pointSchema = require("./model/point");
 
 let chance = new Chance();
 const address = 'http://localhost:3000/api/';
@@ -358,10 +359,12 @@ function vehicleLocationUpdate() {
                 const vehicleID = ownerVehicleList[j];
                 
                 //console.log(vehicleID, typeof(vehicleID));
-
+                const latitude = chance.floating({min: 23.7, max: 23.85, fixed: 9});
+                const longitude = chance.floating({min: 90.35, max: 90.4, fixed: 9});
+                    
                 const newLocation = {
-                    latitude: chance.floating({min: 23.1, max: 23.9, fixed: 7}),
-                    longitude: chance.floating({min: 90.1, max: 90.9, fixed: 7})
+                    type: 'Point',
+                    coordinates: [ longitude, latitude ]
                 };
                 console.log(newLocation);
     
@@ -374,10 +377,47 @@ function vehicleLocationUpdate() {
                         console.log("success", count++);
                     })
                     .catch(err => {
-                        console.log("update error", err);
+                        console.log("update error", err.message);
                     })
                 });
             }
+        }
+    })
+    .catch(err => {
+        console.log(err);
+    });
+}
+
+function makeDriverAvailable() {
+    let count = 0;
+    axios.get(address+'driver/getAll')
+    .then(data => {
+        drivers = data.data;
+        //console.log(owners);
+        for (let index = 0; index < drivers.length; index++) {
+            let n = Math.floor(Math.random() * 16);
+            if (n%3) continue;
+
+
+            let driver = drivers[index];
+            
+            let driverCred = {
+                email: driver.email,
+                password: driver.password  
+            };
+            
+            axios.post(address+'driver/login', driverCred)
+            .then(res => {
+                header_data['auth-token'] = res.headers['auth-token'];
+    
+                axios.get(address+'driver/search', {headers: header_data})
+                .then( data => {
+                    console.log("success", count++, data.data);
+                })
+                .catch(err => {
+                    console.log("update error", err.message);
+                })
+            });
         }
     })
     .catch(err => {
@@ -397,9 +437,9 @@ for (let index = 0; index < n; index++) {
 }*/
 
 //show();
-//ridePopulate(10);
-
-vehicleLocationUpdate();
+ridePopulate(10);
+makeDriverAvailable();
+//vehicleLocationUpdate();
 
 /*let duration = 60;
 let d = new Date();

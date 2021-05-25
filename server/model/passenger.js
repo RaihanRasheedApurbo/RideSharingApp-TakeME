@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-var PassengerSchema = new mongoose.Schema({
+const PassengerSchema = new mongoose.Schema({
     name : {
         type : String,
         required: true

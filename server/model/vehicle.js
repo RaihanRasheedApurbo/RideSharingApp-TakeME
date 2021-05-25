@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const pointSchema = require('./point');
 
-var VehicleSchema = new mongoose.Schema({
+const VehicleSchema = new mongoose.Schema({
     model : {
         type : String,
         required: true
@@ -28,15 +29,8 @@ var VehicleSchema = new mongoose.Schema({
         ref: 'Driver'
     },
     location: {
-        type : Object,
-        latitude: {
-            type: Number,
-            required: true
-        },
-        longitude: {
-            type: Number,
-            required: true
-        }
+        type: pointSchema,
+        index: '2dsphere' // Create a special 2dsphere index on `location`
     }
 })
 

@@ -59,6 +59,9 @@ route.get('/api/ride/vehicleID/', rideController.findByVehicleID);
 route.get('/api/ride/getAll', rideController.getAllRides); //this will be removed afterwards
 
 
+route.get('/api/driver/pool', driverPoolController.showPool);
+
+
 
 //dummy routes
 route.get('/api/dummy', dummyController.get);

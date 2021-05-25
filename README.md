@@ -224,10 +224,19 @@ I receive
 On First Time, you receive  
 ```javascript
 {
-    "message": "driverID {driverID} has been added to pool",
+    "message": "you have been matched",
+    "passengerID": "607478178c29c1408cfad290",
     "entryData": {
-        "_id": "60ad379399b3a13f00d0e7e4",
+        "_id": "60ad6c57aa57e313b09f5723",
         "driverID": "607478178c29c1408cfad295",
+        "location": {
+            "coordinates": [
+                90.444338032,
+                23.68948164
+            ],
+            "_id": "60ad6c23aa57e313b09f56e4",
+            "type": "Point"
+        },
         "vehicleInfo": {
             "_id": "6074779be70efe2e24c95ce5",
             "model": "Audi",
@@ -238,11 +247,16 @@ On First Time, you receive
             "__v": 0,
             "driverID": "607478178c29c1408cfad295",
             "location": {
-                "latitude": 23.8637061,
-                "longitude": 90.2522407
+                "coordinates": [
+                    90.444338032,
+                    23.68948164
+                ],
+                "_id": "60ad6c23aa57e313b09f56e4",
+                "type": "Point"
             }
         },
-        "__v": 0
+        "__v": 0,
+        "passengerID": "607478178c29c1408cfad290"
     }
 }
 ```  
@@ -261,8 +275,16 @@ A plain object without `passengerID` or `entrydata` field
     "message": "you have been matched",
     "passengerID": "607478178c29c1408cfad290",
     "entryData": {
-        "_id": "60ad3a08301f161e8c973e24",
+        "_id": "60ad6ed10278e736acd9cae0",
         "driverID": "607478178c29c1408cfad295",
+        "location": {
+            "coordinates": [
+                90.378883906,
+                23.746971384
+            ],
+            "_id": "60ad6dd8f108f814d07f3a8e",
+            "type": "Point"
+        },
         "vehicleInfo": {
             "_id": "6074779be70efe2e24c95ce5",
             "model": "Audi",
@@ -273,8 +295,12 @@ A plain object without `passengerID` or `entrydata` field
             "__v": 0,
             "driverID": "607478178c29c1408cfad295",
             "location": {
-                "latitude": 23.8637061,
-                "longitude": 90.2522407
+                "coordinates": [
+                    90.378883906,
+                    23.746971384
+                ],
+                "_id": "60ad6dd8f108f814d07f3a8e",
+                "type": "Point"
             }
         },
         "__v": 0,

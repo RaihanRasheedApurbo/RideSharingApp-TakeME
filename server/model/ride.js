@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const pointSchema = require('./point');
 
-var RideSchema = new mongoose.Schema({
+const RideSchema = new mongoose.Schema({
     driverID : {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Driver',
@@ -34,13 +35,8 @@ var RideSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-        latitude: {
-            type: Number,
-            required: true
-        },
-        longitude: {
-            type: Number,
-            required: true
+        location : {
+            type: pointSchema
         },
         required: true
     },
@@ -50,13 +46,8 @@ var RideSchema = new mongoose.Schema({
             type: String,
             required: true
         },
-        latitude: {
-            type: Number,
-            required: true
-        },
-        longitude: {
-            type: Number,
-            required: true
+        location : {
+            type: pointSchema
         },
         required: true
     }
