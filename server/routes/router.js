@@ -9,6 +9,7 @@ const driverController = require('../controller/driverController');
 const passengerController = require('../controller/passengerController');
 const vehicleController = require('../controller/vehicleController');
 const rideController = require('../controller/rideController');
+const driverPoolController = require('../controller/driverPoolController');
 const dummyController = require('../controller/dummyController');
 
 
@@ -29,7 +30,7 @@ route.get('/api/owner/getAll', ownerController.getAllOwners); //this will be rem
 route.post('/api/driver/register', driverController.register);
 route.post('/api/driver/login', driverController.login);
 route.get('/api/driver/dashboard', verify, driverController.showDashboard);
-route.get('/api/driver/search', verify, driverController.lookForPassenger);
+route.get('/api/driver/search', verify, driverPoolController.lookForPassenger);
 route.get('/api/driver/vehicleID', driverController.findByVehicleID);
 route.get('/api/driver/getAll', driverController.getAllDrivers); //this will be removed afterwards
 
@@ -37,6 +38,8 @@ route.get('/api/driver/getAll', driverController.getAllDrivers); //this will be 
 route.post('/api/passenger/register', passengerController.register);
 route.post('/api/passenger/login', passengerController.login);
 route.get('/api/passenger/dashboard', verify, passengerController.showDashboard);
+route.get('/api/passenger/search', driverPoolController.lookForDriver); //this will be changed after passenger app
+route.get('/api/passenger/accept', driverPoolController.acceptDriver);  //this will be changed after passenger app
 route.post('/api/passenger/addRide', verify, rideController.addRide);
 route.get('/api/passenger/getAll', passengerController.getAllPassengers); //this will be removed afterwards
 

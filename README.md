@@ -215,103 +215,103 @@ the `data` portion of response will contain proper response for each of the quer
 }
 ```
 
-
-## Vehicle Earning
-
-***use the one above***  
-
-**API** `/api/ride/vehicleID`  
+## Passenger Search  
+**API** ***GET*** `api/driver/search`  
 I receive  
-either  
+`{'auth-token': token}` inside **req.headers**  
 
+
+On First Time, you receive  
 ```javascript
 {
-  _id: <vehicleID>
-  duration: <duration_in_days> //eg: 1 or 7 or 30
-}
-```
-
-and you recieve  
-
-```javascript
-{
-    [
-        [
-            {
-                "_id": "6074c19a4fad381308cd46e9",
-                "driverID": "607478178c29c1408cfad291",
-                "passengerID": "607478198c29c1408cfad2d3",
-                "vehicleID": "6074779be70efe2e24c95cdb",
-                "duration": 9,
-                "fare": 97.81,
-                "source": {
-                    "name": "511 Guil Point",
-                    "latitude": 23.3652892,
-                    "longitude": 90.1464935
-                },
-                "destination": {
-                    "name": "1423 Fezmo Place",
-                    "latitude": 23.4368054,
-                    "longitude": 90.7679393
-                },
-                "time": "2021-04-12T21:54:34.533Z",
-                "__v": 0
+    "message": "driverID {driverID} has been added to pool",
+    "entryData": {
+        "_id": "60ad379399b3a13f00d0e7e4",
+        "driverID": "607478178c29c1408cfad295",
+        "vehicleInfo": {
+            "_id": "6074779be70efe2e24c95ce5",
+            "model": "Audi",
+            "type": "Delux",
+            "regNo": "253512805",
+            "capacity": 2,
+            "ownerID": "6074779ae70efe2e24c95cd5",
+            "__v": 0,
+            "driverID": "607478178c29c1408cfad295",
+            "location": {
+                "latitude": 23.8637061,
+                "longitude": 90.2522407
             }
-        ],
-        [
-            {
-                "_id": "6074779be70efe2e24c95cdb",
-                "total": 97.81
+        },
+        "__v": 0
+    }
+}
+```  
+
+afterwards  
+**On no match** you receive  
+A plain object without `passengerID` or `entrydata` field  
+```javascript  
+{
+    "message": "No match found"
+}
+```  
+**On match** you recieve 
+```javascript
+{
+    "message": "you have been matched",
+    "passengerID": "607478178c29c1408cfad290",
+    "entryData": {
+        "_id": "60ad3a08301f161e8c973e24",
+        "driverID": "607478178c29c1408cfad295",
+        "vehicleInfo": {
+            "_id": "6074779be70efe2e24c95ce5",
+            "model": "Audi",
+            "type": "Delux",
+            "regNo": "253512805",
+            "capacity": 2,
+            "ownerID": "6074779ae70efe2e24c95cd5",
+            "__v": 0,
+            "driverID": "607478178c29c1408cfad295",
+            "location": {
+                "latitude": 23.8637061,
+                "longitude": 90.2522407
             }
-        ]
-    ]
+        },
+        "__v": 0,
+        "passengerID": "607478178c29c1408cfad290"
+    }
 }
-```
+```  
 
-An **Array** of **Two** objects  
-First object contains **Array** of ride history for last `duration` days  
-Second object contains `id` of the vehicle and `total` earning  
+Now this match was ***manually*** done by calling this api  
+**API** ***GET*** `/api/passenger/accept/?passengerID={passengerID}&driverID={driverID}`  
 
-or  
+for now replace `{passengerID}` by `607478178c29c1408cfad290`  
+replace `{driverID}` by `_id` of the driver  
 
+A sample driver credential
 ```javascript
 {
-  _id: <vehicleID>
+    "email": "robin@loa.com",
+    "password": "thisisrobin"
 }
-```
+```  
 
-This also works sending `duration` as `0` or `null`  
-and you receive  
-
+A sample passenger credential(above mentioned passenger)  
 ```javascript
 {
-    [
-        {
-            "_id": "6074c19a4fad381308cd46e9",
-            "driverID": "607478178c29c1408cfad291",
-            "passengerID": "607478198c29c1408cfad2d3",
-            "vehicleID": "6074779be70efe2e24c95cdb",
-            "duration": 9,
-            "fare": 97.81,
-            "source": {
-                "name": "511 Guil Point",
-                "latitude": 23.3652892,
-                "longitude": 90.1464935
-            },
-            "destination": {
-                "name": "1423 Fezmo Place",
-                "latitude": 23.4368054,
-                "longitude": 90.7679393
-            },
-            "time": "2021-04-12T21:54:34.533Z",
-            "__v": 0
-        }
-    ]
+    "email": "rachel@da.com",
+    "password": "bruceisbatman"
 }
-```
+```  
+A sample owner credential
+```javascript
+{
+    "email": "bruce@wayne.com",
+    "password": "iAmBatman"
+}
+```  
 
-An **Array** of **One** object  
-only containing **Array** of complete ride history with `_id` `vehicleID`
 
 ## Dummy API  
 

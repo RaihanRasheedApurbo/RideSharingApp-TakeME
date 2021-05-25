@@ -1,8 +1,5 @@
-const Vehicle = require('../model/vehicle');
 const Driver = require('../model/driver');
-const DriverPool = require('../model/driverPool');
 const jwt = require('jsonwebtoken');
-const driverPool = require('../model/driverPool');
 
 exports.register = (req, res) => {
     // validate request
@@ -82,48 +79,6 @@ exports.showDashboard = (req, res) => {
         res.status(500).send({ message: err.message || "Error retrieving driver with id " + id})
     })
 }
-
-//passengerSearch
-exports.lookForPassenger = (req, res) => {
-    //DriverPool.remove({})
-    DriverPool.findOne({'driverID': req.data._id})
-    .then(data => {
-        if(data) {
-            if(data.passengerID) {
-                console.log(data);
-                DriverPool.remove({'driverID': req.data._id});
-                res.status(200).send({"message": "you have beend matched", "passengerID": data.passengerID});
-            }
-            else {
-                res.status(200).send({"message": "No match found"});
-            }
-        }
-        else {
-            console.log("new entry");
-            
-            //finding vehicleInfo of the driver
-            getVehicleInfo = Vehicle.findOne({'driverID': req.data._id})
-            .then(data => {
-                const driverEntry = new DriverPool({
-                    driverID : req.data._id,
-                    vehicleInfo: data
-                });   
-                
-                // adding driverEntry to driverPool
-                driverEntry.save()
-                .then(data => {
-                    res.send({ "message": `driverID ${req.data._id} has beend added to pool`, entryData: data});
-                }); 
-            });
-        }
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).send({message: err.message});
-    });
-}
-
-
 
 //maybe will delete these later
 exports.getAllDrivers = (req, res) => {
