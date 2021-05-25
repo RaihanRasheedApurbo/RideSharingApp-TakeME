@@ -9,6 +9,7 @@ import android.view.View;
 
 import com.google.gson.JsonObject;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -81,7 +82,7 @@ public class Waiting extends AppCompatActivity {
         apiDataService2.getProfileData(MainActivity.main_token, new ApiDataService.VolleyResponseListener() {
             @Override
             public void onError(Object message) {
-                System.out.println("Error in Main Activity");
+                System.out.println("Error in Api Call 2");
             }
 
             @Override
@@ -94,6 +95,46 @@ public class Waiting extends AppCompatActivity {
                     System.out.println("hello" + owner_email[0]);
 
                     MainActivity.getInstance().set_owner_data(owner_name[0], owner_email[0]);
+                    System.out.println("uiui calling api 3");
+                    api_call3();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+
+    }
+
+    void api_call3()
+    {
+        ApiDataService apiDataService2 = new ApiDataService(Waiting.this);
+        final JSONArray[] responseData = {new JSONArray()};
+
+
+        apiDataService2.getVehicles(MainActivity.main_token, new ApiDataService.VolleyResponseListener() {
+            @Override
+            public void onError(Object message) {
+                System.out.println("Error in Api Call 3");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+                try {
+
+                    responseData[0] = new JSONArray(responseObject.toString());
+                    for (int i = 0; i < responseData[0].length(); i++) {
+                        System.out.println("uiui");
+                        System.out.print((String)new JSONObject(responseData[0].get(i).toString()).get("model"));
+                        System.out.print((String)new JSONObject(responseData[0].get(i).toString()).get("type"));
+                        System.out.println((String)new JSONObject(responseData[0].get(i).toString()).get("regNo"));
+                    }
+
+                    //owner_name[0] = (String) responseData[0].get("name");
+                    //owner_email[0] = (String) responseData[0].get("email");
+
+
 
                     finish();
 
@@ -102,7 +143,6 @@ public class Waiting extends AppCompatActivity {
                 }
             }
         });
-
 
     }
 

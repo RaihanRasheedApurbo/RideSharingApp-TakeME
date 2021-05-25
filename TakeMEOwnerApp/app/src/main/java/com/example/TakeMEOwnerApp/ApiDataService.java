@@ -89,11 +89,43 @@ public class ApiDataService {
         MySingleton.getInstance(context).addToRequestQueue(request);
     }
 
-    public void getProfileData(String token, VolleyResponseListener volleyResponseListener) {
+    public void getProfileData(String token, VolleyResponseListener volleyResponseListener)
+    {
 
         // Request a string response from the provided URL.
         //String url = LOCAL_URL + "/api/dummy/owner/reqTest";
         String url = BASE_URL + "/api/owner/dashboard";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                volleyResponseListener::onResponse,
+                volleyResponseListener::onError) {
+            @Override
+            public Map<String, String> getHeaders() {
+                // below line we are creating a map for
+                // storing our values in key and value pair.
+                Map<String, String> params = new HashMap<String, String>();
+
+                // on below line we are passing our key
+                // and value pair to our parameters.
+                params.put("auth-token", token);
+
+                // at last we are
+                // returning our params.
+                return params;
+            }
+        };
+
+
+        MySingleton.getInstance(context).addToRequestQueue(stringRequest);
+    }
+
+
+    public void getVehicles(String token, VolleyResponseListener volleyResponseListener)
+    {
+
+        // Request a string response from the provided URL.
+        //String url = LOCAL_URL + "/api/dummy/owner/reqTest";
+        String url = BASE_URL + "/api/owner/vehicles";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 volleyResponseListener::onResponse,
