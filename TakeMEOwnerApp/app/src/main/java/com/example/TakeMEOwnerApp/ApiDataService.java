@@ -102,8 +102,6 @@ public class ApiDataService {
 
     public void getVehicles(String token, VolleyResponseListener volleyResponseListener)
     {
-
-        
         String url = BASE_URL + "/api/owner/vehicles";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -115,8 +113,6 @@ public class ApiDataService {
 
                 params.put("auth-token", token);
 
-                // at last we are
-                // returning our params.
                 return params;
             }
         };
@@ -128,7 +124,7 @@ public class ApiDataService {
 
     public void getVehicleInfo(String id, String token, VolleyResponseListener volleyResponseListener)
     {
-        String url = BASE_URL + "/api/owner/vehicles/id/" + id + "?driver=true";
+        String url = BASE_URL + "/api/owner/vehicle/id/" + id + "?driver=true&duration=360";
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 volleyResponseListener::onResponse,

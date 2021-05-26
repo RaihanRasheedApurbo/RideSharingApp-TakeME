@@ -128,8 +128,9 @@ public class Waiting extends AppCompatActivity {
                         String id = (String)new JSONObject(responseData[0].get(i).toString()).get("_id");
                         String driver_id = (String)new JSONObject(responseData[0].get(i).toString()).get("driverID");
 
-                        MainActivity.getInstance().add_vehicle(id,type, new Integer(regno).intValue());
-                        MainActivity.getInstance().add_driver(driver_id);
+                        //System.out.println("uiui "+ driver_id);
+
+                        api_call_vehicle_info(id, model, type, regno, driver_id);
                     }
 
                     MainActivity.getInstance().update_bottom_slider();
@@ -145,5 +146,43 @@ public class Waiting extends AppCompatActivity {
         });
 
     }
+
+
+    void api_call_vehicle_info(String vehichleId, String model, String type, String regno, String driver_id )
+    {
+        ApiDataService apiDataService2 = new ApiDataService(Waiting.this);
+        final JSONObject[] responseData = new JSONObject[1];
+        final JSONArray[] responseData2 = {new JSONArray()};
+
+        apiDataService2.getVehicleInfo(vehichleId, MainActivity.main_token, new ApiDataService.VolleyResponseListener() {
+            @Override
+            public void onError(Object message) {
+                System.out.println("Error in Api Call 4");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+                try {
+
+                    responseData[0] = new JSONObject(responseObject.toString());
+                    //System.out.println("uiui" + (String) responseData[0].get("data").toString());
+                    responseData2[0] = new JSONArray(responseData[0].get("data").toString());
+                    String driver_name = new JSONObject(responseData2[0].get(0).toString()).get("name").toString();
+                    System.out.println(new JSONArray(responseData2[0].get(2).toString()).toString() );//get("total")
+
+
+                    MainActivity.getInstance().add_vehicle(vehichleId ,type, new Integer(regno).intValue());
+                    MainActivity.getInstance().add_driver(driver_name, driver_id);
+
+                    MainActivity.getInstance().update_bottom_slider();
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+    }
+
 
 }

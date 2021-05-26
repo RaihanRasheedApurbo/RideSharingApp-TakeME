@@ -128,9 +128,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
-    public void add_driver(String id)
+    public void add_driver(String driver_name,String id)
     {
-        String driver_name = "Driver " + new Integer(drivers.size()+1).toString();
+        //String driver_name = "Driver " + new Integer(drivers.size()+1).toString();
         drivers.add(new Driver_class(driver_name, id));
     }
 
