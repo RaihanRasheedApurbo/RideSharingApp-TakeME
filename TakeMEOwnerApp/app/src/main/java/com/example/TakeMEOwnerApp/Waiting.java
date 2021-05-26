@@ -164,15 +164,19 @@ public class Waiting extends AppCompatActivity {
             public void onResponse(Object responseObject) {
                 try {
 
+                    double driver_income = 0.0;
                     responseData[0] = new JSONObject(responseObject.toString());
-                    //System.out.println("uiui" + (String) responseData[0].get("data").toString());
                     responseData2[0] = new JSONArray(responseData[0].get("data").toString());
                     String driver_name = new JSONObject(responseData2[0].get(0).toString()).get("name").toString();
-                    System.out.println(new JSONArray(responseData2[0].get(2).toString()).toString() );//get("total")
+                    //System.out.println(new JSONArray(responseData2[0].get(2).toString()).toString() );//get("total")
 
+                    if(new JSONArray(responseData2[0].get(2).toString()).length()>0)
+                        driver_income = new JSONObject(new JSONArray(responseData2[0].get(2).toString()).get(0).toString()).getDouble("total");
+                    //System.out.println(new JSONArray(responseData2[0].get(2).toString()).length());
+                    System.out.println("Driver Income " + driver_income);
 
                     MainActivity.getInstance().add_vehicle(vehichleId ,type, new Integer(regno).intValue());
-                    MainActivity.getInstance().add_driver(driver_name, driver_id);
+                    MainActivity.getInstance().add_driver(driver_name, driver_id, driver_income);
 
                     MainActivity.getInstance().update_bottom_slider();
 

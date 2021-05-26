@@ -128,16 +128,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
-    public void add_driver(String driver_name,String id)
+    public void add_driver(String driver_name,String id, double inc)
     {
         //String driver_name = "Driver " + new Integer(drivers.size()+1).toString();
-        drivers.add(new Driver_class(driver_name, id));
+        drivers.add(new Driver_class(driver_name, id, inc));
     }
 
     public void update_bottom_slider()
     {
         for (int i = 0; i < drivers.size(); i++) {
-            drivers.get(i).income = 125.69;
             drivers.get(i).vehicle = vehicles.get(i);
         }
 
