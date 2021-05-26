@@ -24,9 +24,6 @@ public class Waiting extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_waiting);
         login();
-
-        //MainActivity.getInstance().set_owner_data();
-
     }
 
     void login()
@@ -133,8 +130,10 @@ public class Waiting extends AppCompatActivity {
 
                         MainActivity.getInstance().add_vehicle(id,type, new Integer(regno).intValue());
                         MainActivity.getInstance().add_driver(driver_id);
-                        MainActivity.getInstance().update_bottom_slider();
                     }
+
+                    MainActivity.getInstance().update_bottom_slider();
+
 
 
                     finish();

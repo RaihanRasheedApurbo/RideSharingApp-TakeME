@@ -90,9 +90,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
 
-
-
-        //**************** Bottom Driver Info Slider**************************//
+        //**************** Bottom Driver Info Slider End**************************//
 
         setSupportActionBar(toolbar);
 
@@ -138,20 +136,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void update_bottom_slider()
     {
-
-
-//        Driver_class a = new Driver_class("Abdur Rahman Fahad", "201605069");
-//        Driver_class b = new Driver_class("Rayhan Rasheed Apurba", "201605062");
-//        Driver_class c = new Driver_class("Mohib Hossain Rafi", "201605078");
-//        a.income = 209.45;
-//        b.income = 405.25;
-//        c.income = 112.35;
-
         for (int i = 0; i < drivers.size(); i++) {
             drivers.get(i).income = 125.69;
             drivers.get(i).vehicle = vehicles.get(i);
         }
-
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(MainActivity.this,
                 LinearLayoutManager.HORIZONTAL, false);
@@ -161,8 +149,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         recyclerViewAdapter = new RecyclerViewAdapter( drivers,MainActivity.this, recyclerView);
         recyclerView.setAdapter( recyclerViewAdapter);
-
-
     }
 
 
