@@ -56,7 +56,7 @@ exports.login = (req, res) => {
             res.status(200).send({ message : "Invalid Email or Password" });
         }else{
             //console.log(data)
-            const token = jwt.sign({_id: data._id}, process.env.TOKEN_SECRET);
+            const token = jwt.sign({_id: data._id}, secret);
             res.header('auth-token', token).send({ message: "login successful", data });
         }
     })

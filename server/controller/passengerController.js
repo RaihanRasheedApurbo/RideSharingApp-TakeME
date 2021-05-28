@@ -1,6 +1,8 @@
 const Passenger = require('../model/passenger');
 const jwt = require('jsonwebtoken');
 
+const secret = process.env.TOKEN_SECRET || "TakeMeSecret";
+
 exports.register = (req, res) => {
     // validate request
     if(!req.body){
@@ -53,7 +55,7 @@ exports.login = (req, res) => {
             res.status(404).send({ message : "Invalid Email or Password" });
         }else{
             //console.log(data)
-            const token = jwt.sign({_id: data._id}, process.env.TOKEN_SECRET);
+            const token = jwt.sign({_id: data._id}, secret);
             res.header('auth-token', token).send({ message: "login successful" });
         }
     })

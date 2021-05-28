@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const secret = process.env.TOKEN_SECRET || "TakeMeSecret";
 
 module.exports = function (req, res, next) {
     /*const bearerHeader = req.header('authorization');
@@ -26,8 +27,7 @@ module.exports = function (req, res, next) {
         return res.status(401).send({ messsage: "Access Denied" });
     }
     try{
-        const secret = process.env.TOKEN_SECRET || "TakeMeSecret";
-        const verified = jwt.verify(token, process.env.TOKEN_SECRET);
+        const verified = jwt.verify(token, secret);
         req.data = verified;
         next();
     }catch (err) {
