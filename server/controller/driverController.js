@@ -1,6 +1,8 @@
 const Driver = require('../model/driver');
 const jwt = require('jsonwebtoken');
 
+const secret = process.env.TOKEN_SECRET || "TakeMeSecret";
+
 exports.register = (req, res) => {
     // validate request
     if(!req.body){

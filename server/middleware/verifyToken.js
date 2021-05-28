@@ -27,7 +27,7 @@ module.exports = function (req, res, next) {
     }
     try{
         const secret = process.env.TOKEN_SECRET || "TakeMeSecret";
-        const verified = jwt.verify(token, secret);
+        const verified = jwt.verify(token, process.env.TOKEN_SECRET);
         req.data = verified;
         next();
     }catch (err) {
