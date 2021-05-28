@@ -47,7 +47,7 @@ route.get('/api/passenger/getAll', passengerController.getAllPassengers); //this
 route.post('/api/vehicle/register', verify, vehicleController.addVehicle);
 route.get('/api/vehicle/id/', vehicleController.find);
 route.get('/api/vehicle/ownerID/', vehicleController.findByOwnerID);
-route.get('/api/vehicle/driverID/', vehicleController.findByDriverID);
+route.get('/api/vehicle/driverID/:id', vehicleController.findByDriverID);
 route.get('/api/vehicle/getAll', vehicleController.getAllVehicles); //this will be removed afterwards
 
 

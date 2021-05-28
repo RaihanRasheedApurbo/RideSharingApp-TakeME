@@ -1,4 +1,5 @@
 const Vehicle = require('../model/vehicle');
+const Passenger = require('../model/passenger');
 const DriverPool = require('../model/driverPool');
 
 //passengerSearch
@@ -10,7 +11,13 @@ exports.lookForPassenger = (req, res) => {
                 console.log(data);
                 DriverPool.findOneAndDelete({'driverID': req.data._id})
                 .then(data => {
-                    res.status(200).send({"message": "you have been matched", "passengerID": data.passengerID, entryData: data});
+                    Passenger.findById(data.passengerID)
+                    .then(passengerData => {
+                        res.status(200).send({"message": "you have been matched", "passengerInfo": passengerData, entryData: data});
+                    })
+                    .catch(err => {
+                        res.status(500).send({message: err.message});
+                    });
                 })
                 .catch(err => {
                     res.status(500).send({"message": err.message});
@@ -46,6 +53,16 @@ exports.lookForPassenger = (req, res) => {
     });
 }
 
+exports.stopPassengerSearch = (req, res) => {
+    DriverPool.findOneAndDelete({'driverID': req.data._id})
+        .then(data => {
+            res.status(200).send({"message": `DriverID ${req.data._id} has been removed from pool`});
+        })
+        .catch(err => {
+            res.status(500).send({"message": err.message});
+        });
+}
+
 function calculateDistance(lat1, lon2, lat2, lon2) {
     console.log(lat1, lon1, lat2, lon2);
     const R = 6371e3; // metres
@@ -78,7 +95,7 @@ exports.lookForDriver = (req, res) => {
                         type: 'Point',
                         coordinates: [ lon1 , lat1 ]
                     },
-                    $maxDistance: 1000
+                    $maxDistance: 10000
                 }
             }
         })

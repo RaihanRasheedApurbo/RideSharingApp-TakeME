@@ -86,13 +86,15 @@ exports.findByOwnerID = (req, res) => {
 
 //find vehicle using driverID
 exports.findByDriverID = (req, res) => {
-    Vehicle.find({ 'driverID': req.body._id })
+    console.log(req.params.id);
+    Vehicle.find({ 'driverID': req.params.id })
     .then(data =>{
         if(data.length <= 0){
-            res.status(404).send({ message : "No vehicle to show" });
+            res.status(200).send({ message : "No vehicle to show" });
         }else{
             //console.log(data)
-            res.send(data);    
+            console.log(data);
+            res.status(200).send(data);    
         }
     })
     .catch(err =>{

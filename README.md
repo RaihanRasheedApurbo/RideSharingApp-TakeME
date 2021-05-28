@@ -98,7 +98,15 @@ You receive
             "capacity": 2,
             "ownerID": "6074779ae70efe2e24c95cd1",
             "__v": 0,
-            "driverID": "607478188c29c1408cfad29c"
+            "driverID": "607478188c29c1408cfad29c",
+            "location": {
+                "coordinates": [
+                    90.444338032,
+                    23.68948164
+                ],
+                "_id": "60ad6c23aa57e313b09f56e4",
+                "type": "Point"
+            }
         },
         {
             "_id": "6074779be70efe2e24c95cdc",
@@ -108,7 +116,15 @@ You receive
             "capacity": 4,
             "ownerID": "6074779ae70efe2e24c95cd1",
             "__v": 0,
-            "driverID": "607478198c29c1408cfad2d8"
+            "driverID": "607478198c29c1408cfad2d8",
+            "location": {
+                "coordinates": [
+                    90.444338032,
+                    23.68948164
+                ],
+                "_id": "60ad6c23aa57e313b09f56e4",
+                "type": "Point"
+            }
         }
     ]
 }

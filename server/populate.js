@@ -425,6 +425,40 @@ function makeDriverAvailable() {
     });
 }
 
+
+function driverCheck() {
+    let count = 0;
+    axios.get(address+'driver/getAll')
+    .then(data => {
+        drivers = data.data;
+        //console.log(owners);
+        for (let index = 0; index < drivers.length; index++) {
+            let driver = drivers[index];
+            let driverID = driver._id;
+            let bodyInfo = {
+                '_id': driverID
+            };
+            
+            axios.get(address+'vehicle/driverID/'+driverID)
+            .then(res => {
+                driverData = res.data;
+                if(driverData.length == 1) {console.log("okay", count++);}
+                if(driverData.length != 1) {
+                    console.log("driverID: " + driverID);
+                    console.log(driverData);
+                }
+                console.log("----------------------------------");
+            })
+            .catch(err => {
+                console.log(err.message);
+            });
+        }
+    })
+    .catch(err => {
+        console.log(err);
+    });    
+}
+
 //driverAssign();
 
 
@@ -437,8 +471,9 @@ for (let index = 0; index < n; index++) {
 }*/
 
 //show();
-ridePopulate(10);
-makeDriverAvailable();
+//ridePopulate(10);
+//driverCheck();
+//makeDriverAvailable();
 //vehicleLocationUpdate();
 
 /*let duration = 60;
