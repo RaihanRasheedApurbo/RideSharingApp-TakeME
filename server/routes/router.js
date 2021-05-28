@@ -31,6 +31,7 @@ route.post('/api/driver/register', driverController.register);
 route.post('/api/driver/login', driverController.login);
 route.get('/api/driver/dashboard', verify, driverController.showDashboard);
 route.get('/api/driver/search', verify, driverPoolController.lookForPassenger);
+route.get('/api/driver/stopSearch', verify, driverPoolController.stopPassengerSearch);
 route.get('/api/driver/vehicleID', driverController.findByVehicleID);
 route.get('/api/driver/getAll', driverController.getAllDrivers); //this will be removed afterwards
 
