@@ -41,28 +41,39 @@
             mapbox:mapbox_cameraTargetLng="-77.0295"
             mapbox:mapbox_cameraZoom="12" />
 
-        <Button
-            android:id="@+id/startButton"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/mapboxGrayLight"
-            android:enabled="false"
-            android:text="Start navigation"
-            android:textColor="@color/mapboxWhite"
-            android:layout_alignParentTop="true" />
 
-        <Button
-            android:id="@+id/endButton"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:background="@color/mapboxGrayLight"
-            android:visibility="invisible"
-            android:enabled="false"
-            android:text="Cancel Ride"
-            android:textColor="@color/mapboxWhite"
-            android:layout_below="@+id/startButton" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
+            <Button
+                android:id="@+id/startButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="60dp"
+                android:background="@color/mapboxGrayLight"
+                android:enabled="false"
+                android:text="Start navigation"
+                android:textColor="@color/mapboxWhite"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"/>
+
+            <Button
+                android:id="@+id/endButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="40dp"
+                android:background="@color/mapboxGrayLight"
+                android:visibility="invisible"
+                android:enabled="false"
+                android:text="Cancel Ride"
+                android:textColor="@color/mapboxWhite"
+                android:layout_below="@+id/startButton"
+                android:layout_centerHorizontal="true"/>
+
+
+
+        </RelativeLayout>
 
 
     </RelativeLayout>
