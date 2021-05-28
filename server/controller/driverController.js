@@ -51,7 +51,7 @@ exports.login = (req, res) => {
     Driver.findOne({'email': req.body.email, 'password': req.body.password})
     .then(data =>{
         if(!data){
-            res.status(404).send({ message : "Invalid Email or Password" });
+            res.status(200).send({ message : "Invalid Email or Password" });
         }else{
             //console.log(data)
             const token = jwt.sign({_id: data._id}, process.env.TOKEN_SECRET);
@@ -59,7 +59,7 @@ exports.login = (req, res) => {
         }
     })
     .catch(err =>{
-        res.status(500).send({ message: err.message || "Error retrieving driver with email " + req.body.email});
+        res.status(200).send({ message: err.message || "Error retrieving driver with email " + req.body.email});
     });
 }
 
