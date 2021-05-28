@@ -7,7 +7,7 @@
     android:gravity="bottom"
     android:padding="15dp"
     android:id="@+id/left_sidebar_header">
-    
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">

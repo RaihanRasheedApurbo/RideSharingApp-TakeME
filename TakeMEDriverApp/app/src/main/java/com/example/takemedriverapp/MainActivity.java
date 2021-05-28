@@ -5,10 +5,16 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import java.util.List;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.drawerlayout.widget.DrawerLayout;
+
+import android.view.MenuItem;
 import android.widget.Toast;
 
 // classes needed to initialize map
+import com.google.android.material.navigation.NavigationView;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
@@ -48,7 +54,7 @@ import android.widget.Button;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener, NavigationView.OnNavigationItemSelectedListener {
     // variables for adding location layer
     private MapView mapView;
     private MapboxMap mapboxMap;
@@ -62,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     // variables needed to initialize navigation
     private Button startButton;
     private Button cancelButton;
+
+
     // boiler plate code of mapbox ended ... Apurbo's code starts from below...
     // state management
     enum DriverState {
@@ -73,6 +81,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     DriverState driverState;
 
 
+    // Variables for left side bar
+    DrawerLayout drawerLayout;
+    NavigationView navigationView;
+    Toolbar toolbar;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +95,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapView = findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+
+        // Fahad's code here
+
+        init_sidebar();
+
+
 
         // Apurbo's code here
         driverState = DriverState.RESTING;
@@ -102,6 +122,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
+    }
+
+
+    public void init_sidebar()
+    {
+
+        toolbar = findViewById(R.id.top_toolbar1);
+        drawerLayout = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view_left);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        setSupportActionBar(toolbar);
+
+        navigationView.bringToFront();
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+    }
+
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        return true;
     }
 
     @Override
