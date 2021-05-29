@@ -163,7 +163,7 @@ public class Waiting extends AppCompatActivity {
             @Override
             public void onResponse(Object responseObject) {
                 try {
-
+                    System.out.println(responseObject.toString());
                     double driver_income = 0.0;
                     responseData[0] = new JSONObject(responseObject.toString());
                     responseData2[0] = new JSONArray(responseData[0].get("data").toString());
