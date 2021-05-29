@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private MapView mapView;
     private MapboxMap mapboxMap;
+    private Marker currentMarker = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,10 +131,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
-    public void add_driver(String driver_name,String id, double inc)
+    public void add_driver(String driver_name, String id, double driver_income, double lat, double lang)
     {
         //String driver_name = "Driver " + new Integer(drivers.size()+1).toString();
-        drivers.add(new Driver_class(driver_name, id, inc));
+        drivers.add(new Driver_class(driver_name, id,driver_income, lat,lang));
     }
 
     public void update_bottom_slider()
@@ -169,10 +171,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public void setMarker(LatLng location, String markerName)
     {
+        if(currentMarker!=null)
+        {
+            mapboxMap.removeMarker(currentMarker);
+        }
         mapboxMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location,13));
-        mapboxMap.addMarker(new MarkerOptions()
+        currentMarker = mapboxMap.addMarker(new MarkerOptions()
                 .position(location)
                 .title(markerName));
+
+
     }
 
     @Override

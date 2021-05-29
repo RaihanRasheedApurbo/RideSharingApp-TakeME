@@ -35,7 +35,7 @@ public class ApiDataService {
 
         void onResponse(Object responseObject);
     }
-    public void getData(String email, String password, VolleyResponseListener volleyResponseListener) {
+    public void login(String email, String password, VolleyResponseListener volleyResponseListener) {
 
         // Request a string response from the provided URL.
         //String url = LOCAL_URL + "/api/dummy/owner/reqTest";

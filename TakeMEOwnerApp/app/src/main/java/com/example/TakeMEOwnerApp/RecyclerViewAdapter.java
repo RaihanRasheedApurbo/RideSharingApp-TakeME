@@ -38,12 +38,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             @Override
             public void onClick(View v) {
                 int itemPosition = recyclerView.getChildLayoutPosition(view);
-                String name = drivers.get(itemPosition).name;
+                Driver_class driver =  drivers.get(itemPosition);
+                String name = driver.name;
+                double lat = driver.lat;
+                double lang = driver.lang;
+                System.out.println(lat+" "+lang);
                 // Go to new window instead of making toast
                 MainActivity activity = (MainActivity) context;
-                activity.setMarker(new LatLng(23.8223,90.3654),"Fahad");
+                activity.setMarker(new LatLng(lat,lang),name);
 
-                Toast.makeText( parent.getContext(), "Hello " + name, Toast.LENGTH_SHORT).show();
+//                Toast.makeText( parent.getContext(), "Hello " + name, Toast.LENGTH_SHORT).show();
             }
         });
 

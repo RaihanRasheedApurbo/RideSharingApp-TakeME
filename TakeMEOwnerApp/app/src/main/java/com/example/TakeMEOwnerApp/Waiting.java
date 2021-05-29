@@ -3,11 +3,9 @@ package com.example.TakeMEOwnerApp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.os.Handler;
-import android.util.Log;
-import android.view.View;
 
-import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,7 +28,7 @@ public class Waiting extends AppCompatActivity {
     {
         ApiDataService apiDataService = new ApiDataService(Waiting.this);
 
-        apiDataService.getData("bruce@wayne.com", "iAmBatman" , new ApiDataService.VolleyResponseListener() {
+        apiDataService.login("bruce@wayne.com", "iAmBatman" , new ApiDataService.VolleyResponseListener() {
             @Override
             public void onError(Object message) {
                 System.out.println("xplication Error");
@@ -121,6 +119,8 @@ public class Waiting extends AppCompatActivity {
                 try {
 
                     responseData[0] = new JSONArray(responseObject.toString());
+                    System.out.println("hello");
+                    System.out.println(responseData[0]);
                     for (int i = 0; i < responseData[0].length(); i++) {
                         String model = (String)new JSONObject(responseData[0].get(i).toString()).get("model");
                         String type = model + " " + (String)new JSONObject(responseData[0].get(i).toString()).get("type");
@@ -128,10 +128,22 @@ public class Waiting extends AppCompatActivity {
                         String id = (String)new JSONObject(responseData[0].get(i).toString()).get("_id");
                         String driver_id = (String)new JSONObject(responseData[0].get(i).toString()).get("driverID");
 
+                        JSONObject location = (JSONObject) new JSONObject(responseData[0].get(i).toString()).get("location");
+                        JSONArray coordinates = (JSONArray) location.get("coordinates");
+                        double lang = (Double) coordinates.get(0);
+                        double lat = (Double) coordinates.get(1);
+                        System.out.println("coordinate: "+coordinates);
+                        System.out.println("lat :"+lat+" lang: "+lang);
+                        System.out.println("location: "+location);
+
+
+
+
                         //System.out.println("uiui "+ driver_id);
 
-                        api_call_vehicle_info(id, model, type, regno, driver_id);
+                        api_call_vehicle_info(id, model, type, regno, driver_id,lat,lang,i);
                     }
+                    System.out.println("hello");
 
                     MainActivity.getInstance().update_bottom_slider();
 
@@ -148,7 +160,7 @@ public class Waiting extends AppCompatActivity {
     }
 
 
-    void api_call_vehicle_info(String vehichleId, String model, String type, String regno, String driver_id )
+    void api_call_vehicle_info(String vehichleId, String model, String type, String regno, String driver_id, double lat, double lang, int index )
     {
         ApiDataService apiDataService2 = new ApiDataService(Waiting.this);
         final JSONObject[] responseData = new JSONObject[1];
@@ -176,9 +188,15 @@ public class Waiting extends AppCompatActivity {
                     System.out.println("Driver Income " + driver_income);
 
                     MainActivity.getInstance().add_vehicle(vehichleId ,type, new Integer(regno).intValue());
-                    MainActivity.getInstance().add_driver(driver_name, driver_id, driver_income);
+                    MainActivity.getInstance().add_driver(driver_name, driver_id, driver_income, lat, lang);
 
                     MainActivity.getInstance().update_bottom_slider();
+
+                    // loading the first driver's coordinate automatically
+                    if(index==0)
+                    {
+                        MainActivity.getInstance().setMarker(new LatLng(lat,lang),driver_name);
+                    }
 
                 } catch (JSONException e) {
                     e.printStackTrace();
