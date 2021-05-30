@@ -38,6 +38,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public static String main_token = "";
 
+    private static MainActivity instance;
+
     DrawerLayout drawerLayout;
     NavigationView navigationView;
     Toolbar toolbar;
@@ -48,7 +50,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     JSONObject responseData, bodyData, headerData;
 
-    ArrayList<Driver_class> drivers;
+    ArrayList<Driver_class> drivers = new ArrayList<>();
+    ArrayList<Vehicle> vehicles = new ArrayList<>();
 
     RecyclerViewAdapter recyclerViewAdapter;
 
@@ -60,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        instance = this;
 
         Intent homeintent = new Intent(MainActivity.this, Waiting.class);
         startActivity(homeintent);
@@ -79,39 +83,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
 
-        //Problem ........ need delay in Main Activity
-        System.out.println("xpxs " + main_token);
-
-        find_owner_data();
 
         //**************** Bottom Driver Info Slider**************************//
 
         recyclerView = findViewById(R.id.recyclerview_driver);
-        drivers = new ArrayList<>();
-        Driver_class a = new Driver_class("Abdur Rahman Fahad", "201605069");
-        Driver_class b = new Driver_class("Rayhan Rasheed Apurba", "201605062");
-        Driver_class c = new Driver_class("Mohib Hossain Rafi", "201605078");
-        a.income = 209.45;
-        b.income = 405.25;
-        c.income = 112.35;
-        Vehicle car = new Vehicle("6074779ae70efe2e", "Toyota Premium", 111503145);
-        a.vehicle = car;
-        b.vehicle = car;
-        c.vehicle = car;
-        drivers.add(a);
-        drivers.add(b);
-        drivers.add(c);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(MainActivity.this,
-                LinearLayoutManager.HORIZONTAL, false);
 
-        recyclerView.setLayoutManager(linearLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
 
-        recyclerViewAdapter = new RecyclerViewAdapter( drivers,MainActivity.this, recyclerView);
-        recyclerView.setAdapter( recyclerViewAdapter);
-
-        //**************** Bottom Driver Info Slider**************************//
+        //**************** Bottom Driver Info Slider End**************************//
 
         setSupportActionBar(toolbar);
 
@@ -126,97 +105,50 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    public void find_owner_data()
+    public static MainActivity getInstance() {
+        return instance;
+    }
+
+    public void set_owner_data(String s1, String s2)
     {
         View header = navigationView.getHeaderView(0);
 
         textView_username = header.findViewById(R.id.textView_owner_name);
         textView_email = header.findViewById(R.id.textView_owner_email);
 
-        login();
-
-        //textView_username.setText(owner_name[0]);
-        //textView_email.setText(owner_email[0]);
-
+        textView_username.setText(s1);
+        textView_email.setText(s2);
     }
 
-
-
-    void login()
+    public void add_vehicle(String id, String model, int regno)
     {
-        ApiDataService apiDataService = new ApiDataService(MainActivity.this);
 
-        apiDataService.getData("bruce@wayne.com", "iAmBatman" , new ApiDataService.VolleyResponseListener() {
-            @Override
-            public void onError(Object message) {
-                System.out.println("xplication Error");
-            }
-
-            @Override
-            public void onResponse(Object responseObject) {
-
-                try {
-                    responseData = new JSONObject(responseObject.toString());
-
-                    bodyData = (JSONObject) responseData.get("body");
-                    headerData = (JSONObject) responseData.get("headers");
-
-                    MainActivity.main_token = (String) headerData.get("Auth-Token");
-                    System.out.println("xps " + MainActivity.main_token);
-
-
-                    // ********************************************************
-
-                    api_call2();
-
-                    // *********************************************************
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
+        Vehicle car = new Vehicle(id, model, regno);
+        vehicles.add(car);
 
     }
 
-
-    void api_call2()
+    public void add_driver(String driver_name,String id, double inc)
     {
-        ApiDataService apiDataService2 = new ApiDataService(MainActivity.this);
-        final JSONObject[] responseData = new JSONObject[1];
-        final String[] owner_name = new String[1];
-        final String[] owner_email = new String[1];
-
-
-        apiDataService2.getProfileData(MainActivity.main_token, new ApiDataService.VolleyResponseListener() {
-            @Override
-            public void onError(Object message) {
-                System.out.println("Error in Main Activity");
-            }
-
-            @Override
-            public void onResponse(Object responseObject) {
-                try {
-                    responseData[0] = new JSONObject(responseObject.toString());
-                    owner_name[0] = (String) responseData[0].get("name");
-                    owner_email[0] = (String) responseData[0].get("email");
-                    System.out.println("hello" + owner_name[0]);
-                    System.out.println("hello" + owner_email[0]);
-                    textView_username.setText(owner_name[0]);
-                    textView_email.setText(owner_email[0]);
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-
-
+        //String driver_name = "Driver " + new Integer(drivers.size()+1).toString();
+        drivers.add(new Driver_class(driver_name, id, inc));
     }
 
+    public void update_bottom_slider()
+    {
+        for (int i = 0; i < drivers.size(); i++) {
+            drivers.get(i).vehicle = vehicles.get(i);
+        }
 
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(MainActivity.this,
+                LinearLayoutManager.HORIZONTAL, false);
 
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        recyclerViewAdapter = new RecyclerViewAdapter( drivers,MainActivity.this, recyclerView);
+        recyclerView.setAdapter( recyclerViewAdapter);
+    }
 
 
     @Override

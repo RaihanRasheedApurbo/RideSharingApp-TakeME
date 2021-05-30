@@ -8,9 +8,10 @@ public class Driver_class {
     Vehicle vehicle;
 
 
-    public Driver_class(String name, String id) {
+    public Driver_class(String name, String id, double income) {
         this.name = name;
         this.id = id;
+        this.income = income;
     }
 
 
