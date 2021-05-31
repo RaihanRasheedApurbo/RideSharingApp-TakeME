@@ -16,4 +16,13 @@
         <item name="windowNoTitle">true</item>
 
     </style>
+
+    <style name="Theme.TakeMEDriverApp.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.TakeMEDriverApp.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.TakeMEDriverApp.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>
