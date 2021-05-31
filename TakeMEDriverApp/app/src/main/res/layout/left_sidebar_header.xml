@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="190dp"
     android:background="#1C1A1A"
     android:gravity="bottom"
     android:padding="15dp"
-    android:id="@+id/header_view">
-
+    android:id="@+id/left_sidebar_header">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -21,28 +18,26 @@
             android:paddingTop="30dp">
 
             <ImageView
-                android:id="@+id/imageView_owner"
+                android:id="@+id/imageView_driver"
                 android:layout_width="85dp"
                 android:layout_height="85dp"
-                android:src="@drawable/owner" />
-
+                android:src="@drawable/driver" />
             <TextView
-                android:id="@+id/textView_owner_name"
+                android:id="@+id/textView_driver_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="22dp"
                 android:fontFamily="sans-serif-condensed"
-                android:text="Owner name...."
+                android:text="Driver name...."
                 android:textColor="@color/cardview_light_background"
                 android:textSize="22dp"
-                android:layout_toRightOf="@+id/imageView_owner"/>
-
+                android:layout_toRightOf="@+id/imageView_driver"/>
 
         </RelativeLayout>
 
 
         <TextView
-            android:id="@+id/textView_owner_email"
+            android:id="@+id/textView_driver_email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -54,6 +49,10 @@
 
 
     </RelativeLayout>
+
+
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

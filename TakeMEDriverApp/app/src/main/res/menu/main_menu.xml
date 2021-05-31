@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_trips"
+            android:title="Your Trips" />
+
+        <item
+            android:id="@+id/nav_income"
+            android:title="Income History" />
+
+        <item
+            android:id="@+id/nav_account"
+            android:title="Account" />
+
+        <item
+            android:id="@+id/nav_settings"
+            android:title="Settings" />
+    </group>
+
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_signout"
+            android:title="Sign Out" />
+    </group>
+
+    <item android:title="version v4.36.69">
+
+    </item>
+
+</menu>

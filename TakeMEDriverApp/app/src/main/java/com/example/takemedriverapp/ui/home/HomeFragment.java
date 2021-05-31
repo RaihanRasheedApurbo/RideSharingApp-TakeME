@@ -1,61 +1,61 @@
-package com.example.takemedriverapp;
+package com.example.takemedriverapp.ui.home;
 
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import java.util.List;
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.drawerlayout.widget.DrawerLayout;
-
-import android.view.MenuItem;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
-// classes needed to initialize map
-import com.google.android.material.navigation.NavigationView;
-import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.Style;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 
-// classes needed to add the location component
+import com.example.takemedriverapp.MainActivity2;
+import com.example.takemedriverapp.R;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Feature;
+import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
-
-// classes needed to add a marker
-import com.mapbox.geojson.Feature;
-import com.mapbox.geojson.Point;
-import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.maps.MapView;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
+import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+
+import java.util.List;
+
+import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 
-// classes to calculate a route
-import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import android.util.Log;
 
-// classes needed to launch navigation UI
-import android.view.View;
-import android.widget.Button;
-import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
+public class HomeFragment extends Fragment implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener {
 
+    private HomeViewModel homeViewModel;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener, NavigationView.OnNavigationItemSelectedListener {
-    // variables for adding location layer
+    // new code
     private MapView mapView;
     private MapboxMap mapboxMap;
     // variables for adding location layer
@@ -68,8 +68,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     // variables needed to initialize navigation
     private Button startButton;
     private Button cancelButton;
-
-
     // boiler plate code of mapbox ended ... Apurbo's code starts from below...
     // state management
     enum DriverState {
@@ -80,75 +78,62 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
     DriverState driverState;
 
+    static View root = null;
+    // new code ended
 
-    // Variables for left side bar
-    DrawerLayout drawerLayout;
-    NavigationView navigationView;
-    Toolbar toolbar;
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Mapbox.getInstance(this, getString(R.string.mapbox_access_token));
-        setContentView(R.layout.activity_main);
-        mapView = findViewById(R.id.mapView);
-        mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(this);
-
-        // Fahad's code here
-
-        init_sidebar();
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+//        homeViewModel =
+//                new ViewModelProvider(this).get(HomeViewModel.class);
 
 
+        System.out.println("kill meh");
+        if(root == null)
+        {
+            System.out.println("kill meh again");
+            Mapbox.getInstance(getActivity(), getString(R.string.mapbox_access_token));
+            root = inflater.inflate(R.layout.fragment_home, container, false);
+            mapView = root.findViewById(R.id.mapView);
+            mapView.onCreate(savedInstanceState);
+            mapView.getMapAsync(this);
+            driverState = DriverState.RESTING;
+            startButton = root.findViewById(R.id.startButton);
+            startButton.setText("Search Passenger");
+            startButton.setEnabled(true);
 
-        // Apurbo's code here
-        driverState = DriverState.RESTING;
-        startButton = findViewById(R.id.startButton);
-        startButton.setText("Search Passenger");
-        startButton.setEnabled(true);
+            cancelButton = root.findViewById(R.id.endButton);
+            cancelButton.setOnClickListener(new View.OnClickListener() {
 
-        cancelButton = findViewById(R.id.endButton);
-        cancelButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+    //                Intent intent = getIntent();
+    //                finish();
+    //                startActivity(intent);
+//                    HomeFragment fragment = (HomeFragment)
+//                            getParentFragmentManager().findFragmentById(R.id.nav_home);
+//                    System.out.println("total fragments: "+getParentFragmentManager().getFragments().size());
+//                    getParentFragmentManager().beginTransaction()
+//                            .detach(fragment)
+//                            .attach(fragment)
+//                            .commit();
 
-            @Override
-            public void onClick(View view) {
-                Intent intent = getIntent();
-                finish();
-                startActivity(intent);
-            }
-        });
+                }
+            });
+        }
 
-
-
-
-    }
-
-
-    public void init_sidebar()
-    {
-
-        toolbar = findViewById(R.id.top_toolbar1);
-        drawerLayout = findViewById(R.id.drawer_layout);
-        navigationView = findViewById(R.id.nav_view_left);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        setSupportActionBar(toolbar);
-
-        navigationView.bringToFront();
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar,
-                R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView.setNavigationItemSelectedListener(this);
-
-    }
+//        final TextView textView = root.findViewById(R.id.text_home);
+//        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+//            @Override
+//            public void onChanged(@Nullable String s) {
+//                textView.setText(s);
+//            }
+//        });
+        // new code
 
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        return true;
+
+        //new code ended
+        return root;
     }
 
     @Override
@@ -161,8 +146,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 addDestinationIconSymbolLayer(style);
 
-                mapboxMap.addOnMapClickListener(MainActivity.this);
-                startButton = findViewById(R.id.startButton);
+                mapboxMap.addOnMapClickListener(HomeFragment.this);
+                startButton = root.findViewById(R.id.startButton);
                 startButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -174,7 +159,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     .shouldSimulateRoute(simulateRoute)
                                     .build();
                             // Call this method with Context from within an Activity
-                            NavigationLauncher.startNavigation(MainActivity.this, options);
+                            NavigationLauncher.startNavigation(getActivity(), options);
                         }
                         else if(driverState==DriverState.RESTING)
                         {
@@ -232,7 +217,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         );
         loadedMapStyle.addLayer(destinationSymbolLayer);
     }
-
     @SuppressWarnings( {"MissingPermission"})
     @Override
     public boolean onMapClick(@NonNull LatLng point) {
@@ -255,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void getRoute(Point origin, Point destination) {
-        NavigationRoute.builder(this)
+        NavigationRoute.builder(getActivity())
                 .accessToken(Mapbox.getAccessToken())
                 .origin(origin)
                 .destination(destination)
@@ -294,20 +278,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @SuppressWarnings( {"MissingPermission"})
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
         // Check if permissions are enabled and if not request
-        if (PermissionsManager.areLocationPermissionsGranted(this)) {
+        if (PermissionsManager.areLocationPermissionsGranted(getActivity())) {
             // Activate the MapboxMap LocationComponent to show user location
             // Adding in LocationComponentOptions is also an optional parameter
             locationComponent = mapboxMap.getLocationComponent();
-            locationComponent.activateLocationComponent(this, loadedMapStyle);
+            locationComponent.activateLocationComponent(getActivity(), loadedMapStyle);
             locationComponent.setLocationComponentEnabled(true);
             // Set the component's camera mode
             locationComponent.setCameraMode(CameraMode.TRACKING);
         } else {
             permissionsManager = new PermissionsManager(this);
-            permissionsManager.requestLocationPermissions(this);
+            permissionsManager.requestLocationPermissions(getActivity());
         }
     }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -316,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onExplanationNeeded(List<String> permissionsToExplain) {
-        Toast.makeText(this, R.string.user_location_permission_explanation, Toast.LENGTH_LONG).show();
+        Toast.makeText(getActivity(), R.string.user_location_permission_explanation, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -324,47 +307,47 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (granted) {
             enableLocationComponent(mapboxMap.getStyle());
         } else {
-            Toast.makeText(this, R.string.user_location_permission_not_granted, Toast.LENGTH_LONG).show();
-            finish();
+            Toast.makeText(getActivity(), R.string.user_location_permission_not_granted, Toast.LENGTH_LONG).show();
+            //finish();
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mapView.onStart();
-    }
+//    @Override
+//    public void onStart() {
+//        super.onStart();
+//        mapView.onStart();
+//    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        mapView.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mapView.onPause();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mapView.onStop();
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mapView.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mapView.onDestroy();
-    }
-
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        mapView.onResume();
+//    }
+//
+//    @Override
+//    public void onPause() {
+//        super.onPause();
+//        mapView.onPause();
+//    }
+//
+//    @Override
+//    public void onStop() {
+//        super.onStop();
+//        mapView.onStop();
+//    }
+//
+//    @Override
+//    public void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//        mapView.onSaveInstanceState(outState);
+//    }
+//
+//    @Override
+//    public void onDestroy() {
+//        super.onDestroy();
+//        mapView.onDestroy();
+//    }
+//
     @Override
     public void onLowMemory() {
         super.onLowMemory();
