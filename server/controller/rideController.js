@@ -73,7 +73,7 @@ exports.findByDriverID = (req, res) => {
         })
         .catch(err => {
             res.status(500).send({ message: err.message });
-        })
+        });
     }
     else {
         Ride.find({ 'driverID': id })

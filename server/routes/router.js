@@ -40,7 +40,8 @@ route.post('/api/passenger/register', passengerController.register);
 route.post('/api/passenger/login', passengerController.login);
 route.get('/api/passenger/dashboard', verify, passengerController.showDashboard);
 route.get('/api/passenger/search', driverPoolController.lookForDriver); //this will be changed after passenger app
-route.get('/api/passenger/accept', driverPoolController.acceptDriver);  //this will be changed after passenger app
+route.get('/api/passenger/accept', driverPoolController.acceptDriverOld);  //this will be changed after passenger app
+route.post('/api/passenger/acceptDriver', verify, driverPoolController.acceptDriver);
 route.post('/api/passenger/addRide', verify, rideController.addRide);
 route.get('/api/passenger/getAll', passengerController.getAllPassengers); //this will be removed afterwards
 

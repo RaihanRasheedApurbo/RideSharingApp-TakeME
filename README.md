@@ -240,8 +240,7 @@ I receive
 On First Time, you receive  
 ```javascript
 {
-    "message": "you have been matched",
-    "passengerID": "607478178c29c1408cfad290",
+    "message": "you have been matched"
     "entryData": {
         "_id": "60ad6c57aa57e313b09f5723",
         "driverID": "607478178c29c1408cfad295",

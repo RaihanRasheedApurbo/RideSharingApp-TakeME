@@ -56,7 +56,7 @@ exports.login = (req, res) => {
         }else{
             //console.log(data)
             const token = jwt.sign({_id: data._id}, secret);
-            res.header('auth-token', token).send({ message: "login successful" });
+            res.header('auth-token', token).send({ message: "login successful", data });
         }
     })
     .catch(err =>{

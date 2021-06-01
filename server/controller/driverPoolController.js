@@ -1,3 +1,4 @@
+const Driver = require('../model/driver');
 const Vehicle = require('../model/vehicle');
 const Passenger = require('../model/passenger');
 const DriverPool = require('../model/driverPool');
@@ -8,16 +9,25 @@ exports.lookForPassenger = (req, res) => {
     .then(data => {
         if(data) {
             if(data.passengerID) {
-                console.log(data);
+                
                 DriverPool.findOneAndDelete({'driverID': req.data._id})
                 .then(data => {
+                    
                     Passenger.findById(data.passengerID)
                     .then(passengerData => {
-                        res.status(200).send({"message": "you have been matched", "passengerInfo": passengerData, entryData: data});
+                        let passengerInfo = {
+                            passengerData: passengerData,
+                            pickUpPoint : data.pickUpPoint
+                        };
+
+                        console.log(passengerInfo);
+
+                        res.status(200).send({"message": "you have been matched", passengerInfo});
                     })
                     .catch(err => {
                         res.status(500).send({message: err.message});
                     });
+
                 })
                 .catch(err => {
                     res.status(500).send({"message": err.message});
@@ -29,21 +39,29 @@ exports.lookForPassenger = (req, res) => {
         }
         else {
             console.log("new entry");
+            //getting driverInfo
+            const getDriverInfo = Driver.findById(req.data._id);
+            const getVehicleInfo = Vehicle.findOne({'driverID': req.data._id});
             
-            //finding vehicleInfo of the driver
-            getVehicleInfo = Vehicle.findOne({'driverID': req.data._id})
+            Promise.all([getDriverInfo, getVehicleInfo])
             .then(data => {
                 const driverEntry = new DriverPool({
                     driverID : req.data._id,
-                    location : data.location,
-                    vehicleInfo: data
-                });   
+                    driverInfo : data[0],
+                    vehicleLocation : data[1].location,
+                    vehicleInfo: data[1]
+                }); 
+                //console.log(driverEntry);
                 
                 // adding driverEntry to driverPool
                 driverEntry.save()
                 .then(data => {
-                    res.send({ "message": `driverID ${req.data._id} has beend added to pool`, entryData: data});
-                }); 
+                    res.status(200).send({ "message": `driverID ${req.data._id} has been added to pool`});
+                });
+            })
+            .catch(err => {
+                //console.log(err);
+                res.status(500).send({ message: err.message });
             });
         }
     })
@@ -89,7 +107,7 @@ exports.lookForDriver = (req, res) => {
         console.log(lat1, lon1);
 
         DriverPool.find({
-            location : {
+            vehicleLocation : {
                 $near: {
                     $geometry: {
                         type: 'Point',
@@ -113,8 +131,8 @@ exports.lookForDriver = (req, res) => {
     
 }
 
-//acceptDriver
-exports.acceptDriver = (req, res) => {
+//acceptDriver via get req
+exports.acceptDriverOld = (req, res) => {
     if(req.query.passengerID && req.query.driverID) {
         const passengerID = req.query.passengerID;
         const driverID = req.query.driverID;
@@ -136,13 +154,44 @@ exports.acceptDriver = (req, res) => {
     }
 }
 
+//acceptDriver via post req
+exports.acceptDriver = (req, res) => {
+    if(req.body.driverID && req.body.pickUpPoint) {
+        const passengerID = req.data._id;
+        const driverID = req.body.driverID;
+        //console.log(passengerID, driverID, req.body.pickUpPoint);
+
+        const filter = {driverID : driverID};
+        const updateInfo = {passengerID: passengerID, pickUpPoint: req.body.pickUpPoint};
+        //console.log(updateInfo);
+
+        DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true })
+        .then(data => {
+            res.status(200).send(data);
+        })
+        .catch(err => {
+            res.status(500).send(err);
+        });
+    }
+    else {
+        res.status(400).send({message: "empty body parameter"});
+    }
+}
+
 
 exports.showPool = (req, res) => {
     DriverPool.find({})
     .then(data => {
         d = [];
         data.forEach(item => {
-            obj = {'driverID': item.driverID, 'location': item.location.coordinates, 'passengerID': item.passengerID};
+            obj = {
+                'driverID': item.driverID, 
+                'location': item.vehicleLocation.coordinates, 
+                'passengerInfo': {
+                    'passengerID': item.passengerID,
+                    'pickUpPoint': item.pickUpPoint
+                }
+            };
             d.push(obj);
         })
         console.log(d);
