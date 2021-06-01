@@ -10,12 +10,15 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class ApiDataService {
     protected Context context;
@@ -32,11 +35,25 @@ public class ApiDataService {
         void onResponse(Object responseObject);
     }
 
+    public Map<String, String> makeHeaders(String key, String value) {
+        // below line we are creating a map for
+        // storing our values in key and value pair.
+        Map<String, String> params = new HashMap<>();
+
+        // on below line we are passing our key
+        // and value pair to our parameters.
+        params.put(key, value);
+
+        // at last we are
+        // returning our params.
+        return params;
+    }
+
     /**
-     *
-     * @param email like "robin@loa.com"
-     * @param password like "thisisrobin"
-     * @param volleyResponseListener the onResponse method should be something like this
+     * A function for driver login
+     * @param email  String Example "robin@loa.com"
+     * @param password String Example "thisisrobin"
+     * @param volleyResponseListener Interface the onResponse method should be something like this
      * <pre>
      * {@code
      *  try {
@@ -96,9 +113,9 @@ public class ApiDataService {
     }
 
     /**
-     *
-     * @param token the token retrieved from login
-     * @param volleyResponseListener onResponse you get plain object containing driver data
+     * A function to show driver dashboard
+     * @param token String the token retrieved from login
+     * @param volleyResponseListener Interface onResponse you get plain object containing driver data
      * this method should be implemented following the given sample
      * <pre>
      * {@code
@@ -121,17 +138,7 @@ public class ApiDataService {
                 volleyResponseListener::onError) {
             @Override
             public Map<String, String> getHeaders() {
-                // below line we are creating a map for
-                // storing our values in key and value pair.
-                Map<String, String> params = new HashMap<>();
-
-                // on below line we are passing our key
-                // and value pair to our parameters.
-                params.put("auth-token", token);
-
-                // at last we are
-                // returning our params.
-                return params;
+                return makeHeaders("auth-token", token);
             }
         };
 
@@ -140,9 +147,9 @@ public class ApiDataService {
     }
 
     /**
-     *
-     * @param token the token retrieved from login
-     * @param volleyResponseListener onResponse
+     * A function that handles passengerSearch
+     * @param token String the token retrieved from login
+     * @param volleyResponseListener Interface onResponse
      * this method should be implemented following the given sample
      *
      * <pre>
@@ -152,8 +159,16 @@ public class ApiDataService {
      *      System.out.println(responseData);
      *
      *      if(responseData.has("passengerInfo")) {
-     *          passengerInfo = (JSONObject) responseData.get("passengerInfo");
-     *          System.out.println(passengerInfo);
+     *          JSONObject passengerInfo = (JSONObject) responseData.get("passengerInfo");
+     *
+     *          JSONObject passengerData = (JSONObject) passengerInfo.get("passengerData");
+     *          JSONArray pickUpPoint = (JSONArray) passengerInfo.get("pickUpPoint");
+     *
+     *          double lat = Double.parseDouble(pickUpPoint.getString(0));
+     *          double lon = Double.parseDouble(pickUpPoint.getString(1));
+     *
+     *          System.out.println("passengerData: " + passengerData);
+     *          System.out.println("pickUpPoint: " + lat + " , " + lon);
      *      } else {
      *          message = responseData.get("message");
      *          //first time or no match so nothing I guess
@@ -176,17 +191,7 @@ public class ApiDataService {
                 volleyResponseListener::onError) {
             @Override
             public Map<String, String> getHeaders() {
-                // below line we are creating a map for
-                // storing our values in key and value pair.
-                Map<String, String> params = new HashMap<>();
-
-                // on below line we are passing our key
-                // and value pair to our parameters.
-                params.put("auth-token", token);
-
-                // at last we are
-                // returning our params.
-                return params;
+                return makeHeaders("auth-token", token);
             }
         };
 
@@ -194,9 +199,9 @@ public class ApiDataService {
     }
 
     /**
-     *
-     * @param token the token retrieved from login
-     * @param volleyResponseListener
+     * A function to stop passenger searching
+     * @param token String the token retrieved from login
+     * @param volleyResponseListener Interface
      * this method should be implemented following the given sample
      *
      * <pre>
@@ -221,17 +226,7 @@ public class ApiDataService {
                 volleyResponseListener::onError) {
             @Override
             public Map<String, String> getHeaders() {
-                // below line we are creating a map for
-                // storing our values in key and value pair.
-                Map<String, String> params = new HashMap<>();
-
-                // on below line we are passing our key
-                // and value pair to our parameters.
-                params.put("auth-token", token);
-
-                // at last we are
-                // returning our params.
-                return params;
+                return makeHeaders("auth-token", token);
             }
         };
 
@@ -239,11 +234,13 @@ public class ApiDataService {
     }
 
     /**
-     * A function that matches a custom passenger to the given driverID and removes the driver from the pool
-     * @param driverID driverID
-     * @param passengerID passengerID like "607478178c29c1408cfad290"
-     * @param volleyResponseListener onResponse
-     * I don't think this is needed :3
+     * A function that matches a pseudo random passenger to the given driverID and removes the driver from the pool
+     * This function provides the simulation of matching a passenger with the given driver
+     * call this function after a driver has made a search request
+     *
+     * @param driverID String driverID
+     * @param volleyResponseListener Interface
+     * I don't think the implementation of this onResponse is necessary ¯\_(ツ)_/¯
      *
      * <pre>
      * {@code
@@ -256,36 +253,45 @@ public class ApiDataService {
      * }</pre>
      *
      */
-    public void customMatching(String apiRoute, String passengerID, String driverID, VolleyResponseListener volleyResponseListener) {
-
+    public void customMatching(String driverID, VolleyResponseListener volleyResponseListener) {
         // Request a string response from the provided URL.
-        //String url = LOCAL_URL + "/api/dummy/owner/reqTest";
-        String url = BASE_URL + "/api/passenger/accept" + "?passengerID=" + passengerID + "&driverID=" + driverID;
+        String url = BASE_URL + "/api/passenger/acceptDriver";
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                volleyResponseListener::onResponse,
-                volleyResponseListener::onError);
+        String[] tokens = {"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTAiLCJpYXQiOjE2MjI1NjQ3NDZ9.JZAM2JfO-QuVD5qbL0wQ7ptsifX3KQEe0kzsWQYo9bA",
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTIiLCJpYXQiOjE2MjI1NjUxMjZ9.S_pl-rQ-lxw6Dc9QM6B4jW6WUGhHdZYGxjd-E4Scsa4",
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTciLCJpYXQiOjE2MjI1NjUxNzB9.Eq9h22EUefCVY9eQSIYI1S0c_VvA3ywW7oSGmviAjyk",
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxODhjMjljMTQwOGNmYWQyOTkiLCJpYXQiOjE2MjI1NjUyMTB9.BrdCkVeT1cdFd1VhrgD7IwKxHDEpkkfIswH2trXcdiE",
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxODhjMjljMTQwOGNmYWQyYTEiLCJpYXQiOjE2MjI1NjUyNTd9.697B5W-LF-5su6jV5vvOdQkOj4WMWuGLWFpJ5CnjBug",
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxODhjMjljMTQwOGNmYWQyYTUiLCJpYXQiOjE2MjI1NjUyOTJ9.UulbXYNHCxt7u0O7Scj48umJmquWXq7dPdGEhcI-F7k"};
 
-        /*StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+        Random random = new Random();
+        String token = tokens[random.nextInt(tokens.length)];
+
+        double lat = 23 + (random.nextInt(1000000)%75000 + 40000)/100000.0;
+        double lon = 90 + (random.nextInt(1000000)%75000 + 40000)/100000.0;
+        double[] pickUpPoint = {lat, lon};
+
+        Map<String,String> params = new HashMap<>();
+        params.put("driverID", driverID);
+        try {
+            JSONArray p = new JSONArray(Arrays.toString(pickUpPoint));
+            params.put("pickUpPoint", p.toString());
+            //System.out.println(p);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, new JSONObject(params),
                 volleyResponseListener::onResponse,
                 volleyResponseListener::onError) {
             @Override
             public Map<String, String> getHeaders() {
-                // below line we are creating a map for
-                // storing our values in key and value pair.
-                Map<String, String> params = new HashMap<String, String>();
-
-                // on below line we are passing our key
-                // and value pair to our parameters.
-                params.put("auth-token", token);
-
-                // at last we are
-                // returning our params.
-                return params;
+                return makeHeaders("auth-token", token);
             }
-        };*/
+        };
 
-        VolleyRequestQueue.getInstance(context).addToRequestQueue(stringRequest);
+        VolleyRequestQueue.getInstance(context).addToRequestQueue(request);
     }
 
 }
