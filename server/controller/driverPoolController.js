@@ -159,17 +159,20 @@ exports.acceptDriver = (req, res) => {
     if(req.body.driverID && req.body.pickUpPoint) {
         const passengerID = req.data._id;
         const driverID = req.body.driverID;
+        const pickUpPoint = JSON.parse(req.body.pickUpPoint);
         //console.log(passengerID, driverID, req.body.pickUpPoint);
 
         const filter = {driverID : driverID};
-        const updateInfo = {passengerID: passengerID, pickUpPoint: req.body.pickUpPoint};
+        const updateInfo = {passengerID: passengerID, pickUpPoint: pickUpPoint};
         //console.log(updateInfo);
 
         DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true })
         .then(data => {
+            //console.log(data);
             res.status(200).send(data);
         })
         .catch(err => {
+            //console.log(err);
             res.status(500).send(err);
         });
     }
