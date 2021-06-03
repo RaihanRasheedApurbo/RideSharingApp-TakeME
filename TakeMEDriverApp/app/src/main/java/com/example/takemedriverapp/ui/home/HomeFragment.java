@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.takemedriverapp.ApiDataService;
 import com.example.takemedriverapp.MainActivity2;
 import com.example.takemedriverapp.R;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -41,6 +42,10 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 
@@ -191,6 +196,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                             Toast.makeText(getApplicationContext(),"Hello Javatpoint",Toast.LENGTH_SHORT).show();
                             // find passenger using loading screen and calling backend apis below...
                             // Fahad code here.....................................
+
+                            api_call_passenger_search();
+
                             //Point destinationPoint = getPassenger(); // write getPassenger Function
                             // assuming passenger has been found his lat lang is (90.37609,23.83287)
 
@@ -227,6 +235,61 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             }
         });
     }
+
+
+    public void api_call_passenger_search()
+    {
+
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+
+        apiDataService.searchPassenger(MainActivity2.main_token, new ApiDataService.VolleyResponseListener() {
+
+            @Override
+            public void onError(Object message) {
+                System.out.println("Problem in finding Passenger");
+            }
+
+            @Override
+            public void onResponse(Object responseObject)
+            {
+
+                try
+                {
+                    JSONObject responseData = new JSONObject(responseObject.toString());
+                    System.out.println(responseData);
+
+                    if(responseData.has("passengerInfo"))
+                    {
+                        JSONObject passengerInfo = (JSONObject) responseData.get("passengerInfo");
+
+                        JSONObject passengerData = (JSONObject) passengerInfo.get("passengerData");
+                        JSONArray pickUpPoint = (JSONArray) passengerInfo.get("pickUpPoint");
+
+                        double lat = Double.parseDouble(pickUpPoint.getString(0));
+                        double lon = Double.parseDouble(pickUpPoint.getString(1));
+
+                        System.out.println("passengerData: " + passengerData);
+                        System.out.println("pickUpPoint: " + lat + " , " + lon);
+
+                    } else {
+                        String message = (String) responseData.get("message");
+                        //first time or no match so nothing I guess
+                    }
+
+                }
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
+
+    }
+
+
+
 
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
         loadedMapStyle.addImage("destination-icon-id",

@@ -107,28 +107,23 @@ public class MainActivity2 extends AppCompatActivity {
                     System.out.println("xps " + main_token);
 
                     JSONObject driverInfo = (JSONObject) bodyData.get("data");
+                    //System.out.println("xpx" + driverInfo);
+
                     name[0] = (String)driverInfo.get("name");
 
                     set_driver_name_email(name[0], email);
-                    //System.out.println("driverInfo:" + driverInfo.get("name"));
-
 
                     // ********************************************************
-
-                    //api_call2();
+                    // second api call if needed
 
                     // *********************************************************
 
-
-                    //finish();
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
-
-
 
     }
 

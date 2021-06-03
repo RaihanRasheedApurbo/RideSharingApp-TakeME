@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.takemedriverapp.R;
+import com.google.android.material.snackbar.Snackbar;
 
 public class GalleryFragment extends Fragment {
 
@@ -23,6 +24,9 @@ public class GalleryFragment extends Fragment {
         galleryViewModel =
                 new ViewModelProvider(this).get(GalleryViewModel.class);
         View root = inflater.inflate(R.layout.fragment_gallery, container, false);
+
+        //System.out.println("snackbar");
+
         final TextView textView = root.findViewById(R.id.text_gallery);
         galleryViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
@@ -30,6 +34,8 @@ public class GalleryFragment extends Fragment {
                 textView.setText(s);
             }
         });
+
+
         return root;
     }
 }
