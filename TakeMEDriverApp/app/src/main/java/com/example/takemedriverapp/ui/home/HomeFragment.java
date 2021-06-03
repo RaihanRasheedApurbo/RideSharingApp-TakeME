@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.takemedriverapp.MainActivity2;
 import com.example.takemedriverapp.R;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -81,6 +83,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     static View root = null;
     // new code ended
 
+
+    // Fahad's Variables
+    FrameLayout frameLayout;
+    BottomSheetBehavior bottomSheetBehavior;
+
+
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 //        homeViewModel =
@@ -102,6 +111,21 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             startButton.setEnabled(true);
 
             cancelButton = root.findViewById(R.id.endButton);
+
+
+
+            //Fahad's************************************************
+
+            frameLayout = root.findViewById(R.id.bottomsheet1);
+            bottomSheetBehavior = BottomSheetBehavior.from(frameLayout);
+            bottomSheetBehavior.setPeekHeight(200);
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+
+
+            //********************************************************
+
+
             cancelButton.setOnClickListener(new View.OnClickListener() {
 
                 @Override
@@ -291,6 +315,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             permissionsManager.requestLocationPermissions(getActivity());
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
