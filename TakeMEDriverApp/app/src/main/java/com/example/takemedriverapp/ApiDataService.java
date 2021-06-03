@@ -146,6 +146,7 @@ public class ApiDataService {
         VolleyRequestQueue.getInstance(context).addToRequestQueue(stringRequest);
     }
 
+
     /**
      * A function that handles passengerSearch
      * @param token String the token retrieved from login
@@ -180,6 +181,7 @@ public class ApiDataService {
      * }</pre>
      *
      */
+
     public void searchPassenger(String token, VolleyResponseListener volleyResponseListener) {
 
         // Request a string response from the provided URL.
@@ -198,6 +200,7 @@ public class ApiDataService {
         VolleyRequestQueue.getInstance(context).addToRequestQueue(stringRequest);
     }
 
+
     /**
      * A function to stop passenger searching
      * @param token String the token retrieved from login
@@ -215,6 +218,7 @@ public class ApiDataService {
      * }</pre>
      *
      */
+
     public void stopSearchPassenger(String token, VolleyResponseListener volleyResponseListener) {
 
         // Request a string response from the provided URL.
@@ -232,6 +236,7 @@ public class ApiDataService {
 
         VolleyRequestQueue.getInstance(context).addToRequestQueue(stringRequest);
     }
+
 
     /**
      * A function that matches a pseudo random passenger to the given driverID and removes the driver from the pool
