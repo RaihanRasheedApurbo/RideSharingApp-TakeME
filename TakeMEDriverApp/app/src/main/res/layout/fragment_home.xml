@@ -53,7 +53,7 @@
         <FrameLayout
             android:id="@+id/bottomsheet1"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="265dp"
             android:layout_alignParentBottom="true"
 
             android:background="@color/black"
@@ -63,16 +63,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 >
-
-<!--                <ImageButton-->
-<!--                    android:layout_marginTop="12dp"-->
-<!--                    android:id="@+id/imageButton"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:background="@color/white"-->
-<!--                    android:layout_centerHorizontal="true"-->
-<!--                    app:srcCompat="@android:drawable/button_onoff_indicator_off" />-->
-
 
                 <TextView
                     android:layout_width="wrap_content"
