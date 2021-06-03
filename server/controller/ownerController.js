@@ -90,7 +90,7 @@ exports.showDashboard = (req, res) => {
     });
 }
 
-//vehicleInfoFunction
+//all vehicles
 exports.showVehicleDetails = (req, res) => {
     const id = req.data._id;
     Owner.findById(id)
@@ -115,6 +115,7 @@ exports.showVehicleDetails = (req, res) => {
 
 }
 
+//show info for one vehicle
 exports.showVehicleInfo = (req, res) => {
     const ownerID = req.data._id;
     const vehicleID = req.params.id;
@@ -183,6 +184,46 @@ exports.updateVehicleInfo =(req, res) => {
     .catch(err => {
         res.status(500).send(err);
     })
+}
+
+//ride history for one vehicle
+exports.showRideHistory = (req, res) => {
+    
+    const ownerID = req.data._id;
+    const vehicleID = req.params.id;
+    const filter = {
+        vehicleID: mongoose.Types.ObjectId(vehicleID)
+    }
+
+    let getRideHistory = null;
+
+    if(req.query.duration) {
+        const duration = parseInt(req.query.duration);
+
+        let d = new Date();
+        let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
+        let end = d.toISOString();
+
+        //console.log("start: ", start);
+        //console.log("end: ", end);
+        
+        getRideHistory = Ride.aggregate([
+            { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
+        ]);
+    }
+    else {
+        console.log(filter);
+        getRideHistory = Ride.find(filter);
+    }
+
+    getRideHistory
+    .then(data => {
+        res.status(200).send(data);
+    })
+    .catch(err => {
+        //console.log(err);
+        res.status(500).send({message: err.message});
+    });
 }
 
 //driverAddFunction

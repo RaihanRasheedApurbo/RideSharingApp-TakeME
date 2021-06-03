@@ -24,48 +24,51 @@ route.get('/api/owner/dashboard', verify, ownerController.showDashboard);
 route.get('/api/owner/vehicles', verify, ownerController.showVehicleDetails);
 route.get('/api/owner/vehicle/id/:id', verify, ownerController.showVehicleInfo);
 route.put('/api/owner/vehicle/id/:id', verify, ownerController.updateVehicleInfo);
-route.post('/api/owner/addDriver', verify, ownerController.addDriverToVehicle);
-route.get('/api/owner/getAll', ownerController.getAllOwners); //this will be removed afterwards
+route.get('/api/owner/vehicle/id/:id/rideHistory', verify, ownerController.showRideHistory);
+route.post('/api/owner/addDriver', verify, ownerController.addDriverToVehicle); //under construction
+route.get('/api/owner/getAll', ownerController.getAllOwners); //test purpose only
 
 route.post('/api/driver/register', driverController.register);
 route.post('/api/driver/login', driverController.login);
 route.get('/api/driver/dashboard', verify, driverController.showDashboard);
+route.get('/api/driver/vehicle', verify, driverController.showVehicleInfo);
+route.get('/api/driver/rideHistory', verify, driverController.showRideHistory);
 route.get('/api/driver/search', verify, driverPoolController.lookForPassenger);
 route.get('/api/driver/stopSearch', verify, driverPoolController.stopPassengerSearch);
-route.get('/api/driver/vehicleID', driverController.findByVehicleID);
-route.get('/api/driver/getAll', driverController.getAllDrivers); //this will be removed afterwards
-
+route.get('/api/driver/earning', verify, driverController.showEarning);
+route.put('/api/driver/vehicle', verify, driverController.updateLocation);
+route.get('/api/driver/vehicleID', driverController.findByVehicleID); //under construction, might be unnecessary
+route.get('/api/driver/getAll', driverController.getAllDrivers); //test purpose only
 
 route.post('/api/passenger/register', passengerController.register);
 route.post('/api/passenger/login', passengerController.login);
 route.get('/api/passenger/dashboard', verify, passengerController.showDashboard);
-route.get('/api/passenger/search', driverPoolController.lookForDriver); //this will be changed after passenger app
-route.get('/api/passenger/accept', driverPoolController.acceptDriverOld);  //this will be changed after passenger app
-route.post('/api/passenger/acceptDriver', verify, driverPoolController.acceptDriver);
-route.post('/api/passenger/addRide', verify, rideController.addRide);
-route.get('/api/passenger/getAll', passengerController.getAllPassengers); //this will be removed afterwards
+route.get('/api/passenger/search', driverPoolController.lookForDriver); //under construction
+route.post('/api/passenger/acceptDriver', verify, driverPoolController.acceptDriver); //under construction
+route.post('/api/passenger/addRide', verify, rideController.addRide); //under construction
+route.get('/api/passenger/getAll', passengerController.getAllPassengers); //test purpose only
 
 
-route.post('/api/vehicle/register', verify, vehicleController.addVehicle);
-route.get('/api/vehicle/id/', vehicleController.find);
-route.get('/api/vehicle/ownerID/', vehicleController.findByOwnerID);
-route.get('/api/vehicle/driverID/:id', vehicleController.findByDriverID);
-route.get('/api/vehicle/getAll', vehicleController.getAllVehicles); //this will be removed afterwards
+route.post('/api/vehicle/register', verify, vehicleController.addVehicle); //under construction, might be unnecessary
+route.get('/api/vehicle/id/', vehicleController.find); //under construction, might be unnecessary
+route.get('/api/vehicle/ownerID/', vehicleController.findByOwnerID); //under construction, might be unnecessary
+route.get('/api/vehicle/driverID/:id', vehicleController.findByDriverID); //under construction, might be unnecessary
+route.get('/api/vehicle/getAll', vehicleController.getAllVehicles); //test purpose only
 
 
-route.post('/api/ride/add', verify, rideController.addRide);
-route.get('/api/ride/id/', rideController.find);
-route.get('/api/ride/passengerID/', rideController.findByPassengerID);
-route.get('/api/ride/driverID/', rideController.findByDriverID);
-route.get('/api/ride/vehicleID/', rideController.findByVehicleID);
-route.get('/api/ride/getAll', rideController.getAllRides); //this will be removed afterwards
+route.post('/api/ride/add', verify, rideController.addRide); //under construction, might be unnecessary
+route.get('/api/ride/id/', rideController.find); //under construction, might be unnecessary
+route.get('/api/ride/passengerID/', rideController.findByPassengerID); //under construction, might be unnecessary
+route.get('/api/ride/driverID/', rideController.findByDriverID); //under construction, might be unnecessary
+route.get('/api/ride/vehicleID/', rideController.findByVehicleID); //under construction, might be unnecessary
+route.get('/api/ride/getAll', rideController.getAllRides); //test purpose only
 
 
-route.get('/api/driver/pool', driverPoolController.showPool);
+route.get('/api/driver/pool', driverPoolController.showPool); //test purpose only
 
 
 
-//dummy routes
+//dummy routes only for test purposes
 route.get('/api/dummy', dummyController.get);
 route.post('/api/dummy', dummyController.set);
 

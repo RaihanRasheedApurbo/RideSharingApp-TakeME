@@ -1,9 +1,8 @@
 # take-me-backend
 
 back-end server for Take Me App  
-[Heroku Link](http://take-me-backend.herokuapp.com "Take Me Homepage") 
+[Heroku Link](http://take-me-backend.herokuapp.com "Take Me Homepage")
 `http://take-me-backend.herokuapp.com`  
-
 
 ## Owner Register
 
@@ -131,6 +130,7 @@ You receive
 ```
 
 ## Vehicle Info  
+
 **API** ***GET*** `/api/owner/vehicle/id/{id}` where `{id}` should be replaced by `vehicleID` of that vehicle  
 I receive  
 `{'auth-token': token}` inside **req.headers**  
@@ -151,6 +151,7 @@ you recieve
     "data": []
 }  
 ```  
+
 **Optional Parameter** `driver` and `duration`  
 **Example**  
 `/api/owner/vehicle/id/{id}?driver={driverValue}`  
@@ -160,14 +161,13 @@ you recieve
 replace  
 `{id}` by `vehicleID` of that vehicle  
 `{driverValue}` by `true` or `required`  
-`{duration}` by and `int` like `1`, `7` or `30`   
+`{duration}` by an `integer` value like `1`, `7` or `30` (denotes the day count)
 
 the `data` portion of response will contain proper response for each of the query  
 ***driverInfo*** will be returned as an object  
 ***rideHistory*** will be returned as an array object  
 ***driverInfo*** will be returned as an array object  
 
-**Example**
 ```javascript
 {
     "vehicleInfo": {
@@ -232,105 +232,71 @@ the `data` portion of response will contain proper response for each of the quer
 ```
 
 ## Passenger Search  
+
 **API** ***GET*** `api/driver/search`  
 I receive  
 `{'auth-token': token}` inside **req.headers**  
 
-
 On First Time, you receive  
+
 ```javascript
 {
-    "message": "you have been matched"
-    "entryData": {
-        "_id": "60ad6c57aa57e313b09f5723",
-        "driverID": "607478178c29c1408cfad295",
-        "location": {
-            "coordinates": [
-                90.444338032,
-                23.68948164
-            ],
-            "_id": "60ad6c23aa57e313b09f56e4",
-            "type": "Point"
-        },
-        "vehicleInfo": {
-            "_id": "6074779be70efe2e24c95ce5",
-            "model": "Audi",
-            "type": "Delux",
-            "regNo": "253512805",
-            "capacity": 2,
-            "ownerID": "6074779ae70efe2e24c95cd5",
-            "__v": 0,
-            "driverID": "607478178c29c1408cfad295",
-            "location": {
-                "coordinates": [
-                    90.444338032,
-                    23.68948164
-                ],
-                "_id": "60ad6c23aa57e313b09f56e4",
-                "type": "Point"
-            }
-        },
-        "__v": 0,
-        "passengerID": "607478178c29c1408cfad290"
-    }
+    "message": "driverID 607478178c29c1408cfad295 has been added to pool"
 }
 ```  
 
 afterwards  
 **On no match** you receive  
-A plain object without `passengerID` or `entrydata` field  
+A plain object without `passengerInfo` field  
+
 ```javascript  
 {
     "message": "No match found"
 }
 ```  
-**On match** you recieve 
+
+**On match** you recieve
+
 ```javascript
 {
     "message": "you have been matched",
-    "passengerID": "607478178c29c1408cfad290",
-    "entryData": {
-        "_id": "60ad6ed10278e736acd9cae0",
-        "driverID": "607478178c29c1408cfad295",
-        "location": {
-            "coordinates": [
-                90.378883906,
-                23.746971384
-            ],
-            "_id": "60ad6dd8f108f814d07f3a8e",
-            "type": "Point"
+    "passengerInfo": {
+        "passengerData": {
+            "_id": "607478178c29c1408cfad290",
+            "name": "Rachel Dews",
+            "email": "rachel@da.c0m",
+            "password": "bruceisbatman",
+            "phone": "4608528544",
+            "gender": "Female",
+            "address": {
+                "street": "Tutbej Heights",
+                "city": "Pebewa",
+                "country": "South Africa"
+            },
+            "nid": "385042561",
+            "__v": 0
         },
-        "vehicleInfo": {
-            "_id": "6074779be70efe2e24c95ce5",
-            "model": "Audi",
-            "type": "Delux",
-            "regNo": "253512805",
-            "capacity": 2,
-            "ownerID": "6074779ae70efe2e24c95cd5",
-            "__v": 0,
-            "driverID": "607478178c29c1408cfad295",
-            "location": {
-                "coordinates": [
-                    90.378883906,
-                    23.746971384
-                ],
-                "_id": "60ad6dd8f108f814d07f3a8e",
-                "type": "Point"
-            }
-        },
-        "__v": 0,
-        "passengerID": "607478178c29c1408cfad290"
+        "pickUpPoint": [
+            23.665,
+            90.445
+        ]
     }
 }
 ```  
 
 Now this match was ***manually*** done by calling this api  
-**API** ***GET*** `/api/passenger/accept/?passengerID={passengerID}&driverID={driverID}`  
+**API** ***POST*** `/api/passenger/acceptDriver`  
+I recieve
 
-for now replace `{passengerID}` by `607478178c29c1408cfad290`  
-replace `{driverID}` by `_id` of the driver  
+```javascript
+{
+    "driverID" : "607478178c29c1408cfad295",
+    "pickUpPoint": [23.665, 90.445]
+}
+```  
 
 A sample driver credential
+
 ```javascript
 {
     "email": "robin@loa.com",
@@ -339,20 +305,22 @@ A sample driver credential
 ```  
 
 A sample passenger credential(above mentioned passenger)  
+
 ```javascript
 {
     "email": "rachel@da.com",
     "password": "bruceisbatman"
 }
 ```  
+
 A sample owner credential
+
 ```javascript
 {
     "email": "bruce@wayne.com",
     "password": "iAmBatman"
 }
 ```  
-
 
 ## Dummy API  
 
@@ -386,6 +354,7 @@ you receive
 ```
 
 ## Test
+
 **API** `/api/owner/getAll`  
 **API** `/api/ride/getAll`  
 **API** `/api/passenger/getAll`  

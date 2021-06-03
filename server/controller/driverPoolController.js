@@ -159,7 +159,16 @@ exports.acceptDriver = (req, res) => {
     if(req.body.driverID && req.body.pickUpPoint) {
         const passengerID = req.data._id;
         const driverID = req.body.driverID;
-        const pickUpPoint = JSON.parse(req.body.pickUpPoint);
+        
+        let pickUpPoint = null;
+        try {
+            console.log("JSON parsing");
+            pickUpPoint = JSON.parse(req.body.pickUpPoint);
+        }
+        catch(err) {
+            console.log("err... so no parsing");
+            pickUpPoint = req.body.pickUpPoint;
+        }
         //console.log(passengerID, driverID, req.body.pickUpPoint);
 
         const filter = {driverID : driverID};
