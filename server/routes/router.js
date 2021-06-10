@@ -65,6 +65,7 @@ route.get('/api/ride/getAll', rideController.getAllRides); //test purpose only
 
 
 route.get('/api/driver/pool', driverPoolController.showPool); //test purpose only
+route.delete('/api/driver/pool', driverPoolController.deletePool); //test purpose only
 
 
 

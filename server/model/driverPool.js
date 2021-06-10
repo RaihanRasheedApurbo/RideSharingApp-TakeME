@@ -14,11 +14,7 @@ const DriverPoolSchema = new mongoose.Schema({
     driverInfo : {
         type: Object
     },
-    passengerID : {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Passenger'
-    },
-    pickUpPoint : {
+    passengerInfo : {
         type: Object
     },
     vehicleLocation : {

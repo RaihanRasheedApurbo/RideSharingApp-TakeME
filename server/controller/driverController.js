@@ -187,7 +187,17 @@ exports.showEarning = (req, res) => {
 
 //update Location
 exports.updateLocation = (req, res) => {
-    
+    let vehicleLocation = null;
+    try {
+        console.log("JSON parsing");
+        vehicleLocation = JSON.parse(req.body.location);
+    }
+    catch(err) {
+        console.log("err... so no parsing");
+        vehicleLocation = req.body.location;
+    }
+    //console.log(passengerID, driverID, vehicleLocation);
+
     if(req.body.location) {
         const filter = {
             'driverID': mongoose.Types.ObjectId(req.data._id)
@@ -195,7 +205,7 @@ exports.updateLocation = (req, res) => {
         
         const updateBody = {
             $set: {
-                'location.coordinates': [req.body.location[1], req.body.location[0]]
+                'location.coordinates': [vehicleLocation[1], vehicleLocation[0]]
             }
         };
         //console.log(updateBody);
