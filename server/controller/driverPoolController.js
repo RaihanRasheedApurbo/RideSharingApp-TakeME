@@ -10,8 +10,8 @@ exports.lookForPassenger = (req, res) => {
     .then(data => {
         if(data) {
             if(data.passengerInfo) {
-                
-                DriverPool.findOneAndDelete({'driverID': req.data._id})
+                res.status(200).send({"message": "you have been matched", passengerInfo});
+                /*DriverPool.findOneAndDelete({'driverID': req.data._id})
                 .then(data => {
                     let passengerInfo = data.passengerInfo;
                     
@@ -19,7 +19,7 @@ exports.lookForPassenger = (req, res) => {
                 })
                 .catch(err => {
                     res.status(500).send({"message": err.message});
-                });
+                });*/
             }
             else {
                 let n = Math.floor(Math.random()*10);
