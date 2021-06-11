@@ -102,6 +102,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     TextView bottom_text;
     Button bottom_start, bottom_cancel;
 
+    double driver_lat, driver_long, passenger_lat, passenger_long;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -137,6 +139,20 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             bottom_start = root.findViewById(R.id.bottom_start_button);
             bottom_cancel = root.findViewById(R.id.bottom_cancel_button);
 
+
+            bottom_start.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    driver_lat = locationComponent.getLastKnownLocation().getLatitude();
+                    driver_long = locationComponent.getLastKnownLocation().getLongitude();
+                    
+                    double distance_now = calculateDistanceInMeter(driver_lat, driver_long, passenger_lat, passenger_long);
+                    if(distance_now>100)
+                        Toast.makeText(getApplicationContext(),distance_now + " meters away",Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(getApplicationContext(),"Ride Started",Toast.LENGTH_SHORT).show();
+                }
+            });
 
             bottom_cancel.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -376,6 +392,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
         //Point destinationPoint = Point.fromLngLat(90.37609,23.83287);
 
+        passenger_long = lon;
+        passenger_lat = lat;
+
+
         Point destinationPoint = Point.fromLngLat(lon,lat);
 
         if(destinationPoint!=null)
@@ -421,6 +441,28 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         driverState = DriverState.RESTING;
 
     }
+
+
+    public int calculateDistanceInMeter(double userLat, double userLng, double venueLat, double venueLng)
+    {
+
+        double AVERAGE_RADIUS_OF_EARTH_KM = 6371;
+
+        double latDistance = Math.toRadians(userLat - venueLat);
+        double lngDistance = Math.toRadians(userLng - venueLng);
+
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(userLat)) * Math.cos(Math.toRadians(venueLat))
+                * Math.sin(lngDistance / 2) * Math.sin(lngDistance / 2);
+
+        double c = 2 * 1000 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return (int) (Math.round(AVERAGE_RADIUS_OF_EARTH_KM * c));
+    }
+
+
+
+
 
 
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
