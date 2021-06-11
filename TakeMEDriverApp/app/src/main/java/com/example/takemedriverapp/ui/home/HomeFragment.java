@@ -1,5 +1,6 @@
 package com.example.takemedriverapp.ui.home;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -8,6 +9,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,8 +20,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.takemedriverapp.ApiDataService;
 import com.example.takemedriverapp.MainActivity2;
 import com.example.takemedriverapp.R;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -40,7 +45,12 @@ import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.geojson.Point;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
@@ -81,6 +91,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     static View root = null;
     // new code ended
 
+
+    // Fahad's Variables
+    FrameLayout frameLayout;
+    BottomSheetBehavior bottomSheetBehavior;
+    int time_spent = 0;
+    ProgressDialog progressDialog;
+    TextView bottom_text;
+
+
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 //        homeViewModel =
@@ -102,6 +122,21 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             startButton.setEnabled(true);
 
             cancelButton = root.findViewById(R.id.endButton);
+
+
+
+            //Fahad's************************************************
+
+            frameLayout = root.findViewById(R.id.bottomsheet1);
+            bottomSheetBehavior = BottomSheetBehavior.from(frameLayout);
+            bottomSheetBehavior.setPeekHeight(200);
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            bottom_text = root.findViewById(R.id.bottom_sheet_text);
+
+
+            //********************************************************
+
+
             cancelButton.setOnClickListener(new View.OnClickListener() {
 
                 @Override
@@ -164,34 +199,22 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                         else if(driverState==DriverState.RESTING)
                         {
 
-                            Toast.makeText(getApplicationContext(),"Hello Javatpoint",Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(),"Hello Javatpoint",Toast.LENGTH_SHORT).show();
                             // find passenger using loading screen and calling backend apis below...
                             // Fahad code here.....................................
+
+                            progressDialog = new ProgressDialog(HomeFragment.super.getContext());
+                            progressDialog.show();
+                            progressDialog.setContentView(R.layout.waiting_screen);
+                            progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                            time_spent = 0;
+                            api_call_passenger_search();
+
                             //Point destinationPoint = getPassenger(); // write getPassenger Function
                             // assuming passenger has been found his lat lang is (90.37609,23.83287)
 
-                            Point destinationPoint = Point.fromLngLat(90.37609,23.83287);
 
-                            if(destinationPoint!=null)
-                            {
-                                Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
-                                        locationComponent.getLastKnownLocation().getLatitude());
-                                GeoJsonSource source = mapboxMap.getStyle().getSourceAs("destination-source-id");
-                                if (source != null) {
-                                    source.setGeoJson(Feature.fromGeometry(destinationPoint));
-                                }
-
-                                getRoute(originPoint, destinationPoint);
-
-                                startButton.setText("Start Navigation");
-                                startButton.setEnabled(true);
-                                startButton.setBackgroundResource(R.color.mapboxBlue);
-
-                                driverState = DriverState.PICKING;
-
-                                cancelButton.setVisibility(v.VISIBLE);
-                                cancelButton.setEnabled(true);
-                            }
 
 
 
@@ -202,6 +225,144 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
             }
         });
+    }
+
+
+    public void api_call_passenger_search()
+    {
+
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+
+        apiDataService.searchPassenger(MainActivity2.main_token, new ApiDataService.VolleyResponseListener() {
+
+            @Override
+            public void onError(Object message) {
+                System.out.println("Problem in finding Passenger");
+            }
+
+            @Override
+            public void onResponse(Object responseObject)
+            {
+
+                try
+                {
+                    JSONObject responseData = new JSONObject(responseObject.toString());
+                    //System.out.println(responseData);
+
+                    if(responseData.has("passengerInfo"))
+                    {
+                        JSONObject passengerInfo = (JSONObject) responseData.get("passengerInfo");
+
+                        JSONObject passengerData = (JSONObject) passengerInfo.get("passengerData");
+                        JSONArray pickUpPoint = (JSONArray) passengerInfo.get("pickUpPoint");
+
+                        double lat = Double.parseDouble(pickUpPoint.getString(0));
+                        double lon = Double.parseDouble(pickUpPoint.getString(1));
+
+
+                        //System.out.println("passengerData: " + passengerData);
+                        System.out.println(passengerData.get("name"));
+                        System.out.println(passengerData.get("phone"));
+                        System.out.println("pickUpPoint: " + lat + " , " + lon);
+
+                        update_bottom_slider(passengerData.get("name").toString(), passengerData.get("phone").toString());
+                        update_marker_passenger(lon, lat);
+
+                        stop_searching();
+                        progressDialog.dismiss();
+
+                    }
+                    else
+                    {
+                        String message = (String) responseData.get("message");
+                        if(time_spent>12)
+                        {
+                            bottom_text.setText("No Passenger Found!");
+                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                            stop_searching();
+                            progressDialog.dismiss();
+                            return;
+                        }
+                        time_spent += 3;
+                        TimeUnit.SECONDS.sleep(3);
+                        api_call_passenger_search();
+                        //first time or no match so nothing I guess
+                    }
+
+                }
+                catch (JSONException | InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
+
+    }
+
+
+    public void stop_searching()
+    {
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+
+        apiDataService.stopSearchPassenger(MainActivity2.main_token, new ApiDataService.VolleyResponseListener() {
+
+            @Override
+            public void onError(Object message) {
+                System.out.println("Problem in stop search");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+
+                try {
+                    JSONObject responseData = new JSONObject(responseObject.toString());
+                    System.out.println(responseData);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+    }
+
+    public void update_bottom_slider(String name, String phone)
+    {
+        bottom_text.setText("You have been matched with a passenger!\n" + "Name : " + name + "\nPhone : " + phone);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
+
+    public void update_marker_passenger(double lon, double lat)
+    {
+
+        //Point destinationPoint = Point.fromLngLat(90.37609,23.83287);
+
+        Point destinationPoint = Point.fromLngLat(lon,lat);
+
+        if(destinationPoint!=null)
+        {
+            Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                    locationComponent.getLastKnownLocation().getLatitude());
+            GeoJsonSource source = mapboxMap.getStyle().getSourceAs("destination-source-id");
+            if (source != null) {
+                source.setGeoJson(Feature.fromGeometry(destinationPoint));
+            }
+
+            getRoute(originPoint, destinationPoint);
+
+            startButton.setText("Start Navigation");
+            startButton.setEnabled(true);
+            startButton.setBackgroundResource(R.color.mapboxBlue);
+
+            driverState = DriverState.PICKING;
+
+            //cancelButton.setVisibility(v.VISIBLE);
+            cancelButton.setVisibility(View.VISIBLE);
+            cancelButton.setEnabled(true);
+        }
+
+
     }
 
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
@@ -291,6 +452,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             permissionsManager.requestLocationPermissions(getActivity());
         }
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);

@@ -13,12 +13,12 @@
     <fragment
         android:id="@+id/nav_gallery"
         android:name="com.example.takemedriverapp.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
+        android:label="Your Trips"
         tools:layout="@layout/fragment_gallery" />
 
     <fragment
         android:id="@+id/nav_slideshow"
         android:name="com.example.takemedriverapp.ui.slideshow.SlideshowFragment"
-        android:label="@string/menu_slideshow"
+        android:label="Income History"
         tools:layout="@layout/fragment_slideshow" />
 </navigation>
