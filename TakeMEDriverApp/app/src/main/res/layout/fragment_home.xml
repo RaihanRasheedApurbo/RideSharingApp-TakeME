@@ -70,7 +70,7 @@
                     android:layout_height="wrap_content"
                     android:text="Welcome"
                     android:textColor="@color/white"
-                    android:textSize="18dp"
+                    android:textSize="16dp"
                     android:layout_centerInParent="true"/>
 
                 <ImageView

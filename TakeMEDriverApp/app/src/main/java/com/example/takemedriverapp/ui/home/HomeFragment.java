@@ -199,7 +199,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                         else if(driverState==DriverState.RESTING)
                         {
 
-                            Toast.makeText(getApplicationContext(),"Hello Javatpoint",Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(getApplicationContext(),"Hello Javatpoint",Toast.LENGTH_SHORT).show();
                             // find passenger using loading screen and calling backend apis below...
                             // Fahad code here.....................................
 
@@ -214,28 +214,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                             //Point destinationPoint = getPassenger(); // write getPassenger Function
                             // assuming passenger has been found his lat lang is (90.37609,23.83287)
 
-                            Point destinationPoint = Point.fromLngLat(90.37609,23.83287);
 
-                            if(destinationPoint!=null)
-                            {
-                                Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
-                                        locationComponent.getLastKnownLocation().getLatitude());
-                                GeoJsonSource source = mapboxMap.getStyle().getSourceAs("destination-source-id");
-                                if (source != null) {
-                                    source.setGeoJson(Feature.fromGeometry(destinationPoint));
-                                }
-
-                                getRoute(originPoint, destinationPoint);
-
-                                startButton.setText("Start Navigation");
-                                startButton.setEnabled(true);
-                                startButton.setBackgroundResource(R.color.mapboxBlue);
-
-                                driverState = DriverState.PICKING;
-
-                                cancelButton.setVisibility(v.VISIBLE);
-                                cancelButton.setEnabled(true);
-                            }
 
 
 
@@ -287,6 +266,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                         System.out.println("pickUpPoint: " + lat + " , " + lon);
 
                         update_bottom_slider(passengerData.get("name").toString(), passengerData.get("phone").toString());
+                        update_marker_passenger(lon, lat);
 
                         stop_searching();
                         progressDialog.dismiss();
@@ -298,6 +278,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                         if(time_spent>12)
                         {
                             bottom_text.setText("No Passenger Found!");
+                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                             stop_searching();
                             progressDialog.dismiss();
                             return;
@@ -347,12 +328,42 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
     public void update_bottom_slider(String name, String phone)
     {
-
         bottom_text.setText("You have been matched with a passenger!\n" + "Name : " + name + "\nPhone : " + phone);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
 
+    public void update_marker_passenger(double lon, double lat)
+    {
+
+        //Point destinationPoint = Point.fromLngLat(90.37609,23.83287);
+
+        Point destinationPoint = Point.fromLngLat(lon,lat);
+
+        if(destinationPoint!=null)
+        {
+            Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                    locationComponent.getLastKnownLocation().getLatitude());
+            GeoJsonSource source = mapboxMap.getStyle().getSourceAs("destination-source-id");
+            if (source != null) {
+                source.setGeoJson(Feature.fromGeometry(destinationPoint));
+            }
+
+            getRoute(originPoint, destinationPoint);
+
+            startButton.setText("Start Navigation");
+            startButton.setEnabled(true);
+            startButton.setBackgroundResource(R.color.mapboxBlue);
+
+            driverState = DriverState.PICKING;
+
+            //cancelButton.setVisibility(v.VISIBLE);
+            cancelButton.setVisibility(View.VISIBLE);
+            cancelButton.setEnabled(true);
+        }
+
+
+    }
 
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
         loadedMapStyle.addImage("destination-icon-id",
