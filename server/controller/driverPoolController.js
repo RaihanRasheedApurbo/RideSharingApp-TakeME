@@ -25,7 +25,42 @@ exports.lookForPassenger = (req, res) => {
             else {
                 let n = Math.floor(Math.random()*10);
                 console.log("n: ", n);
-                if(n%2) passengerAssign(req.data._id);
+                if(n%2) {
+                    let passengers = ["607478178c29c1408cfad290", "607478178c29c1408cfad292", "607478178c29c1408cfad297", "607478188c29c1408cfad29b", "607478188c29c1408cfad2a1"];
+
+                    let passengerID = passengers[Math.floor((Math.random() * passengers.length))];
+
+                    let lat = Math.random() * (23.7 - 23.4) + 23.4;
+                    let lon = Math.random() * (90.6 - 90.4) + 90.4;
+                    let pickUpPoint = [lat, lon];
+
+                    Passenger.findById(passengerID)
+                    .then(passengerData => {
+                        let passengerInfo = {
+                            passengerData: passengerData,
+                            pickUpPoint: pickUpPoint 
+                        }
+
+                        const filter = {driverID : driverID};
+                        const updateInfo = {passengerInfo: passengerInfo};
+                        //console.log(updateInfo);
+
+                        DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true })
+                        .then(data => {
+                            console.log(data);
+                            //res.status(200).send(data);
+                        })
+                        .catch(err => {
+                            console.log(err);
+                            res.status(500).send(err);
+                        });
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        res.status(500).send(err);
+                    });
+                } 
+
 
                 res.status(200).send({"message": "No match found"});
             }
