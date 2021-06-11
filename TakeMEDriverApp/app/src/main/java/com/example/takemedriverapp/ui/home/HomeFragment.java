@@ -1,5 +1,6 @@
 package com.example.takemedriverapp.ui.home;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -93,6 +95,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     // Fahad's Variables
     FrameLayout frameLayout;
     BottomSheetBehavior bottomSheetBehavior;
+    int time_spent = 0;
+    ProgressDialog progressDialog;
 
 
 
@@ -198,6 +202,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                             // find passenger using loading screen and calling backend apis below...
                             // Fahad code here.....................................
 
+                            progressDialog = new ProgressDialog(HomeFragment.super.getContext());
+                            progressDialog.show();
+                            progressDialog.setContentView(R.layout.waiting_screen);
+                            progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                            time_spent = 0;
                             api_call_passenger_search();
 
                             //Point destinationPoint = getPassenger(); // write getPassenger Function
@@ -241,7 +251,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     public void api_call_passenger_search()
     {
 
-        final int[] time_spent = {0};
         ApiDataService apiDataService = new ApiDataService(this.getContext());
 
         apiDataService.searchPassenger(MainActivity2.main_token, new ApiDataService.VolleyResponseListener() {
@@ -273,13 +282,18 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                         System.out.println("passengerData: " + passengerData);
                         System.out.println("pickUpPoint: " + lat + " , " + lon);
 
+                        progressDialog.dismiss();
+
                     }
                     else
                     {
                         String message = (String) responseData.get("message");
-                        if(time_spent[0]>15)
+                        if(time_spent>12)
+                        {
+                            progressDialog.dismiss();
                             return;
-                        time_spent[0] += 3;
+                        }
+                        time_spent += 3;
                         TimeUnit.SECONDS.sleep(3);
                         api_call_passenger_search();
                         //first time or no match so nothing I guess
