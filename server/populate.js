@@ -393,35 +393,38 @@ function makeDriverAvailable() {
     axios.get(address+'driver/getAll')
     .then(data => {
         drivers = data.data;
-        //console.log(owners);
+        //console.log(drivers);
         for (let index = 0; index < drivers.length; index++) {
-            let n = Math.floor(Math.random() * 16);
-            if (n%3) continue;
-
-
             let driver = drivers[index];
+            console.log("driver.vehicleID: ", driver.vehicleID);
             
-            let driverCred = {
-                email: driver.email,
-                password: driver.password  
-            };
-            
-            axios.post(address+'driver/login', driverCred)
-            .then(res => {
-                header_data['auth-token'] = res.headers['auth-token'];
-    
-                axios.get(address+'driver/search', {headers: header_data})
-                .then( data => {
-                    console.log("success", count++, data.data);
+            let n = Math.floor(Math.random() * 16);
+            if (n%3 && driver.vehicleID) {
+                let driverCred = {
+                    email: driver.email,
+                    password: driver.password  
+                };
+                
+                axios.post(address+'driver/login', driverCred)
+                .then(res => {
+                    header_data['auth-token'] = res.headers['auth-token'];
+        
+                    axios.get(address+'driver/search', {headers: header_data})
+                    .then( data => {
+                        console.log("success", count++, data.data);
+                    })
+                    .catch(err => {
+                        console.log("update error", err.message);
+                    });
                 })
                 .catch(err => {
-                    console.log("update error", err.message);
-                })
-            });
+                    console.log("login error", err.message);
+                });
+            }
         }
     })
     .catch(err => {
-        console.log(err);
+        console.log("get all error", err.message);
     });
 }
 
@@ -473,7 +476,7 @@ for (let index = 0; index < n; index++) {
 //show();
 //ridePopulate(10);
 //driverCheck();
-//makeDriverAvailable();
+makeDriverAvailable();
 //vehicleLocationUpdate();
 
 /*let duration = 60;

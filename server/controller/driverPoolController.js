@@ -10,6 +10,7 @@ exports.lookForPassenger = (req, res) => {
     .then(data => {
         if(data) {
             if(data.passengerInfo) {
+                let passengerInfo = data.passengerInfo;
                 res.status(200).send({"message": "you have been matched", passengerInfo});
                 /*DriverPool.findOneAndDelete({'driverID': req.data._id})
                 .then(data => {
@@ -74,7 +75,7 @@ exports.stopPassengerSearch = (req, res) => {
         });
 }
 
-function calculateDistance(lat1, lon2, lat2, lon2) {
+function calculateDistance(lat1, lon1, lat2, lon2) {
     console.log(lat1, lon1, lat2, lon2);
     const R = 6371e3; // metres
     const φ1 = lat1 * Math.PI/180; // φ, λ in radians
@@ -92,8 +93,24 @@ function calculateDistance(lat1, lon2, lat2, lon2) {
     return d;
 }
 
+const driverWithLocation = (lat, lon) => {
+    DriverPool.find({
+        vehicleLocation : {
+            $near: {
+                $geometry: {
+                    type: 'Point',
+                    coordinates: [ lon , lat ]
+                },
+                $maxDistance: 5000
+            }
+        }
+    });
+}
+
 //driverSearch
 exports.lookForDriver = (req, res) => {
+    let passengerID = req.data._id;
+                
     if(req.query.latitude && req.query.longitude) {
         const lat1 = parseFloat(req.query.latitude);
         const lon1 = parseFloat(req.query.longitude);
@@ -106,12 +123,75 @@ exports.lookForDriver = (req, res) => {
                         type: 'Point',
                         coordinates: [ lon1 , lat1 ]
                     },
-                    $maxDistance: 10000
+                    $maxDistance: 5000
                 }
             }
         })
         .then(data => {
-            res.status(200).send(data);
+            
+            if(data.length > 0) {
+                
+                let driverID = data[0].driverID;
+                let passengerLat = data[0].vehicleLocation.coordinates[1];
+                let passengerLon = data[0].vehicleLocation.coordinates[0];
+                let pickUpPoint = [passengerLat, passengerLon];
+                let dist = calculateDistance(lat1, lon1, passengerLat, passengerLon);
+                console.log(dist);
+                
+                Passenger.findById(passengerID)
+                .then(passengerData => {
+                    let passengerInfo = {
+                        passengerData: passengerData,
+                        pickUpPoint: pickUpPoint 
+                    }
+
+                    const filter = {driverID : driverID};
+                    const updateInfo = {passengerInfo: passengerInfo};
+                    //console.log(updateInfo);
+
+                    DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true })
+                    .then(data => {
+                        console.log(data);
+                        let obj = {
+                            'distance': dist/1000,
+                            'vehicleLocation': data.vehicleLocation.coordinates, 
+                            'driverName': data.driverInfo.name,
+                            'vehicle': data.vehicleInfo.model
+                        };
+                        res.status(200).send(obj);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        res.status(500).send(err);
+                    });
+                })
+                .catch(err => {
+                    console.log(err);
+                    res.status(500).send(err);
+                });
+                
+
+                /*
+                let d = [];
+                data.forEach(item => {
+                    //console.log(item.vehicleInfo.model);
+                    let lat2 = item.vehicleLocation.coordinates[1];
+                    let lon2 = item.vehicleLocation.coordinates[0];
+                    let dist = calculateDistance(lat1, lon1, lat2, lon2);
+                    console.log(dist);
+                    obj = {
+                        'distance': dist/1000,
+                        'vehicleLocation': item.vehicleLocation.coordinates, 
+                        'driverName': item.driverInfo.name,
+                        'vehicle': item.vehicleInfo.model
+                    };
+                    d.push(obj);
+                });
+                d.push({total: data.length});*/
+            } else {
+                //console.log(data);
+                res.status(200).send({message: "no preferable driver found"});
+            }
         })
         .catch(err => {
             console.log(err);
@@ -180,11 +260,14 @@ exports.showPool = (req, res) => {
         data.forEach(item => {
             obj = {
                 'driverID': item.driverID, 
-                'location': item.vehicleLocation, 
-                'passengerInfo': item.passengerInfo
+                'driverName': item.driverInfo.name,
+                'vehicle': item.vehicleInfo.model,
+                'location': item.vehicleLocation.coordinates
             };
+            if(item.passengerInfo) obj['passengerInfo'] = item.passengerInfo;
             d.push(obj);
         })
+        d.push({total: data.length});
         console.log(d);
         res.status(200).send(d);
     })
@@ -234,10 +317,11 @@ function passengerAssign(driverID) {
     console.log(token);
     console.log(postBody);
 
-    let address = 'http://take-me-backend.herokuapp.com';
+    //let address = 'https://take-me-backend.herokuapp.com';
+    let address = "http://localhost:3000";
     axios.post(address+'/api/passenger/acceptDriver', postBody, {headers: header_data})
         .then( data => {
-            console.log("success\n", data.body);
+            console.log("success\n", data.data);
         })
         .catch(err => {
             console.log(err.message);

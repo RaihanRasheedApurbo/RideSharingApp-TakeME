@@ -43,7 +43,7 @@ route.get('/api/driver/getAll', driverController.getAllDrivers); //test purpose 
 route.post('/api/passenger/register', passengerController.register);
 route.post('/api/passenger/login', passengerController.login);
 route.get('/api/passenger/dashboard', verify, passengerController.showDashboard);
-route.get('/api/passenger/search', driverPoolController.lookForDriver); //under construction
+route.get('/api/passenger/search', verify, driverPoolController.lookForDriver); //under construction
 route.post('/api/passenger/acceptDriver', verify, driverPoolController.acceptDriver); //under construction
 route.post('/api/passenger/addRide', verify, rideController.addRide); //under construction
 route.get('/api/passenger/getAll', passengerController.getAllPassengers); //test purpose only

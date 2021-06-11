@@ -4,12 +4,10 @@ const pointSchema = require('./point');
 const DriverPoolSchema = new mongoose.Schema({
     driverID : {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
         ref: 'Driver'
     },
     vehicleInfo : {
-        type: Object,
-        required: true
+        type: Object
     },
     driverInfo : {
         type: Object
