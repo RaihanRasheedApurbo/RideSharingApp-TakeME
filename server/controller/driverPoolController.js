@@ -6,7 +6,8 @@ const axios = require("axios");
 
 //passengerSearch
 exports.lookForPassenger = (req, res) => {
-    DriverPool.findOne({'driverID': req.data._id})
+    let driverID = req.data._id;
+    DriverPool.findOne({'driverID': driverID})
     .then(data => {
         if(data) {
             if(data.passengerInfo) {
@@ -48,7 +49,7 @@ exports.lookForPassenger = (req, res) => {
                         DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true })
                         .then(data => {
                             console.log(data);
-                            //res.status(200).send(data);
+                            res.status(200).send({"message": "you should get one in the next call"});
                         })
                         .catch(err => {
                             console.log(err);
@@ -60,9 +61,9 @@ exports.lookForPassenger = (req, res) => {
                         res.status(500).send(err);
                     });
                 } 
-
-
-                res.status(200).send({"message": "No match found"});
+                else {
+                    res.status(200).send({"message": "No match found "+n});
+                }
             }
         }
         else {
