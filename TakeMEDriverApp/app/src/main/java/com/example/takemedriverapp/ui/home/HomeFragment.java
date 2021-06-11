@@ -48,6 +48,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
@@ -240,6 +241,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     public void api_call_passenger_search()
     {
 
+        final int[] time_spent = {0};
         ApiDataService apiDataService = new ApiDataService(this.getContext());
 
         apiDataService.searchPassenger(MainActivity2.main_token, new ApiDataService.VolleyResponseListener() {
@@ -271,13 +273,20 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                         System.out.println("passengerData: " + passengerData);
                         System.out.println("pickUpPoint: " + lat + " , " + lon);
 
-                    } else {
+                    }
+                    else
+                    {
                         String message = (String) responseData.get("message");
+                        if(time_spent[0]>15)
+                            return;
+                        time_spent[0] += 3;
+                        TimeUnit.SECONDS.sleep(3);
+                        api_call_passenger_search();
                         //first time or no match so nothing I guess
                     }
 
                 }
-                catch (JSONException e)
+                catch (JSONException | InterruptedException e)
                 {
                     e.printStackTrace();
                 }
