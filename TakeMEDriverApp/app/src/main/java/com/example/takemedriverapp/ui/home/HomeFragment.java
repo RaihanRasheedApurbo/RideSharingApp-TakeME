@@ -97,6 +97,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     BottomSheetBehavior bottomSheetBehavior;
     int time_spent = 0;
     ProgressDialog progressDialog;
+    TextView bottom_text;
 
 
 
@@ -130,7 +131,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             bottomSheetBehavior = BottomSheetBehavior.from(frameLayout);
             bottomSheetBehavior.setPeekHeight(200);
             bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
+            bottom_text = root.findViewById(R.id.bottom_sheet_text);
 
 
             //********************************************************
@@ -267,7 +268,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 try
                 {
                     JSONObject responseData = new JSONObject(responseObject.toString());
-                    System.out.println(responseData);
+                    //System.out.println(responseData);
 
                     if(responseData.has("passengerInfo"))
                     {
@@ -279,9 +280,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                         double lat = Double.parseDouble(pickUpPoint.getString(0));
                         double lon = Double.parseDouble(pickUpPoint.getString(1));
 
-                        System.out.println("passengerData: " + passengerData);
+
+                        //System.out.println("passengerData: " + passengerData);
+                        System.out.println(passengerData.get("name"));
+                        System.out.println(passengerData.get("phone"));
                         System.out.println("pickUpPoint: " + lat + " , " + lon);
 
+                        update_bottom_slider(passengerData.get("name").toString(), passengerData.get("phone").toString());
+
+                        stop_searching();
                         progressDialog.dismiss();
 
                     }
@@ -290,6 +297,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                         String message = (String) responseData.get("message");
                         if(time_spent>12)
                         {
+                            bottom_text.setText("No Passenger Found!");
+                            stop_searching();
                             progressDialog.dismiss();
                             return;
                         }
@@ -311,6 +320,37 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
     }
 
+
+    public void stop_searching()
+    {
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+
+        apiDataService.stopSearchPassenger(MainActivity2.main_token, new ApiDataService.VolleyResponseListener() {
+
+            @Override
+            public void onError(Object message) {
+                System.out.println("Problem in stop search");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+
+                try {
+                    JSONObject responseData = new JSONObject(responseObject.toString());
+                    System.out.println(responseData);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+    }
+
+    public void update_bottom_slider(String name, String phone)
+    {
+
+        bottom_text.setText("You have been matched with a passenger!\n" + "Name : " + name + "\nPhone : " + phone);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
 
 
 
