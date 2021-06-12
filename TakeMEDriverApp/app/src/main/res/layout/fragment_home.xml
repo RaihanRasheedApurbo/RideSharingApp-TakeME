@@ -29,7 +29,7 @@
         android:textColor="@color/mapboxWhite"
         mapbox:layout_constraintStart_toStartOf="parent"
         mapbox:layout_constraintTop_toTopOf="parent" />
-
+<!--    // end button is not used anymore but if you remove this element a runtime error occurs so don't remove it if you can't solve the crash-->
     <Button
         android:id="@+id/endButton"
         android:layout_width="fill_parent"

@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -79,7 +80,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     private NavigationMapRoute navigationMapRoute;
     // variables needed to initialize navigation
     private Button startButton;
-    private Button cancelButton;
     // boiler plate code of mapbox ended ... Apurbo's code starts from below...
     // state management
     enum DriverState {
@@ -112,113 +112,84 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
 
         System.out.println("kill meh");
-        if(root == null)
-        {
-            System.out.println("kill meh again");
-            Mapbox.getInstance(getActivity(), getString(R.string.mapbox_access_token));
-            root = inflater.inflate(R.layout.fragment_home, container, false);
-            mapView = root.findViewById(R.id.mapView);
-            mapView.onCreate(savedInstanceState);
-            mapView.getMapAsync(this);
-            driverState = DriverState.RESTING;
-            startButton = root.findViewById(R.id.startButton);
-            startButton.setText("Search Passenger");
-            startButton.setEnabled(true);
 
-            cancelButton = root.findViewById(R.id.endButton);
+        System.out.println("kill meh again");
+        Mapbox.getInstance(getActivity(), getString(R.string.mapbox_access_token));
+        root = inflater.inflate(R.layout.fragment_home, container, false);
+        mapView = root.findViewById(R.id.mapView);
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(this);
+        driverState = DriverState.RESTING;
+        startButton = root.findViewById(R.id.startButton);
+        startButton.setText("Search Passenger");
+        startButton.setEnabled(true);
 
 
 
-            //Fahad's************************************************
 
-            frameLayout = root.findViewById(R.id.bottomsheet1);
-            bottomSheetBehavior = BottomSheetBehavior.from(frameLayout);
-            bottomSheetBehavior.setPeekHeight(200);
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-            bottom_text = root.findViewById(R.id.bottom_sheet_text);
-            bottom_start = root.findViewById(R.id.bottom_start_button);
-            bottom_cancel = root.findViewById(R.id.bottom_cancel_button);
+        //Fahad's************************************************
 
-
-            bottom_start.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    driver_lat = locationComponent.getLastKnownLocation().getLatitude();
-                    driver_long = locationComponent.getLastKnownLocation().getLongitude();
-                    
-                    double distance_now = calculateDistanceInMeter(driver_lat, driver_long, passenger_lat, passenger_long);
-                    if(distance_now>100)
-                        Toast.makeText(getApplicationContext(),distance_now + " meters away",Toast.LENGTH_SHORT).show();
-                    else
-                        Toast.makeText(getApplicationContext(),"Ride Started",Toast.LENGTH_SHORT).show();
-                }
-            });
-
-            bottom_cancel.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+        frameLayout = root.findViewById(R.id.bottomsheet1);
+        bottomSheetBehavior = BottomSheetBehavior.from(frameLayout);
+        bottomSheetBehavior.setPeekHeight(200);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottom_text = root.findViewById(R.id.bottom_sheet_text);
+        bottom_start = root.findViewById(R.id.bottom_start_button);
+        bottom_cancel = root.findViewById(R.id.bottom_cancel_button);
 
 
-                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which){
-                                case DialogInterface.BUTTON_POSITIVE:
-                                    //Yes button clicked // Reset Things
-                                    reset_passenger();
-                                    break;
+        bottom_start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                driver_lat = locationComponent.getLastKnownLocation().getLatitude();
+                driver_long = locationComponent.getLastKnownLocation().getLongitude();
 
-                                case DialogInterface.BUTTON_NEGATIVE:
-                                    //No button clicked
-                                    break;
-                            }
+                double distance_now = calculateDistanceInMeter(driver_lat, driver_long, passenger_lat, passenger_long);
+                if(distance_now>100)
+                    Toast.makeText(getApplicationContext(),distance_now + " meters away",Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(getApplicationContext(),"Ride Started",Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        bottom_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
+                                //Yes button clicked // Reset Things
+//                                    reset_passenger();
+                                // we have to call backend here and update backend so that it knows ride has been canceld by driver
+                                Intent intent = getActivity().getIntent();
+                                getActivity().finish();
+                                startActivity(intent);
+                                break;
+
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                //No button clicked
+                                break;
                         }
-                    };
+                    }
+                };
 
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
-                            .setNegativeButton("No", dialogClickListener).show();
-
-
-                }
-            });
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
 
 
 
-            //********************************************************
 
-
-            cancelButton.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-    //                Intent intent = getIntent();
-    //                finish();
-    //                startActivity(intent);
-//                    HomeFragment fragment = (HomeFragment)
-//                            getParentFragmentManager().findFragmentById(R.id.nav_home);
-//                    System.out.println("total fragments: "+getParentFragmentManager().getFragments().size());
-//                    getParentFragmentManager().beginTransaction()
-//                            .detach(fragment)
-//                            .attach(fragment)
-//                            .commit();
-
-                }
-            });
-        }
-
-//        final TextView textView = root.findViewById(R.id.text_home);
-//        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-//            @Override
-//            public void onChanged(@Nullable String s) {
-//                textView.setText(s);
-//            }
-//        });
-        // new code
+            }
+        });
 
 
 
-        //new code ended
+
         return root;
     }
 
@@ -415,9 +386,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
             driverState = DriverState.PICKING;
 
-            //cancelButton.setVisibility(v.VISIBLE);
-            cancelButton.setVisibility(View.VISIBLE);
-            cancelButton.setEnabled(true);
+
         }
 
 
@@ -434,8 +403,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         bottom_cancel.setVisibility(View.INVISIBLE);
         bottom_cancel.setEnabled(false);
 
-        cancelButton.setVisibility(View.INVISIBLE);
-        cancelButton.setEnabled(false);
+
 
         startButton.setText("Search Passenger");
         driverState = DriverState.RESTING;
