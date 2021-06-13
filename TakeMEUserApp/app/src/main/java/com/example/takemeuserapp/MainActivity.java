@@ -104,11 +104,11 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println("xps " + main_token);
 
                     JSONObject userInfo = (JSONObject) bodyData.get("data");
-                    //System.out.println("xpx" + driverInfo);
+                    //System.out.println("xpx" + userInfo);
 
                     name[0] = (String)userInfo.get("name");
 
-                    set_driver_name_email(name[0], email);
+                    set_user_name_email(name[0], email);
 
                     // ********************************************************
                     // second api call if needed
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void set_driver_name_email(String name, String email)
+    public void set_user_name_email(String name, String email)
     {
         View header = navigationView.getHeaderView(0);
 
