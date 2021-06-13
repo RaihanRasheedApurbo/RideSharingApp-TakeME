@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -82,6 +83,18 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     // variables needed to initialize navigation
 
     private Button startButton;
+
+
+
+    // Fahad's Variables
+    FrameLayout frameLayout;
+    BottomSheetBehavior bottomSheetBehavior;
+    //int time_spent = 0;
+    //ProgressDialog progressDialog;
+    TextView bottom_text;
+    Button bottom_start, bottom_cancel;
+
+
 
 
 
@@ -161,7 +174,18 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
 
         //Apurbo's code ended here **********************
+
+
         //Fahad's code****************************
+
+        frameLayout = root.findViewById(R.id.bottomsheet1);
+        bottomSheetBehavior = BottomSheetBehavior.from(frameLayout);
+        bottomSheetBehavior.setPeekHeight(200);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        bottom_text = root.findViewById(R.id.bottom_sheet_text);
+        bottom_start = root.findViewById(R.id.bottom_start_button);
+        bottom_cancel = root.findViewById(R.id.bottom_cancel_button);
+
 
 
 
