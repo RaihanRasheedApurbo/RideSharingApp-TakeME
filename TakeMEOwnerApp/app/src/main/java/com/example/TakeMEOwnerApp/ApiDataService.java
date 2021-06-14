@@ -143,4 +143,58 @@ public class ApiDataService {
         MySingleton.getInstance(context).addToRequestQueue(stringRequest);
     }
 
+    /**
+     * A function to view Driver current location and his status
+     * @param token String token from login auth
+     * @param vehicleID String vehicleID of the vehicle to monitor
+     * @param volleyResponseListener interface to handle response
+     *                               An example of how to call this function is given below
+     * <pre>
+     * {@code
+     *  apiDataService.viewDriver(token, driverID, new ApiDataService.VolleyResponseListener() {
+     *                     @Override
+     *                     public void onError(Object message) {
+     *                         System.out.println(message);
+     *                     }
+     *
+     *                     @Override
+     *                     public void onResponse(Object responseObject) {
+     *                         try {
+     *                             responseData = new JSONObject(responseObject.toString());
+     *                             System.out.println(responseData);
+     *
+     *                             //change here to handle these info
+     *                             System.out.println(responseData.getString("vehicleInfo"));
+     *                             System.out.println(responseData.getString("driverInfo"));
+     *                             System.out.println(responseData.getString("vehicleLocation")); //this is an array from javascript side so I haven't checked how to handle it in java
+     *                             if (responseData.has("status")) System.out.println(responseData.getString("status"));  //status will be undefined for inactive driver
+     *                             if (responseData.has("passengerInfo")) System.out.println(responseData.getString("passengerInfo")); //passengerInfo will be undefined for driver in searching state
+     *
+     *                         } catch (JSONException e) {
+     *                             e.printStackTrace();
+     *                         }
+     *                     }
+     *                 });
+     *  }</pre>
+     */
+    public void viewDriver(String token, String vehicleID, VolleyResponseListener volleyResponseListener) {
+        String url = BASE_URL + "/api/owner/vehicle/id/" + vehicleID + "/status";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                volleyResponseListener::onResponse,
+                volleyResponseListener::onError) {
+            @Override
+            public Map<String, String> getHeaders() {
+
+                Map<String, String> params = new HashMap<String, String>();
+
+                params.put("auth-token", token);
+
+                return params;
+            }
+        };
+
+        MySingleton.getInstance(context).addToRequestQueue(stringRequest);
+    }
+
 }
