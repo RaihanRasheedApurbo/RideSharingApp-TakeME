@@ -29,25 +29,26 @@ const RideSchema = new mongoose.Schema({
         type : Number,
         required: true
     },
+    distance : {
+        type : Number
+    },
     source : {
         type : Object,
         name : {
-            type: String,
-            required: true
+            type: String
         },
         location : {
-            type: pointSchema
+            type: Object
         },
         required: true
     },
     destination : {
         type : Object,
         name : {
-            type: String,
-            required: true
+            type: String
         },
         location : {
-            type: pointSchema
+            type: Object
         },
         required: true
     }

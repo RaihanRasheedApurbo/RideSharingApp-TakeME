@@ -198,7 +198,7 @@ exports.updateLocation = (req, res) => {
     }
     //console.log(passengerID, driverID, vehicleLocation);
 
-    if(req.body.location) {
+    if(vehicleLocation) {
         const filter = {
             'driverID': mongoose.Types.ObjectId(req.data._id)
         };

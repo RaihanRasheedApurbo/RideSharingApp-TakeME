@@ -6,6 +6,10 @@ const DriverPoolSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Driver'
     },
+    passengerID : {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Passenger'
+    },
     vehicleInfo : {
         type: Object
     },
@@ -18,6 +22,13 @@ const DriverPoolSchema = new mongoose.Schema({
     vehicleLocation : {
         type: pointSchema,
         index: '2dsphere' // Create a special 2dsphere index on `vehicleLocation`
+    },
+    status : {
+        type : String
+    },
+    startTime : {
+        type : Date,
+        default: Date.now
     }
 });
 

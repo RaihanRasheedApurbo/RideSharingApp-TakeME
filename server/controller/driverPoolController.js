@@ -1,116 +1,48 @@
+const Ride = require('../model/ride');
 const Driver = require('../model/driver');
 const Vehicle = require('../model/vehicle');
 const Passenger = require('../model/passenger');
 const DriverPool = require('../model/driverPool');
-const axios = require("axios");
 
-//passengerSearch
-exports.lookForPassenger = (req, res) => {
-    let driverID = req.data._id;
-    DriverPool.findOne({'driverID': driverID})
-    .then(data => {
-        if(data) {
-            if(data.passengerInfo) {
-                let passengerInfo = data.passengerInfo;
-                res.status(200).send({"message": "you have been matched", passengerInfo});
-                /*DriverPool.findOneAndDelete({'driverID': req.data._id})
-                .then(data => {
-                    let passengerInfo = data.passengerInfo;
-                    
-                    res.status(200).send({"message": "you have been matched", passengerInfo});
-                })
-                .catch(err => {
-                    res.status(500).send({"message": err.message});
-                });*/
-            }
-            else {
-                let n = Math.floor(Math.random()*10);
-                console.log("n: ", n);
-                if(n%2) {
-                    let passengers = ["607478178c29c1408cfad290", "607478178c29c1408cfad292", "607478178c29c1408cfad297", "607478188c29c1408cfad29b", "607478188c29c1408cfad2a1"];
+const mongoose = require('mongoose');
 
-                    let passengerID = passengers[Math.floor((Math.random() * passengers.length))];
 
-                    let lat = Math.random() * (23.7 - 23.4) + 23.4;
-                    let lon = Math.random() * (90.6 - 90.4) + 90.4;
-                    let pickUpPoint = [lat, lon];
+const MATCHED = "matched";
+const SEARCHING = "searching";
+const RIDING = "riding";
+const DENIED = "denied";
+const CANCELLED = "cancelled";
 
-                    Passenger.findById(passengerID)
-                    .then(passengerData => {
-                        let passengerInfo = {
-                            passengerData: passengerData,
-                            pickUpPoint: pickUpPoint 
-                        }
+const DRIVER = "driver";
+const PASSENGER = "passenger";
 
-                        const filter = {driverID : driverID};
-                        const updateInfo = {passengerInfo: passengerInfo};
-                        //console.log(updateInfo);
 
-                        DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true })
-                        .then(data => {
-                            console.log(data);
-                            res.status(200).send({"message": "you should get one in the next call"});
-                        })
-                        .catch(err => {
-                            console.log(err);
-                            res.status(500).send(err);
-                        });
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        res.status(500).send(err);
-                    });
-                } 
-                else {
-                    res.status(200).send({"message": "No match found "+n});
-                }
-            }
-        }
-        else {
-            console.log("new entry");
-            //getting driverInfo
-            const getDriverInfo = Driver.findById(req.data._id);
-            const getVehicleInfo = Vehicle.findOne({'driverID': req.data._id});
-            
-            Promise.all([getDriverInfo, getVehicleInfo])
-            .then(data => {
-                const driverEntry = new DriverPool({
-                    driverID : req.data._id,
-                    driverInfo : data[0],
-                    vehicleLocation : data[1].location,
-                    vehicleInfo: data[1]
-                }); 
-                //console.log(driverEntry);
-                
-                // adding driverEntry to driverPool
-                driverEntry.save()
-                .then(data => {
-                    res.status(200).send({ "message": `driverID ${req.data._id} has been added to pool`});
-                });
-            })
-            .catch(err => {
-                //console.log(err);
-                res.status(500).send({ message: err.message });
-            });
-        }
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).send({message: err.message});
-    });
+//function to array parse
+function arrayParse(arr) {
+    console.log("arrayParse here: ", arr);
+    try {
+        arr = JSON.parse(arr);
+        return arr;
+    } catch (error) {
+        console.log(error, arr);
+        return arr;
+    }
 }
 
-//stop searching for passenger
-exports.stopPassengerSearch = (req, res) => {
-    DriverPool.findOneAndDelete({'driverID': req.data._id})
-        .then(data => {
-            res.status(200).send({"message": `DriverID ${req.data._id} has been removed from pool`});
-        })
-        .catch(err => {
-            res.status(500).send({"message": err.message});
-        });
+//function to pretify driver and vehicleInfo
+function pretifyDriverInfo(data) {
+    console.log(data);
+    return {
+        driverID: data.driverID,
+        driverName: data.driverInfo.name,
+        driverRating: data.driverInfo.rating,
+        vehicleName: data.vehicleInfo.model,
+        vehicleType: data.vehicleInfo.type,
+        vehicleLocation: data.vehicleInfo.location.coordinates
+    }
 }
 
+//calculated geo distance between two geo coordinate
 function calculateDistance(lat1, lon1, lat2, lon2) {
     console.log(lat1, lon1, lat2, lon2);
     const R = 6371e3; // metres
@@ -126,191 +58,355 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
     const d = R * c; // in metres
 
+    console.log(d);
     return d;
 }
 
-const driverWithLocation = (lat, lon) => {
-    DriverPool.find({
+//find the nearest driver
+function getNearestDriver(lat, lon, maxDist) {
+    return DriverPool.find({
+        status : SEARCHING,
         vehicleLocation : {
             $near: {
                 $geometry: {
                     type: 'Point',
                     coordinates: [ lon , lat ]
                 },
-                $maxDistance: 5000
+                $maxDistance: maxDist
             }
         }
     });
 }
 
-//driverSearch
-exports.lookForDriver = (req, res) => {
-    let passengerID = req.data._id;
-                
-    if(req.query.latitude && req.query.longitude) {
-        const lat1 = parseFloat(req.query.latitude);
-        const lon1 = parseFloat(req.query.longitude);
-        console.log(lat1, lon1);
+//passenger match with driver
+async function matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint) {
+    try {
+        passengerData = await Passenger.findById(passengerID);
+        let passengerInfo = {
+            passengerData: passengerData,
+            pickUpPoint: pickUpPoint,
+            dropOutPoint: dropOutPoint,
+        };
+        //console.log(passengerData);
 
-        DriverPool.find({
-            vehicleLocation : {
-                $near: {
-                    $geometry: {
-                        type: 'Point',
-                        coordinates: [ lon1 , lat1 ]
-                    },
-                    $maxDistance: 5000
+        const filter = {driverID : driverID};
+        const updateInfo = {passengerInfo: passengerInfo, status: MATCHED, passengerID: passengerData._id};
+        console.log(updateInfo);
+
+        return DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true });
+    } catch (error) {
+        console.log(error);
+        return error;
+    }
+}
+
+//passengerSearchAlt
+exports.lookForPassenger = async(req, res) => {
+    try {
+        let driverID = req.data._id;
+        let data = await DriverPool.findOne({'driverID': driverID});
+        
+        if(data) {
+            if(data.passengerInfo) {
+                let passengerInfo = data.passengerInfo;
+                res.status(200).send({"message": "you have been matched", passengerInfo, status: data.status});
+            }
+            else {
+                if(data.status === CANCELLED) {
+                    let removedData = await DriverPool.findOneAndDelete({'driverID': req.data._id});
+                    res.status(200).send({"message": "passenger cancelled the ride", status: data.status, removedData});
+                } else {
+                    let n = Math.floor(Math.random()*10);
+                    if(n%2) {
+                        //let passengers = ["607478178c29c1408cfad290", "607478178c29c1408cfad292", "607478178c29c1408cfad297", "607478188c29c1408cfad29b", "607478188c29c1408cfad2a1"];
+                        let passengers = ["607478178c29c1408cfad290"];
+                        
+                        let passengerID = passengers[Math.floor((Math.random() * passengers.length))];
+
+                        let lat = Math.random() * (23.87 - 23.72) + 23.72;
+                        let lon = Math.random() * (90.426 - 90.345) + 90.345;
+                        let pickUpPoint = [lat, lon];
+
+                        lat = Math.random() * (23.87 - 23.72) + 23.72;
+                        lon = Math.random() * (90.426 - 90.345) + 90.345;
+                        let dropOutPoint = [lat, lon];
+
+                        entryData = await matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint);
+                        if(entryData.passengerInfo) res.status(200).send({"message": "you should get one in the next call", entryData});
+                        else throw new Error("couldn't update entry");
+                    } 
+                    else {
+                        res.status(200).send({"message": "No match found "+n});
+                    }
                 }
             }
-        })
-        .then(data => {
+        }
+        else {
+            console.log("new entry");
+            //getting driverInfo
+            const getDriverInfo = Driver.findById(req.data._id);
+            const getVehicleInfo = Vehicle.findOne({'driverID': req.data._id});
             
-            if(data.length > 0) {
-                
-                let driverID = data[0].driverID;
-                let passengerLat = data[0].vehicleLocation.coordinates[1];
-                let passengerLon = data[0].vehicleLocation.coordinates[0];
-                let pickUpPoint = [passengerLat, passengerLon];
-                let dist = calculateDistance(lat1, lon1, passengerLat, passengerLon);
-                console.log(dist);
-                
-                Passenger.findById(passengerID)
-                .then(passengerData => {
-                    let passengerInfo = {
-                        passengerData: passengerData,
-                        pickUpPoint: pickUpPoint 
-                    }
+            data = await Promise.all([getDriverInfo, getVehicleInfo]);
+            const driverEntry = new DriverPool({
+                driverID : req.data._id,
+                driverInfo : data[0],
+                vehicleLocation : data[1].location,
+                vehicleInfo: data[1],
+                status: SEARCHING
+            });
 
-                    const filter = {driverID : driverID};
-                    const updateInfo = {passengerInfo: passengerInfo};
-                    //console.log(updateInfo);
+            entryInfo = await driverEntry.save();
+            res.status(200).send({ "message": `driverID ${req.data._id} has been added to pool`, entryInfo});
+        }
+    } catch (error) {
+        console.log(error); 
+        res.status(500).send({message: error.message});
+    }
+}
 
-                    DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true })
-                    .then(data => {
-                        console.log(data);
-                        let obj = {
-                            'distance': dist/1000,
-                            'vehicleLocation': data.vehicleLocation.coordinates, 
-                            'driverName': data.driverInfo.name,
-                            'vehicle': data.vehicleInfo.model
-                        };
-                        res.status(200).send(obj);
-                    })
-                    .catch(err => {
-                        console.log(err);
-                        res.status(500).send(err);
-                    });
-                })
-                .catch(err => {
-                    console.log(err);
-                    res.status(500).send(err);
-                });
-                
-
-                /*
-                let d = [];
-                data.forEach(item => {
-                    //console.log(item.vehicleInfo.model);
-                    let lat2 = item.vehicleLocation.coordinates[1];
-                    let lon2 = item.vehicleLocation.coordinates[0];
-                    let dist = calculateDistance(lat1, lon1, lat2, lon2);
-                    console.log(dist);
-                    obj = {
-                        'distance': dist/1000,
-                        'vehicleLocation': item.vehicleLocation.coordinates, 
-                        'driverName': item.driverInfo.name,
-                        'vehicle': item.vehicleInfo.model
-                    };
-                    d.push(obj);
-                });
-                d.push({total: data.length});*/
-            } else {
-                //console.log(data);
-                res.status(200).send({message: "no preferable driver found"});
-            }
+//stop searching for passenger
+exports.stopPassengerSearch = (req, res) => {
+    DriverPool.findOneAndDelete({'driverID': req.data._id})
+        .then(data => {
+            if(data && Object.keys(data).length) res.status(200).send({"message": `DriverID ${req.data._id} has been removed from pool`});
+            else res.status(200).send({"message": "DriverID has already been removed from pool"})
         })
         .catch(err => {
-            console.log(err);
-            res.status(500).send(err);
+            res.status(500).send({"message": err.message});
         });
+}
+
+exports.cancelMatch = async(req, res) => {
+    try {
+        let entity = req.body.entity;
+        let filter, updateInfo;
+        if(entity === DRIVER) {
+            filter = {"driverID": req.data._id, "status": MATCHED};
+            updateInfo = {
+                $set: {"status": DENIED},
+                $unset: {
+                    "driverID": "",
+                    "vehicleInfo": "",
+                    "vehicleLocation": "",
+                    "driverInfo": "",
+                }
+            }
+        } 
+        if(entity === PASSENGER) {
+            filter = {"passengerID": req.data._id, "status": MATCHED};
+            updateInfo = {
+                $set: {"status": CANCELLED},
+                $unset: {
+                    "passengerID": "",
+                    "passengerInfo": "",
+                }
+            }
+        }
+        console.log(filter, updateInfo);
+        entryData = await DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true });    
+        
+        if(entity && entryData && Object.keys(entryData).length) res.send({message: "You cancelled the ride", entryData});
+        else throw new Error("This call was wrongfully made");
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({message: error.message});
     }
-    else {
-        res.status(400).send({message: "empty query parameter"});
+}
+
+exports.startRide = async(req, res) => {
+    try {
+        let filter = {"driverID": req.data._id, "status": MATCHED};
+        let updateInfo = {
+            $set: {"status": RIDING, "startTime": Date.now()}
+        }
+        entryData = await DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true });    
+        
+        if(entryData && Object.keys(entryData).length) res.send({message: "Ride started", entryData});
+        else throw new Error("This call was wrongfully made");
+    } catch (error) {
+        res.status(500).send({message: error.message});
     }
+}
+
+exports.endRide = async(req, res) => {
+    try {
+        let entity = req.body.entity;
+        let filter = {status: "nothing"};
+
+        if(entity === DRIVER) filter = {"driverID": req.data._id, "status": RIDING};
+        else if(entity === PASSENGER) filter = {"passengerID": req.data._id, "status": RIDING};
+        console.log(req.body.location);
+        let currentLocation = arrayParse(req.body.location);
+        let entryData = await DriverPool.findOne(filter);
+        
+        if(entryData && Object.keys(entryData).length) {
+            let pickUpPoint = entryData.passengerInfo.pickUpPoint;
+            console.log(pickUpPoint, currentLocation);
+            let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], currentLocation[0], currentLocation[1]); 
+            let total = dist/100.0;
+            
+            let d1 = Date.now();
+            let d2 = new Date(entryData.startTime);
+            let duration = (d1-d2)/1000;
+            
+            let ride = new Ride({
+                driverID: entryData.driverID,
+                passengerID: entryData.passengerID,
+                vehicleID: entryData.vehicleInfo._id,
+                duration: duration,
+                fare: total,
+                distance: dist,
+                source: pickUpPoint,
+                destination: currentLocation
+            });
+            console.log(ride);
+            //res.status(200).send({ride});
+
+            //let rideEntry = ride.save();
+            let removedEntry = DriverPool.findOneAndDelete(filter);
+
+            let info = await Promise.all([removedEntry])
+            res.status(200).send({ride});
+        } 
+        else throw new Error("This call was wrongfully made"); 
+    } catch (error) {
+        res.status(500).send({message: error.message});
+    }
+}
+
+//driverSearchWithDist
+exports.lookforNearestDriver = async(req, res) => {
     
+    try {
+        let passengerID = req.data._id;
+        let pickUpPoint = arrayParse(req.body.pickUpPoint);
+        let dropOutPoint = arrayParse(req.body.dropOutPoint);
+        //console.log(pickUpPoint, dropOutPoint, typeof(pickUpPoint), typeof(dropOutPoint));
+
+        let entry = await DriverPool.findOne({passengerID: passengerID});
+        if(entry && entry.driverID !== undefined) {
+            console.log("exists");
+            let driverLocation = entry.vehicleInfo.location.coordinates;
+            let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
+                
+            let driverInfo = pretifyDriverInfo(entry);
+            return res.status(200).send({"message": "Driver Matched", "distance": dist, driverInfo});
+        }
+        else if(entry && entry.status === DENIED) {
+            console.log("should i delete now?");
+            let removedData = await DriverPool.findOneAndDelete({passengerID: passengerID});
+            return res.status(200).send({message: "driver denied the ride", status: data.status, removedData});
+        }
+        else {
+            let drivers = await getNearestDriver(pickUpPoint[0], pickUpPoint[1], 5000);
+            if(drivers.length > 0) {
+                let driverID = drivers[0].driverID;
+                let driverLocation = drivers[0].vehicleLocation.coordinates;
+                let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
+                console.log(dist);
+
+                entryData = await matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint);
+                
+                if(entryData && Object.keys(entryData).length) {
+                    let driverInfo = pretifyDriverInfo(entryData);
+                    res.status(200).send({"message": "Driver Matched", "distance": dist, driverInfo});
+                } 
+                else throw new Error("couldn't update entry");
+            } else {
+                //if(n%2) res.status(200).send({message: "no preferable driver found"});
+                console.log("custom match");
+                let driverID = mongoose.Types.ObjectId("607478178c29c1408cfad295");
+                
+                let getDriverData = Driver.findById(driverID);
+                let getPassengerData = Passenger.findById(passengerID);
+                let getVehicleData = Vehicle.findOne({driverID: driverID});
+
+                let data = await Promise.all([getDriverData, getPassengerData, getVehicleData]);
+                let driverInfo = data[0];
+                let vehicleInfo = data[2];
+                let vehicleLocation = data[2].location;
+                let passengerInfo = {
+                    passengerData: data[1],
+                    pickUpPoint: pickUpPoint,
+                    dropOutPoint: dropOutPoint
+                }
+                
+                let entry = new DriverPool({
+                    driverID: driverID,
+                    passengerID: passengerID,
+                    driverInfo: driverInfo,
+                    passengerInfo: passengerInfo,
+                    vehicleInfo: vehicleInfo,
+                    vehicleLocation: vehicleLocation,
+                    status: MATCHED
+                });
+                
+                let entryInfo = await entry.save();
+                driverInfo = pretifyDriverInfo(entryInfo);
+                
+                let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], vehicleLocation.coordinates[1], vehicleLocation.coordinates[0]);
+                return res.status(200).send({"message": "Driver Matched", "distance": dist, driverInfo});
+            }
+        }
+        
+    } catch (error) {
+        res.status(200).send({message: error});
+    }
 }
 
 //acceptDriver via post req
-exports.acceptDriver = (req, res) => {
-    if(req.body.driverID && req.body.pickUpPoint) {
+exports.acceptDriver = async(req, res) => {
+    try {
         const passengerID = req.data._id;
         const driverID = req.body.driverID;
         
-        let pickUpPoint = null;
-        try {
-            console.log("JSON parsing");
-            pickUpPoint = JSON.parse(req.body.pickUpPoint);
-        }
-        catch(err) {
-            console.log("err... so no parsing");
-            pickUpPoint = req.body.pickUpPoint;
-        }
+        let pickUpPoint = arrayParse(req.body.pickUpPoint);
         console.log(passengerID, driverID, req.body.pickUpPoint);
-
-        Passenger.findById(passengerID)
-        .then(passengerData => {
-            let passengerInfo = {
-                passengerData: passengerData,
-                pickUpPoint: pickUpPoint 
-            }
-
-            const filter = {driverID : driverID};
-            const updateInfo = {passengerInfo: passengerInfo};
-            //console.log(updateInfo);
-
-            DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true })
-            .then(data => {
-                console.log(data);
-                res.status(200).send(data);
-            })
-            .catch(err => {
-                console.log(err);
-                res.status(500).send(err);
-            });
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(500).send(err);
-        });
-    }
-    else {
-        res.status(400).send({message: "empty body parameter"});
+        
+        entryData = await matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint);
+        if(entryData.passengerInfo) res.status(200).send({"message": "Driver Matched", entryData});
+        else throw new Error("couldn't update entry");
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({message: error});
     }
 }
 
 //show pool
-exports.showPool = (req, res) => {
-    DriverPool.find({})
-    .then(data => {
-        d = [];
-        data.forEach(item => {
-            obj = {
-                'driverID': item.driverID, 
-                'driverName': item.driverInfo.name,
-                'vehicle': item.vehicleInfo.model,
-                'location': item.vehicleLocation.coordinates
-            };
-            if(item.passengerInfo) obj['passengerInfo'] = item.passengerInfo;
-            d.push(obj);
-        })
-        d.push({total: data.length});
-        console.log(d);
-        res.status(200).send(d);
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).send(err);
-    })
+exports.showPool = async(req, res) => {
+    function pretify(item) {
+        //console.log(item);
+        try {
+            let obj = {};
+            if(item.driverID) {
+                obj['driverID'] = item.driverID;
+                obj['driverName'] = item.driverInfo.name;
+                obj['vehicle'] = item.vehicleInfo.model;
+                obj['vehicleLocation'] = item.vehicleLocation.coordinates;
+            }
+            if(item.passengerID) {
+                obj['passengerID'] = item.passengerID;
+                obj['passengerName'] = item.passengerInfo.passengerData.name;
+                obj['pickUpPoint'] = item.passengerInfo.pickUpPoint;
+                obj['dropOutPoint'] = item.passengerInfo.dropOutPoint;
+            }
+            obj['status'] = item.status;
+            return obj;
+        } catch (error) {
+            console.log("oops", error);
+            return "oops";
+        }
+    }
+
+    try {
+        let data = await DriverPool.find({});
+        let pool = data.map(pretify);
+        res.status(200).send({pool, 'total': pool.length});
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    }
 }
 
 //deletePool
@@ -323,44 +419,4 @@ exports.deletePool = (req, res) => {
         console.log(err);
         res.status(500).send(err);
     });
-}
-
-//passenger assign
-function passengerAssign(driverID) {
-    let tokens = ["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTAiLCJpYXQiOjE2MjI1NjQ3NDZ9.JZAM2JfO-QuVD5qbL0wQ7ptsifX3KQEe0kzsWQYo9bA",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTIiLCJpYXQiOjE2MjI1NjUxMjZ9.S_pl-rQ-lxw6Dc9QM6B4jW6WUGhHdZYGxjd-E4Scsa4",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTciLCJpYXQiOjE2MjI1NjUxNzB9.Eq9h22EUefCVY9eQSIYI1S0c_VvA3ywW7oSGmviAjyk",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxODhjMjljMTQwOGNmYWQyOTkiLCJpYXQiOjE2MjI1NjUyMTB9.BrdCkVeT1cdFd1VhrgD7IwKxHDEpkkfIswH2trXcdiE",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxODhjMjljMTQwOGNmYWQyYTEiLCJpYXQiOjE2MjI1NjUyNTd9.697B5W-LF-5su6jV5vvOdQkOj4WMWuGLWFpJ5CnjBug",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxODhjMjljMTQwOGNmYWQyYTUiLCJpYXQiOjE2MjI1NjUyOTJ9.UulbXYNHCxt7u0O7Scj48umJmquWXq7dPdGEhcI-F7k"
-    ];
-
-    let token = tokens[Math.floor((Math.random() * tokens.length))];
-
-    let lat = Math.random() * (23.7 - 23.4) + 23.4;
-    let lon = Math.random() * (90.6 - 90.4) + 90.4;
-    let pickUpPoint = [lat, lon];
-
-    let header_data = {
-        'auth-token': token
-    };
-
-    let postBody = {
-        driverID,
-        pickUpPoint
-    };
-
-    console.log(token);
-    console.log(postBody);
-
-    //let address = 'https://take-me-backend.herokuapp.com';
-    let address = "http://localhost:3000";
-    axios.post(address+'/api/passenger/acceptDriver', postBody, {headers: header_data})
-        .then( data => {
-            console.log("success\n", data.data);
-        })
-        .catch(err => {
-            console.log(err.message);
-        });
-
 }

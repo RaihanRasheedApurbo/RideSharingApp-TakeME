@@ -131,6 +131,38 @@ You receive
 
 ## Vehicle Info  
 
+**API** ***GET*** `/api/owner/vehicle/id/{id}/status` where `{id}` should be replaced by `vehicleID` of that vehicle  
+I receive  
+`{'auth-token': token}` inside **req.headers**  
+you recieve  
+
+```javascript
+{
+    "vehicleInfo": <object>,
+    "driverInfo": <object>,
+    "status": <object>,
+    "passengerInfo": <object>
+}
+```  
+
+`status` will be `undefined` in case of driver being inactive  
+`passengerInfo` will be `undefined` in case of driver being in searching state  
+
+**API** ***GET*** `/api/owner/vehicle/id/{id}/rideHistory` where `{id}` should be replaced by `vehicleID` of that vehicle  
+I receive  
+`{'auth-token': token}` inside **req.headers**  
+you recieve  
+
+```javascript
+[
+    Array
+]
+```  
+
+Array of Ride History  
+
+The below one will be deprecated laterwards
+
 **API** ***GET*** `/api/owner/vehicle/id/{id}` where `{id}` should be replaced by `vehicleID` of that vehicle  
 I receive  
 `{'auth-token': token}` inside **req.headers**  
@@ -284,16 +316,162 @@ A plain object without `passengerInfo` field
 }
 ```  
 
-Now this match was ***manually*** done by calling this api  
-**API** ***POST*** `/api/passenger/acceptDriver`  
-I recieve
+## Cancel Search  
+
+Driver can cancel search  
+**API** ***GET*** `/api/driver/stopSearch`  
+I receive  
+`{'auth-token': token}` inside **req.headers**  
+
+You recieve  
 
 ```javascript
 {
-    "driverID" : "607478178c29c1408cfad295",
-    "pickUpPoint": [23.665, 90.445]
+    "message": `DriverID 607478178c29c1408cfad295 has been removed from pool`
 }
 ```  
+
+## Cancel Match
+
+Driver can cancel matching  
+**API** ***POST*** `/api/driver/cancelMatch`  
+
+I receive  
+`{'auth-token': token}` inside **req.headers**  
+
+```javascript
+{
+    "entity": "driver"
+}
+```  
+
+You recieve  
+
+```javascript
+{
+    "message": "you cancelled the ride",
+    "entryData": <Object>
+}
+```  
+
+Passenger can cancel search  
+**API** ***POST*** `/api/passenger/cancelMatch`  
+
+I receive  
+`{'auth-token': token}` inside **req.headers**  
+
+```javascript
+{
+    "entity": "passenger"
+}
+```  
+
+You recieve  
+
+```javascript
+{
+    "message": "you cancelled the ride",
+    "entryData": <Object>
+}
+```  
+
+Driver can start ride  
+**API** ***POST*** `/api/driver/startRide  
+
+I receive  
+`{'auth-token': token}` inside **req.headers**  
+
+You recieve  
+
+```javascript
+{
+    "message": "you started the ride",
+    "entryData": <Object>
+}
+```  
+
+## End Ride  
+
+Driver can end ride  
+**API** ***POST*** `/api/driver/endRide  
+
+I receive  
+`{'auth-token': token}` inside **req.headers**  
+
+```javascript
+{
+    "entity": "driver",
+    "location": [23.8363434, 90.4029433]
+}
+```
+
+`location` is where they ended the ride
+
+You receive  
+
+```javascript
+{
+    "_id": "60c6afde566feb2ba4fcd39a",
+    "driverID": "607478178c29c1408cfad295",
+    "passengerID": "607478178c29c1408cfad290",
+    "vehicleID": "6074779be70efe2e24c95ce5",
+    "duration": 94.235,
+    "fare": 103.25746159323133,
+    "distance": 10325.746159323133,
+    "source": [
+        23.7463434,
+        90.3779433
+    ],
+    "destination": [
+        23.8363434,
+        90.4029433
+    ],
+    "time": "2021-06-14T01:24:46.790Z"
+}
+```  
+
+`duration` is in seconds and  
+`distance` is in meters  
+`time` is in GMT+0 (mongo stores it in that way)
+
+Passenger can end ride  
+**API** ***POST*** `/api/passenger/endRide  
+
+I receive  
+`{'auth-token': token}` inside **req.headers**  
+
+```javascript
+{
+    "entity": "passenger",
+    "location": [23.8363434, 90.4029433]
+}
+```
+
+You receive just like the previous one  
+
+## Driver Location Update
+
+Driver can update Location  
+**API** ***POST*** `/api/driver/vehicle/location`  
+
+I receive  
+`{'auth-token': token}` inside **req.headers**  
+
+```javascript
+{
+    "location": [23.8363434, 90.4029433]
+}
+```
+
+you receive  
+
+```javascript
+{
+    <vehicleInfo>
+}
+```
+
+## Sample Credentials
 
 A sample driver credential
 
@@ -304,7 +482,7 @@ A sample driver credential
 }
 ```  
 
-A sample passenger credential(above mentioned passenger)  
+A sample passenger credential  
 
 ```javascript
 {
@@ -362,3 +540,12 @@ you receive
 
 ***These are GET requests***  
 to get all the data  
+
+## Some location  
+
+Gabtoli 23.784571240550992, 90.34350787202551  
+badda 23.779858698691537, 90.42727862832386  
+uttara 23.875803748885694, 90.37990008557794  
+jatrabari 23.712136340035364, 90.42487536699855  
+lat 23.72 -- 23.87  
+lon 90.345 -- 90.426

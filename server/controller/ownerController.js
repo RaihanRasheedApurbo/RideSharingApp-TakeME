@@ -2,12 +2,9 @@ const Owner = require('../model/owner');
 const Driver = require('../model/driver');
 const Vehicle = require('../model/vehicle');
 const Ride = require('../model/ride');
+const DriverPool = require('../model/driverPool');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-
-const driverController = require('../controller/driverController');
-const vehicleController = require('./vehicleController');
-const rideController = require('./rideController'); 
 
 const secret = process.env.TOKEN_SECRET || "TakeMeSecret";
 
@@ -164,6 +161,44 @@ exports.showVehicleInfo = (req, res) => {
         //console.log(err);
         res.status(500).send({ message: err.message});
     });
+}
+
+exports.showVehicleStatus = async(req, res) => {
+    try {
+        const ownerID = req.data._id;
+        const vehicleID = req.params.id;
+
+        let filter = {_id: vehicleID, ownerID: ownerID};
+        vehicleInfo = await Vehicle.findOne(filter);
+
+        let driverID = vehicleInfo.driverID;
+        let getDriverInfo = Driver.findById(driverID);
+        let getPoolStatus = DriverPool.findOne({driverID: driverID});
+        let info = await Promise.all([getDriverInfo, getPoolStatus]);
+
+        let driverInfo = info[0];
+        let poolStatus = info[1];
+        let vehicleLocation = driverInfo.location.coordinates;
+
+        let passengerInfo = undefined;
+        let status = undefined;
+        if(poolStatus && Object.keys(poolStatus).length) {
+            let obj = {};
+            
+            if(poolStatus.passengerID) {
+                obj['passengerID'] = poolStatus.passengerID;
+                obj['passengerName'] = poolStatus.passengerInfo.passengerData.name;
+                obj['pickUpPoint'] = poolStatus.passengerInfo.pickUpPoint;
+                obj['dropOutPoint'] = poolStatus.passengerInfo.dropOutPoint;
+            }
+            status = poolStatus.status;
+            passsengerInfo = obj;
+        }
+        res.status(200).send({vehicleInfo, driverInfo, status, passengerInfo});
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({message: error.message, error});
+    }
 }
 
 //vehicleUpdate
