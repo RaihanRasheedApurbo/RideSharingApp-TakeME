@@ -178,23 +178,23 @@ exports.showVehicleStatus = async(req, res) => {
 
         let driverInfo = info[0];
         let poolStatus = info[1];
-        let vehicleLocation = driverInfo.location.coordinates;
+        let vehicleLocation = vehicleInfo.location.coordinates;
 
         let passengerInfo = undefined;
         let status = undefined;
         if(poolStatus && Object.keys(poolStatus).length) {
-            let obj = {};
-            
-            if(poolStatus.passengerID) {
-                obj['passengerID'] = poolStatus.passengerID;
-                obj['passengerName'] = poolStatus.passengerInfo.passengerData.name;
-                obj['pickUpPoint'] = poolStatus.passengerInfo.pickUpPoint;
-                obj['dropOutPoint'] = poolStatus.passengerInfo.dropOutPoint;
-            }
             status = poolStatus.status;
-            passsengerInfo = obj;
+            if(poolStatus.passengerID) {
+                passengerInfo = {
+                    "passengerID": poolStatus.passengerID,
+                    "passengerName": poolStatus.passengerInfo.passengerData.name,
+                    "pickUpPoint": poolStatus.passengerInfo.pickUpPoint,
+                    "dropOutPoint": poolStatus.passengerInfo.dropOutPoint    
+                }
+            }
         }
-        res.status(200).send({vehicleInfo, driverInfo, status, passengerInfo});
+        console.log(passengerInfo);
+        res.status(200).send({vehicleInfo, vehicleLocation, driverInfo, status, passengerInfo});
     } catch (error) {
         console.log(error);
         res.status(500).send({message: error.message, error});
