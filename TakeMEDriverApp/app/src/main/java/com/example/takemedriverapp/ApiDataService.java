@@ -170,6 +170,12 @@ public class ApiDataService {
      *
      *          System.out.println("passengerData: " + passengerData);
      *          System.out.println("pickUpPoint: " + lat + " , " + lon);
+     *
+     *          double destLat = Double.parseDouble(dropOutPoint.getString(0));
+     *          double desLon = Double.parseDouble(dropOutPoint.getString(1));
+     *
+     *          System.out.println("passengerData: " + passengerData);
+     *          System.out.println("pickUpPoint: " + destLat + " , " + desLon);
      *      } else {
      *          message = responseData.get("message");
      *          //first time or no match so nothing I guess
@@ -237,15 +243,12 @@ public class ApiDataService {
         VolleyRequestQueue.getInstance(context).addToRequestQueue(stringRequest);
     }
 
-
+    //New codes from here and added a comment before search passenger to get the destination coordinates
     /**
-     * A function that matches a pseudo random passenger to the given driverID and removes the driver from the pool
-     * This function provides the simulation of matching a passenger with the given driver
-     * call this function after a driver has made a search request
-     *
-     * @param driverID String driverID
+     * A function to cancel matched passenger
+     * @param token String the token retrieved from login
      * @param volleyResponseListener Interface
-     * I don't think the implementation of this onResponse is necessary ¯\_(ツ)_/¯
+     * this method should be implemented following the given sample
      *
      * <pre>
      * {@code
@@ -258,38 +261,16 @@ public class ApiDataService {
      * }</pre>
      *
      */
-    public void customMatching(String driverID, VolleyResponseListener volleyResponseListener) {
-        // Request a string response from the provided URL.
-        String url = BASE_URL + "/api/passenger/acceptDriver";
-
-        String[] tokens = {"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTAiLCJpYXQiOjE2MjI1NjQ3NDZ9.JZAM2JfO-QuVD5qbL0wQ7ptsifX3KQEe0kzsWQYo9bA",
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTIiLCJpYXQiOjE2MjI1NjUxMjZ9.S_pl-rQ-lxw6Dc9QM6B4jW6WUGhHdZYGxjd-E4Scsa4",
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTciLCJpYXQiOjE2MjI1NjUxNzB9.Eq9h22EUefCVY9eQSIYI1S0c_VvA3ywW7oSGmviAjyk",
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxODhjMjljMTQwOGNmYWQyOTkiLCJpYXQiOjE2MjI1NjUyMTB9.BrdCkVeT1cdFd1VhrgD7IwKxHDEpkkfIswH2trXcdiE",
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxODhjMjljMTQwOGNmYWQyYTEiLCJpYXQiOjE2MjI1NjUyNTd9.697B5W-LF-5su6jV5vvOdQkOj4WMWuGLWFpJ5CnjBug",
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxODhjMjljMTQwOGNmYWQyYTUiLCJpYXQiOjE2MjI1NjUyOTJ9.UulbXYNHCxt7u0O7Scj48umJmquWXq7dPdGEhcI-F7k"};
-
-        Random random = new Random();
-        String token = tokens[random.nextInt(tokens.length)];
-
-        double lat = 23 + (random.nextInt(1000000)%75000 + 40000)/100000.0;
-        double lon = 90 + (random.nextInt(1000000)%75000 + 40000)/100000.0;
-        double[] pickUpPoint = {lat, lon};
+    public void cancelMatch(String token, VolleyResponseListener volleyResponseListener) {
+        String url = BASE_URL + "/api/driver/cancelMatch";
 
         Map<String,String> params = new HashMap<>();
-        params.put("driverID", driverID);
-        try {
-            JSONArray p = new JSONArray(Arrays.toString(pickUpPoint));
-            params.put("pickUpPoint", p.toString());
-            //System.out.println(p);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        params.put("entity", "driver");
+        //System.out.println(new JSONObject(params).toString());
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, new JSONObject(params),
                 volleyResponseListener::onResponse,
-                volleyResponseListener::onError) {
+                volleyResponseListener::onError){
             @Override
             public Map<String, String> getHeaders() {
                 return makeHeaders("auth-token", token);
@@ -299,4 +280,132 @@ public class ApiDataService {
         VolleyRequestQueue.getInstance(context).addToRequestQueue(request);
     }
 
+    /**
+     * A function to start ride with matched passenger
+     * @param token String the token retrieved from login
+     * @param volleyResponseListener Interface
+     * this method should be implemented following the given sample
+     *
+     * <pre>
+     * {@code
+     *  try {
+     *      responseData = new JSONObject(responseObject.toString());
+     *      System.out.println(responseData);
+     *   } catch (JSONException e) {
+     *      e.printStackTrace();
+     *   }
+     * }</pre>
+     *
+     */
+    public void startRide(String token, VolleyResponseListener volleyResponseListener) {
+        String url = BASE_URL + "/api/driver/startRide";
+
+        Map<String,String> params = new HashMap<>();
+        params.put("entity", "driver");
+        //System.out.println(new JSONObject(params).toString());
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, new JSONObject(params),
+                volleyResponseListener::onResponse,
+                volleyResponseListener::onError){
+            @Override
+            public Map<String, String> getHeaders() {
+                return makeHeaders("auth-token", token);
+            }
+        };
+
+        VolleyRequestQueue.getInstance(context).addToRequestQueue(request);
+    }
+
+    /**
+     * A function to end ride with the riding passenger
+     * @param token String the token retrieved from login
+     * @param lat Double latitude of end ride point
+     * @param lon Double longitude of end ride point
+     * @param volleyResponseListener Interface
+     * this method should be implemented following the given sample
+     *
+     * <pre>
+     * {@code
+     *  try {
+     *      responseData = new JSONObject(responseObject.toString());
+     *      System.out.println(responseData);
+     *   } catch (JSONException e) {
+     *      e.printStackTrace();
+     *   }
+     * }</pre>
+     *
+     */
+    public void endRide(String token, double lat, double lon, VolleyResponseListener volleyResponseListener) {
+        String url = BASE_URL + "/api/driver/endRide";
+        double[] location = {lat, lon};
+        Map<String,String> params = new HashMap<>();
+        params.put("entity", "driver");
+        try {
+            System.out.println(Arrays.toString(location));
+            JSONArray p = new JSONArray(Arrays.toString(location));
+            System.out.println(p);
+            params.put("location", p.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        //System.out.println(new JSONObject(params).toString());
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, new JSONObject(params),
+                volleyResponseListener::onResponse,
+                volleyResponseListener::onError){
+            @Override
+            public Map<String, String> getHeaders() {
+                return makeHeaders("auth-token", token);
+            }
+        };
+
+        VolleyRequestQueue.getInstance(context).addToRequestQueue(request);
+    }
+
+    /**
+     * A function to update driver's own location
+     * @param token String the token retrieved from login
+     * @param lat Double latitude
+     * @param lon Double longitude
+     * @param volleyResponseListener Interface
+     * this method should be implemented following the given sample
+     *
+     * <pre>
+     * {@code
+     *  try {
+     *      responseData = new JSONObject(responseObject.toString());
+     *      System.out.println(responseData);
+     *   } catch (JSONException e) {
+     *      e.printStackTrace();
+     *   }
+     * }</pre>
+     *
+     */
+    public void updateLocation(String token, double lat, double lon, VolleyResponseListener volleyResponseListener) {
+        String url = BASE_URL + "/api/driver/vehicle/location";
+
+        double[] location = {lat, lon};
+
+        Map<String,String> params = new HashMap<>();
+        try {
+            System.out.println(Arrays.toString(location));
+            JSONArray p = new JSONArray(Arrays.toString(location));
+            System.out.println(p);
+            params.put("location", p.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        //System.out.println(new JSONObject(params).toString());
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, new JSONObject(params),
+                volleyResponseListener::onResponse,
+                volleyResponseListener::onError){
+            @Override
+            public Map<String, String> getHeaders() {
+                return makeHeaders("auth-token", token);
+            }
+        };
+
+        VolleyRequestQueue.getInstance(context).addToRequestQueue(request);
+    }
 }
