@@ -57,6 +57,75 @@
         app:layout_constraintVertical_bias="0.0" />
 
 
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <FrameLayout
+            android:id="@+id/bottomsheet1"
+            android:layout_width="match_parent"
+            android:layout_height="265dp"
+            android:layout_alignParentBottom="true"
+
+            android:background="@color/black"
+            mapbox:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+            <RelativeLayout
+                android:id="@+id/bottom_relative_layout1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/imageView_bottom_bar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="13dp"
+                    mapbox:srcCompat="@android:drawable/button_onoff_indicator_off" />
+
+                <TextView
+                    android:id="@+id/bottom_sheet_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="170dp"
+                    android:layout_centerInParent="true"
+                    android:text="Welcome"
+                    android:textColor="@color/white"
+                    android:textSize="16dp" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/bottom_start_button"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/bottom_sheet_text"
+                    android:background="@drawable/bg_waiting"
+                    android:text="Start"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginBottom="10dp"
+                    android:visibility="invisible"
+                    android:enabled="false"/>
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/bottom_cancel_button"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/bottom_sheet_text"
+                    android:layout_marginLeft="37dp"
+                    android:layout_toRightOf="@+id/bottom_start_button"
+                    android:background="@drawable/bg_waiting"
+                    android:text="Cancel"
+                    android:layout_marginBottom="10dp"
+                    android:visibility="invisible"
+                    android:enabled="false"/>
+
+
+
+            </RelativeLayout>
+
+
+        </FrameLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
 
 
 
