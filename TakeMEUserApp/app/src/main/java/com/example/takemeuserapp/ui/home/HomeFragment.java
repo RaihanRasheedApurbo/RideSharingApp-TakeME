@@ -160,6 +160,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             public void onPlaceSelected(@NonNull Place place) {
                 // TODO: Get info about the selected place.
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getLatLng());
+                updatePassengerDestination(place.getLatLng().longitude,place.getLatLng().latitude);
                 autocompleteFragment.getView().setVisibility(View.GONE);
 
             }
@@ -245,6 +246,39 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
             }
         });
+    }
+
+    public void updatePassengerDestination(double lon, double lat)
+    {
+
+        //Point destinationPoint = Point.fromLngLat(90.37609,23.83287);
+
+
+
+
+        Point destinationPoint = Point.fromLngLat(lon,lat);
+
+        if(destinationPoint!=null)
+        {
+            Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                    locationComponent.getLastKnownLocation().getLatitude());
+            GeoJsonSource source = mapboxMap.getStyle().getSourceAs("destination-source-id");
+            if (source != null) {
+                source.setGeoJson(Feature.fromGeometry(destinationPoint));
+            }
+
+            getRoute(originPoint, destinationPoint);
+
+//            startButton.setText("Start Navigation");
+//            startButton.setEnabled(true);
+//            startButton.setBackgroundResource(R.color.mapboxBlue);
+//
+//            userState = user.PICKING;
+
+
+        }
+
+
     }
 
 
