@@ -40,6 +40,7 @@ import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Feature;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
@@ -115,6 +116,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     // Variables needed to listen to location updates
     private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
     private MapboxNavigation mapboxNavigation;
+    private Location prevLocation;
 
 
     // Fahad's Variables
@@ -437,14 +439,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         System.out.println("lat lang is not 0");
         if(destinationPoint!=null)
         {
-            Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
-                    locationComponent.getLastKnownLocation().getLatitude());
-            GeoJsonSource source = mapboxMap.getStyle().getSourceAs("destination-source-id");
-            if (source != null) {
-                source.setGeoJson(Feature.fromGeometry(destinationPoint));
-            }
+//            Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+//                    locationComponent.getLastKnownLocation().getLatitude());
+//            GeoJsonSource source = mapboxMap.getStyle().getSourceAs("destination-source-id");
+//            if (source != null) {
+//                source.setGeoJson(Feature.fromGeometry(destinationPoint));
+//            }
             System.out.println("calling getRoute from updateNavigationPath");
-            getRoute(originPoint, destinationPoint);
+            getRoute(Point.fromLngLat(prevLocation.getLongitude(),prevLocation.getLatitude()), destinationPoint);
 
 //            startButton.setText("Start Navigation");
 //            startButton.setEnabled(true);
@@ -644,18 +646,47 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 //                Toast.makeText(fragment.getActivity(),
 //                        String.valueOf(result.getLastLocation().getLatitude()) + " " + String.valueOf(result.getLastLocation().getLongitude()),
 //                        Toast.LENGTH_SHORT).show();
-                System.out.println("kill meh");
-
+//                System.out.println("kill meh");
+                Location prevLocation = fragment.prevLocation;
                 // Pass the new location to the Maps SDK's LocationComponent
                 if (fragment.mapboxMap != null && result.getLastLocation() != null) {
+//                    System.out.println("inside forceLocationupdate");
                     fragment.mapboxMap.getLocationComponent().forceLocationUpdate(result.getLastLocation());
-                }
-                if(fragment.driverState == DriverState.PICKING || fragment.driverState == DriverState.RIDING)
-                {
-                    System.out.println("picking or riding");
 
-//                    fragment.updateNavigationPath();
                 }
+                if(prevLocation != null)
+                {
+                    boolean notNear = Math.abs(prevLocation.getLatitude()-location.getLatitude()) > 0.001 || Math.abs(prevLocation.getLongitude()-location.getLongitude()) > 0.001;
+//                    System.out.println("calculated notNear: notNear "+notNear);
+
+                    if(notNear)
+                    {
+                        fragment.prevLocation = location;
+                        if(fragment.driverState == DriverState.PICKING || fragment.driverState == DriverState.RIDING)
+                        {
+//                            System.out.println("picking or riding");
+//                            System.out.println("need to redraw");
+
+                             fragment.updateNavigationPath();
+//                            CameraPosition position = new CameraPosition.Builder()
+//                                    .target(new LatLng(location.getLatitude(), location.getLongitude()))
+//                                    .zoom(10)
+//                                    .tilt(20)
+//                                    .build();
+//                            fragment.mapboxMap.setCameraPosition(position);
+//                            System.out.println("cameraposition has been set");
+                            fragment.locationComponent.setCameraMode(CameraMode.TRACKING);
+                            fragment.locationComponent.setRenderMode(RenderMode.COMPASS);
+
+                        }
+                    }
+                }
+                else
+                {
+                    fragment.prevLocation = location;
+                }
+
+
 
             }
         }
