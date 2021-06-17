@@ -1,9 +1,11 @@
 package com.example.takemedriverapp.ui.home;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,6 +29,11 @@ import com.example.takemedriverapp.ApiDataService;
 import com.example.takemedriverapp.MainActivity2;
 import com.example.takemedriverapp.R;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineCallback;
+import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.android.core.location.LocationEngineRequest;
+import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -36,6 +43,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -46,20 +54,26 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.geojson.Point;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static android.os.Looper.getMainLooper;
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 
+import okhttp3.EventListener;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -80,6 +94,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     private NavigationMapRoute navigationMapRoute;
     // variables needed to initialize navigation
     private Button startButton;
+
+
     // boiler plate code of mapbox ended ... Apurbo's code starts from below...
     // state management
     enum DriverState {
@@ -92,6 +108,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
     static View root = null;
     // new code ended
+    // Variables needed to add the location engine
+    private LocationEngine locationEngine;
+    private long DEFAULT_INTERVAL_IN_MILLISECONDS = 10000L;
+    private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS;
+    // Variables needed to listen to location updates
+    private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
+    private MapboxNavigation mapboxNavigation;
 
 
     // Fahad's Variables
@@ -102,7 +125,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     TextView bottom_text;
     Button bottom_start, bottom_cancel;
 
-    double driver_lat, driver_long, passenger_lat, passenger_long;
+    double driver_lat, driver_long;
+    double passenger_lat = 0;
+    double passenger_long = 0;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -210,13 +235,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     public void onClick(View v) {
                         if(driverState==DriverState.PICKING)
                         {
-                            boolean simulateRoute = true;
+                            boolean simulateRoute = false;
                             NavigationLauncherOptions options = NavigationLauncherOptions.builder()
                                     .directionsRoute(currentRoute)
                                     .shouldSimulateRoute(simulateRoute)
                                     .build();
                             // Call this method with Context from within an Activity
+
                             NavigationLauncher.startNavigation(getActivity(), options);
+
                         }
                         else if(driverState==DriverState.RESTING)
                         {
@@ -392,6 +419,45 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
     }
 
+    public void updateNavigationPath()
+    {
+
+        //Point destinationPoint = Point.fromLngLat(90.37609,23.83287);
+        System.out.println("inside updateNavigationPath");
+        double lon=0,lat=0;
+        lon = passenger_long;
+        lat = passenger_lat;
+
+
+        if(lat==0 && lon == 0)
+        {
+            return;
+        }
+        Point destinationPoint = Point.fromLngLat(lon,lat);
+        System.out.println("lat lang is not 0");
+        if(destinationPoint!=null)
+        {
+            Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                    locationComponent.getLastKnownLocation().getLatitude());
+            GeoJsonSource source = mapboxMap.getStyle().getSourceAs("destination-source-id");
+            if (source != null) {
+                source.setGeoJson(Feature.fromGeometry(destinationPoint));
+            }
+            System.out.println("calling getRoute from updateNavigationPath");
+            getRoute(originPoint, destinationPoint);
+
+//            startButton.setText("Start Navigation");
+//            startButton.setEnabled(true);
+//            startButton.setBackgroundResource(R.color.mapboxBlue);
+//
+//            driverState = DriverState.PICKING;
+
+
+        }
+
+
+    }
+
 
     public void reset_passenger()
     {
@@ -468,6 +534,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     }
 
     private void getRoute(Point origin, Point destination) {
+        System.out.println("inside getRoute");
         NavigationRoute.builder(getActivity())
                 .accessToken(Mapbox.getAccessToken())
                 .origin(origin)
@@ -490,11 +557,23 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
                         // Draw the route on the map
                         if (navigationMapRoute != null) {
+//                            navigationMapRoute = null;
                             navigationMapRoute.removeRoute();
+//                            navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap, R.style.NavigationMapRoute);
                         } else {
+//                            navigationMapRoute = new NavigationMapRoute.Builder
                             navigationMapRoute = new NavigationMapRoute(null, mapView, mapboxMap, R.style.NavigationMapRoute);
+//                            .withMapboxNavigation(mapboxNavigation)
+//                                    .withVanishRouteLineEnabled(true)
+//                            navigationMapRoute.
                         }
                         navigationMapRoute.addRoute(currentRoute);
+//                        navigationMapRoute.addProgressChangeListener(new ProgressChangeListener() {
+//                            @Override
+//                            public void onProgressChange(Location location, RouteProgress routeProgress) {
+//
+//                            }
+//                        });
                     }
 
                     @Override
@@ -515,12 +594,87 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             locationComponent.setLocationComponentEnabled(true);
             // Set the component's camera mode
             locationComponent.setCameraMode(CameraMode.TRACKING);
+            locationComponent.setRenderMode(RenderMode.COMPASS);
+            initLocationEngine();
         } else {
             permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(getActivity());
         }
     }
 
+    @SuppressLint("MissingPermission")
+    private void initLocationEngine() {
+        locationEngine = LocationEngineProvider.getBestLocationEngine(getActivity());
+
+        LocationEngineRequest request = new LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
+                .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
+                .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME).build();
+
+        locationEngine.requestLocationUpdates(request, callback, getMainLooper());
+        locationEngine.getLastLocation(callback);
+    }
+
+    private static class MainActivityLocationCallback
+            implements LocationEngineCallback<LocationEngineResult> {
+
+        private final WeakReference<HomeFragment> fragmentWeakReference;
+
+        MainActivityLocationCallback(HomeFragment fragment) {
+            this.fragmentWeakReference = new WeakReference<>(fragment);
+        }
+
+        /**
+         * The LocationEngineCallback interface's method which fires when the device's location has changed.
+         *
+         * @param result the LocationEngineResult object which has the last known location within it.
+         */
+        @SuppressLint("StringFormatMatches")
+        @Override
+        public void onSuccess(LocationEngineResult result) {
+            HomeFragment fragment = fragmentWeakReference.get();
+
+            if (fragment != null) {
+                Location location = result.getLastLocation();
+
+                if (location == null) {
+                    return;
+                }
+
+                // Create a Toast which displays the new location's coordinates
+//                Toast.makeText(fragment.getActivity(),
+//                        String.valueOf(result.getLastLocation().getLatitude()) + " " + String.valueOf(result.getLastLocation().getLongitude()),
+//                        Toast.LENGTH_SHORT).show();
+                System.out.println("kill meh");
+
+                // Pass the new location to the Maps SDK's LocationComponent
+                if (fragment.mapboxMap != null && result.getLastLocation() != null) {
+                    fragment.mapboxMap.getLocationComponent().forceLocationUpdate(result.getLastLocation());
+                }
+                if(fragment.driverState == DriverState.PICKING || fragment.driverState == DriverState.RIDING)
+                {
+                    System.out.println("picking or riding");
+
+//                    fragment.updateNavigationPath();
+                }
+
+            }
+        }
+
+        /**
+         * The LocationEngineCallback interface's method which fires when the device's location can not be captured
+         *
+         * @param exception the exception message
+         */
+        @Override
+        public void onFailure(@NonNull Exception exception) {
+            Log.d("LocationChangeActivity", exception.getLocalizedMessage());
+            HomeFragment fragment = fragmentWeakReference.get();
+            if (fragment.getActivity() != null) {
+                Toast.makeText(fragment.getActivity(), exception.getLocalizedMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
