@@ -36,6 +36,7 @@ function pretifyDriverInfo(data) {
         driverID: data.driverID,
         driverName: data.driverInfo.name,
         driverRating: data.driverInfo.rating,
+        driverPhone: data.driverInfo.phone,
         vehicleName: data.vehicleInfo.model,
         vehicleType: data.vehicleInfo.type,
         vehicleLocation: data.vehicleInfo.location.coordinates
@@ -77,6 +78,82 @@ function getNearestDriver(lat, lon, maxDist) {
         }
     });
 }
+
+//find the driver with most rides in last 7 days
+async function getMostRideDriver(passengerID, pickUpPoint, dropOutPoint) {
+    let datainfo = await DriverPool.aggregate([
+        { 
+            $match: { 
+                status : SEARCHING 
+            } 
+        },
+        { 
+            $lookup: {
+                'from': Ride.collection.name,
+                'localField': 'driverID',
+                'foreignField': 'driverID',
+                'as': 'rides'
+            }
+        },
+        {
+            $project: {
+                "driverID": 1,
+                "driverInfo": 1,
+                "vehicleInfo": 1,
+                "vehicleLocation": 1,
+                "status": 1,
+                "rideCount": { "$size": "$rides" }
+            }
+        },
+        {   
+            $sort : { 
+                rideCount : 1, _id: 1 
+            } 
+        }
+    ]);
+    if(datainfo && datainfo.length > 0) {
+        let entryData = await matchPassenger(datainfo[0].driverID, passengerID, pickUpPoint, dropOutPoint);
+        return entryData;
+    }
+}
+
+//custom driver match(temporary for testing purpose)
+async function customDriverMatch(passengerID, pickUpPoint, dropOutPoint) {
+    //if(n%2) res.status(200).send({message: "no preferable driver found"});
+    console.log("custom match");
+    let driverID = mongoose.Types.ObjectId("607478178c29c1408cfad295");
+    
+    let getDriverData = Driver.findById(driverID);
+    let getPassengerData = Passenger.findById(passengerID);
+    let getVehicleData = Vehicle.findOne({driverID: driverID});
+
+    let data = await Promise.all([getDriverData, getPassengerData, getVehicleData]);
+    let driverInfo = data[0];
+    let vehicleInfo = data[2];
+    let vehicleLocation = data[2].location;
+    let passengerInfo = {
+        passengerData: data[1],
+        pickUpPoint: pickUpPoint,
+        dropOutPoint: dropOutPoint
+    }
+    
+    let entry = new DriverPool({
+        driverID: driverID,
+        passengerID: passengerID,
+        driverInfo: driverInfo,
+        passengerInfo: passengerInfo,
+        vehicleInfo: vehicleInfo,
+        vehicleLocation: vehicleLocation,
+        status: MATCHED
+    });
+    
+    let entryInfo = await entry.save();
+    driverInfo = pretifyDriverInfo(entryInfo);
+    
+    let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], vehicleLocation.coordinates[1], vehicleLocation.coordinates[0]);
+    return {"message": "Driver Matched", "distance": dist, driverInfo};
+}
+
 
 //passenger match with driver
 async function matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint) {
@@ -222,7 +299,7 @@ exports.startRide = async(req, res) => {
         }
         entryData = await DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true });    
         
-        if(entryData && Object.keys(entryData).length) res.send({message: "Ride started", entryData});
+        if(entryData && Object.keys(entryData).length) res.send({message: "Ride started", entryData, dropOutPoint: entryData.passengerInfo.dropOutPoint});
         else throw new Error("This call was wrongfully made");
     } catch (error) {
         res.status(500).send({message: error.message});
@@ -272,6 +349,79 @@ exports.endRide = async(req, res) => {
         else throw new Error("This call was wrongfully made"); 
     } catch (error) {
         res.status(500).send({message: error.message});
+    }
+}
+
+//lookForDriver
+exports.lookForDriver = async(req, res) => {
+    try {
+        let passengerID = req.data._id;
+        let requirement = req.body.requirement;
+        let pickUpPoint = arrayParse(req.body.pickUpPoint);
+        let dropOutPoint = arrayParse(req.body.dropOutPoint);
+        //console.log(pickUpPoint, dropOutPoint, typeof(pickUpPoint), typeof(dropOutPoint));
+
+        let entry = await DriverPool.findOne({passengerID: passengerID});
+        if(entry && entry.driverID !== undefined) {
+            console.log("exists");
+            let driverLocation = entry.vehicleInfo.location.coordinates;
+            let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
+                
+            let driverInfo = pretifyDriverInfo(entry);
+            return res.status(200).send({"message": "Driver Matched", "distance": dist, driverInfo});
+        }
+        else if(entry && entry.status === DENIED) {
+            console.log("should i delete now?");
+            let removedData = await DriverPool.findOneAndDelete({passengerID: passengerID});
+            return res.status(200).send({message: "driver denied the ride", status: removedData.status, removedData});
+        }
+        else {
+            if(requirement === 'nearest') {
+                console.log('hello');
+                let drivers = await getNearestDriver(pickUpPoint[0], pickUpPoint[1], 5000);
+                if(drivers.length > 0) {
+                    let driverID = drivers[0].driverID;
+                    let driverLocation = drivers[0].vehicleLocation.coordinates;
+                    let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
+                    console.log(dist);
+
+                    entryData = await matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint);
+                    
+                    if(entryData && Object.keys(entryData).length) {
+                        let driverInfo = pretifyDriverInfo(entryData);
+                        res.status(200).send({"message": "Driver Matched", "distance": dist, driverInfo});
+                    } 
+                    else throw new Error("couldn't update entry");
+                } else {
+                    //res.status(200).send({message: "no driver found"});
+                    let retBody = await customDriverMatch(passengerID, pickUpPoint, dropOutPoint);
+                    return res.status(200).send(retBody);
+                }
+            }
+            else if(requirement === 'most_ride') {
+                entryData = await getMostRideDriver(passengerID, pickUpPoint, dropOutPoint);
+                    
+                if(entryData && Object.keys(entryData).length) {
+                    //res.send(entryData);
+                    let driverInfo = pretifyDriverInfo(entryData);
+                    let driverLocation = entryData.vehicleInfo.location.coordinates;
+                    let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
+                    
+                    res.status(200).send({"message": "Driver Matched", "distance": dist, driverInfo});
+                } else {
+                    //res.status(200).send({message: "no driver found"});
+                    let retBody = await customDriverMatch(passengerID, pickUpPoint, dropOutPoint);
+                    return res.status(200).send(retBody);
+                }
+            }
+
+            else throw new Error("body parameter wrong");
+            
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({message: 'error occurred'});
     }
 }
 
