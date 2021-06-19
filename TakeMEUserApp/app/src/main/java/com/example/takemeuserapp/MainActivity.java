@@ -56,7 +56,6 @@ public class MainActivity extends AppCompatActivity {
 
         login();
 
-
         //********************************************************
 
 

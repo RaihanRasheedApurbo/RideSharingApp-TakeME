@@ -125,9 +125,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     int time_spent = 0;
     ProgressDialog progressDialog;
     TextView bottom_text;
-    Button bottom_start, bottom_cancel;
+    Button bottom_start, bottom_cancel, bottom_end_ride;
 
     double driver_lat, driver_long;
+    double curr_dest_lat, curr_dest_long;
     double passenger_lat = 0;
     double passenger_long = 0;
 
@@ -163,7 +164,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         bottom_text = root.findViewById(R.id.bottom_sheet_text);
         bottom_start = root.findViewById(R.id.bottom_start_button);
         bottom_cancel = root.findViewById(R.id.bottom_cancel_button);
-
+        bottom_end_ride = root.findViewById(R.id.bottom_end_ride_button);
 
         bottom_start.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -172,13 +173,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 driver_long = locationComponent.getLastKnownLocation().getLongitude();
 
                 double distance_now = calculateDistanceInMeter(driver_lat, driver_long, passenger_lat, passenger_long);
-                if(distance_now>500)
+                if(distance_now>25000)
                     Toast.makeText(getApplicationContext(),distance_now + " feets away",Toast.LENGTH_SHORT).show();
                 else
                 {
                     // fahad instead of creating a toast we need to call backend api and find passenger destination
                     // then change the ui so that start ride and cancel button vanishes, and we create a button called end ride between
                     // those vanished button. Then we have to change the map.... leave that to me... I will do that....
+                    bottom_text.setText("Destination: \nLat: " + curr_dest_lat + "\nLon: " + curr_dest_long);
+                    start_ride();
                     Toast.makeText(getApplicationContext(),"Ride Started",Toast.LENGTH_SHORT).show();
                 }
 
@@ -189,16 +192,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             @Override
             public void onClick(View v) {
 
-
                 DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which){
                             case DialogInterface.BUTTON_POSITIVE:
                                 //Yes button clicked // Reset Things
-//                                    reset_passenger();
+                                //reset_passenger();
                                 // we have to call backend here and update backend so that it knows ride has been canceld by driver
                                 // fahad call backend here..... to cancel the ride....
+
+                                cancel_ride();
                                 Intent intent = getActivity().getIntent();
                                 getActivity().finish();
                                 startActivity(intent);
@@ -215,15 +219,19 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
                         .setNegativeButton("No", dialogClickListener).show();
 
-
-
-
             }
         });
 
-
-
-
+        bottom_end_ride.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getApplicationContext(),"Ride Ended",Toast.LENGTH_SHORT).show();
+                end_ride();
+                reset_passenger();
+                bottom_end_ride.setVisibility(View.INVISIBLE);
+                bottom_end_ride.setEnabled(false);
+            }
+        });
         return root;
     }
 
@@ -301,7 +309,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 try
                 {
                     JSONObject responseData = new JSONObject(responseObject.toString());
-                    //System.out.println(responseData);
+                    System.out.println(responseData);
 
                     if(responseData.has("passengerInfo"))
                     {
@@ -309,10 +317,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
                         JSONObject passengerData = (JSONObject) passengerInfo.get("passengerData");
                         JSONArray pickUpPoint = (JSONArray) passengerInfo.get("pickUpPoint");
+                        JSONArray dropOutPoint = (JSONArray) passengerInfo.get("dropOutPoint");
 
                         double lat = Double.parseDouble(pickUpPoint.getString(0));
                         double lon = Double.parseDouble(pickUpPoint.getString(1));
 
+                        curr_dest_lat = Double.parseDouble(dropOutPoint.getString(0));
+                        curr_dest_long = Double.parseDouble(dropOutPoint.getString(1));
 
                         //System.out.println("passengerData: " + passengerData);
                         System.out.println(passengerData.get("name"));
@@ -322,7 +333,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                         update_bottom_slider(passengerData.get("name").toString(), passengerData.get("phone").toString());
                         update_marker_passenger(lon, lat);
 
-                        stop_searching();
+                        //stop_searching();
                         progressDialog.dismiss();
 
                     }
@@ -378,6 +389,107 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 }
             }
         });
+    }
+
+    public void cancel_ride()
+    {
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+
+        apiDataService.cancelMatch(MainActivity2.main_token, new ApiDataService.VolleyResponseListener() {
+
+            @Override
+            public void onError(Object message) {
+                System.out.println("Problem in cancel ride");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+
+                try {
+                    JSONObject responseData = new JSONObject(responseObject.toString());
+                    System.out.println("Ride Cancelled by driver");
+                    System.out.println(responseData);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+
+    }
+
+    public void start_ride()
+    {
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+
+        apiDataService.startRide(MainActivity2.main_token, new ApiDataService.VolleyResponseListener() {
+
+            @Override
+            public void onError(Object message) {
+                System.out.println("Problem in starting ride");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+
+                try {
+                    JSONObject responseData = new JSONObject(responseObject.toString());
+                    System.out.println("Ride Started by driver");
+                    System.out.println(responseData);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+
+        bottom_start.setVisibility(View.INVISIBLE);
+        bottom_start.setEnabled(false);
+
+        bottom_cancel.setVisibility(View.INVISIBLE);
+        bottom_cancel.setEnabled(false);
+
+        bottom_end_ride.setVisibility(View.VISIBLE);
+        bottom_end_ride.setEnabled(true);
+        bottom_end_ride.setText("End Ride");
+
+
+    }
+
+    public void end_ride()
+    {
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+        double end_lat = locationComponent.getLastKnownLocation().getLatitude();
+        double end_long = locationComponent.getLastKnownLocation().getLongitude();
+        apiDataService.endRide(MainActivity2.main_token, end_lat, end_long, new ApiDataService.VolleyResponseListener() {
+
+            @Override
+            public void onError(Object message) {
+                System.out.println("Problem in Ending ride");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+
+                try {
+                    JSONObject responseData = new JSONObject(responseObject.toString());
+                    System.out.println("Ride Ended");
+                    System.out.println(responseData);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+
+        bottom_start.setVisibility(View.INVISIBLE);
+        bottom_start.setEnabled(false);
+
+        bottom_cancel.setVisibility(View.INVISIBLE);
+        bottom_cancel.setEnabled(false);
+
+        bottom_end_ride.setVisibility(View.VISIBLE);
+        bottom_end_ride.setEnabled(true);
+        bottom_end_ride.setText("End Ride");
+
+
     }
 
     public void update_bottom_slider(String name, String phone)
