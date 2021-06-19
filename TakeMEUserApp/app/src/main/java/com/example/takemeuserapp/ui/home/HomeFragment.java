@@ -1,7 +1,9 @@
 package com.example.takemeuserapp.ui.home;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.graphics.BitmapFactory;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,6 +30,11 @@ import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.mapbox.android.core.location.LocationEngine;
+import com.mapbox.android.core.location.LocationEngineCallback;
+import com.mapbox.android.core.location.LocationEngineProvider;
+import com.mapbox.android.core.location.LocationEngineRequest;
+import com.mapbox.android.core.location.LocationEngineResult;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -38,6 +45,7 @@ import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
 import com.mapbox.mapboxsdk.location.modes.CameraMode;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -47,12 +55,14 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -61,6 +71,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.os.Looper.getMainLooper;
 import static com.mapbox.mapboxsdk.Mapbox.getApplicationContext;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
@@ -84,15 +95,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
     private Button startButton;
 
+    //variables needed for threading
 
+    private LocationEngine locationEngine;
+    private long DEFAULT_INTERVAL_IN_MILLISECONDS = 10000L;
+    private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS;
+    // Variables needed to listen to location updates
+    private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
+    private MapboxNavigation mapboxNavigation;
+    private Location prevLocation;
 
-    // Fahad's Variables
-    FrameLayout frameLayout;
-    BottomSheetBehavior bottomSheetBehavior;
-    //int time_spent = 0;
-    //ProgressDialog progressDialog;
-    TextView bottom_text;
-    Button bottom_start, bottom_cancel;
 
 
 
@@ -110,6 +122,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
     static View root = null;
     //Fahad's variable should start here....
+    // Fahad's Variables
+    FrameLayout frameLayout;
+    BottomSheetBehavior bottomSheetBehavior;
+    //int time_spent = 0;
+    //ProgressDialog progressDialog;
+    TextView bottom_text;
+    Button bottom_start, bottom_cancel;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -162,6 +181,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getLatLng());
                 updatePassengerDestination(place.getLatLng().longitude,place.getLatLng().latitude);
                 autocompleteFragment.getView().setVisibility(View.GONE);
+                        startButton.setText("Find Driver");
+                        startButton.setEnabled(true);
+                        startButton.setVisibility(View.VISIBLE);
+
+
+
+
+
+
 
             }
 
@@ -205,39 +233,23 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 enableLocationComponent(style);
 
                 addDestinationIconSymbolLayer(style);
+                addDriverIconSymbolLayer(style);
 
                 mapboxMap.addOnMapClickListener(HomeFragment.this);
                 startButton = root.findViewById(R.id.startButton);
                 startButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(userState==UserState.PICKING)
+                        if(userState==UserState.RESTING)
                         {
-                            boolean simulateRoute = true;
-                            NavigationLauncherOptions options = NavigationLauncherOptions.builder()
-                                    .directionsRoute(currentRoute)
-                                    .shouldSimulateRoute(simulateRoute)
-                                    .build();
-                            // Call this method with Context from within an Activity
-                            NavigationLauncher.startNavigation(getActivity(), options);
-                        }
-                        else if(userState==UserState.RESTING)
-                        {
-
-                            //Toast.makeText(getApplicationContext(),"Hello Javatpoint",Toast.LENGTH_SHORT).show();
-                            // find passenger using loading screen and calling backend apis below...
-                            // Fahad code here.....................................
-
-//                            progressDialog = new ProgressDialog(HomeFragment.super.getContext());
-//                            progressDialog.show();
-//                            progressDialog.setContentView(R.layout.waiting_screen);
-//                            progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-//
-//                            time_spent = 0;
-//                            api_call_passenger_search();
-
-                            //Point destinationPoint = getPassenger(); // write getPassenger Function
-                            // assuming passenger has been found his lat lang is (90.37609,23.83287)
+                            System.out.println("searching");
+                            // you should call find driver api here....
+                            // while finding driver you should show loading ui
+                            // after getting all the information and driver location use updateDriverLocation function like below with coordinate to show the driver location
+                            updateDriverLocation(90.37609,23.83287);
+                            //then inflate all the information in the bottom card
+                            // then change userState to picking
+                            userState = UserState.PICKING;
 
                         }
 
@@ -247,6 +259,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             }
         });
     }
+
 
     public void updatePassengerDestination(double lon, double lat)
     {
@@ -268,6 +281,39 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             }
 
             getRoute(originPoint, destinationPoint);
+
+//            startButton.setText("Start Navigation");
+//            startButton.setEnabled(true);
+//            startButton.setBackgroundResource(R.color.mapboxBlue);
+//
+//            userState = user.PICKING;
+
+
+        }
+
+
+    }
+
+    public void updateDriverLocation(double lon, double lat)
+    {
+
+        //Point destinationPoint = Point.fromLngLat(90.37609,23.83287);
+
+
+
+
+        Point destinationPoint = Point.fromLngLat(lon,lat);
+
+        if(destinationPoint!=null)
+        {
+            Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
+                    locationComponent.getLastKnownLocation().getLatitude());
+            GeoJsonSource source = mapboxMap.getStyle().getSourceAs("driver-source-id");
+            if (source != null) {
+                source.setGeoJson(Feature.fromGeometry(destinationPoint));
+            }
+
+//            getRoute(originPoint, destinationPoint);
 
 //            startButton.setText("Start Navigation");
 //            startButton.setEnabled(true);
@@ -471,12 +517,26 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
         loadedMapStyle.addImage("destination-icon-id",
-                BitmapFactory.decodeResource(this.getResources(), R.drawable.mapbox_marker_icon_default));
+                BitmapFactory.decodeResource(this.getResources(), R.drawable.map_marker_light));
         GeoJsonSource geoJsonSource = new GeoJsonSource("destination-source-id");
         loadedMapStyle.addSource(geoJsonSource);
         SymbolLayer destinationSymbolLayer = new SymbolLayer("destination-symbol-layer-id", "destination-source-id");
         destinationSymbolLayer.withProperties(
                 iconImage("destination-icon-id"),
+                iconAllowOverlap(true),
+                iconIgnorePlacement(true)
+        );
+        loadedMapStyle.addLayer(destinationSymbolLayer);
+    }
+
+    private void addDriverIconSymbolLayer(@NonNull Style loadedMapStyle) {
+        loadedMapStyle.addImage("driver-icon-id",
+                BitmapFactory.decodeResource(this.getResources(), R.drawable.map_marker_dark));
+        GeoJsonSource geoJsonSource = new GeoJsonSource("driver-source-id");
+        loadedMapStyle.addSource(geoJsonSource);
+        SymbolLayer destinationSymbolLayer = new SymbolLayer("driver-symbol-layer-id", "driver-source-id");
+        destinationSymbolLayer.withProperties(
+                iconImage("driver-icon-id"),
                 iconAllowOverlap(true),
                 iconIgnorePlacement(true)
         );
@@ -551,11 +611,77 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             locationComponent.setLocationComponentEnabled(true);
             // Set the component's camera mode
             locationComponent.setCameraMode(CameraMode.TRACKING);
+            locationComponent.setRenderMode(RenderMode.COMPASS);
+            initLocationEngine();
         } else {
             permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(getActivity());
         }
     }
+
+    @SuppressLint("MissingPermission")
+    private void initLocationEngine() {
+        locationEngine = LocationEngineProvider.getBestLocationEngine(getActivity());
+
+        LocationEngineRequest request = new LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
+                .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
+                .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME).build();
+
+        locationEngine.requestLocationUpdates(request, callback, getMainLooper());
+        locationEngine.getLastLocation(callback);
+    }
+
+    private static class MainActivityLocationCallback
+            implements LocationEngineCallback<LocationEngineResult> {
+
+        private final WeakReference<HomeFragment> fragmentWeakReference;
+
+        MainActivityLocationCallback(HomeFragment fragment) {
+            this.fragmentWeakReference = new WeakReference<>(fragment);
+        }
+
+        /**
+         * The LocationEngineCallback interface's method which fires when the device's location has changed.
+         *
+         * @param result the LocationEngineResult object which has the last known location within it.
+         */
+        @SuppressLint("StringFormatMatches")
+        @Override
+        public void onSuccess(LocationEngineResult result) {
+            HomeFragment fragment = fragmentWeakReference.get();
+
+            if (fragment != null) {
+                Location location = result.getLastLocation();
+
+                if (location == null) {
+                    return;
+                }
+
+//                System.out.println("kill meh");
+
+
+
+
+            }
+        }
+
+        /**
+         * The LocationEngineCallback interface's method which fires when the device's location can not be captured
+         *
+         * @param exception the exception message
+         */
+        @Override
+        public void onFailure(@NonNull Exception exception) {
+            Log.d("LocationChangeActivity", exception.getLocalizedMessage());
+            HomeFragment fragment = fragmentWeakReference.get();
+            if (fragment.getActivity() != null) {
+                Toast.makeText(fragment.getActivity(), exception.getLocalizedMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
