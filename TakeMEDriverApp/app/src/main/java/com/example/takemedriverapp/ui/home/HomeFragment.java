@@ -172,10 +172,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 driver_long = locationComponent.getLastKnownLocation().getLongitude();
 
                 double distance_now = calculateDistanceInMeter(driver_lat, driver_long, passenger_lat, passenger_long);
-                if(distance_now>100)
-                    Toast.makeText(getApplicationContext(),distance_now + " meters away",Toast.LENGTH_SHORT).show();
+                if(distance_now>500)
+                    Toast.makeText(getApplicationContext(),distance_now + " feets away",Toast.LENGTH_SHORT).show();
                 else
+                {
+                    // fahad instead of creating a toast we need to call backend api and find passenger destination
+                    // then change the ui so that start ride and cancel button vanishes, and we create a button called end ride between
+                    // those vanished button. Then we have to change the map.... leave that to me... I will do that....
                     Toast.makeText(getApplicationContext(),"Ride Started",Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
 
@@ -192,6 +198,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                 //Yes button clicked // Reset Things
 //                                    reset_passenger();
                                 // we have to call backend here and update backend so that it knows ride has been canceld by driver
+                                // fahad call backend here..... to cancel the ride....
                                 Intent intent = getActivity().getIntent();
                                 getActivity().finish();
                                 startActivity(intent);
@@ -659,6 +666,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     boolean notNear = Math.abs(prevLocation.getLatitude()-location.getLatitude()) > 0.001 || Math.abs(prevLocation.getLongitude()-location.getLongitude()) > 0.001;
 //                    System.out.println("calculated notNear: notNear "+notNear);
 
+
+
+
                     if(notNear)
                     {
                         fragment.prevLocation = location;
@@ -677,6 +687,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 //                            System.out.println("cameraposition has been set");
                             fragment.locationComponent.setCameraMode(CameraMode.TRACKING);
                             fragment.locationComponent.setRenderMode(RenderMode.COMPASS);
+
+
+                            // fahad this section gets executed if gps location changes while picking or riding....
+                            // we have to call backend codes here to inform backend all the time about our position so that owner and user can see a driver's realtime location
+                            // so constant position update can be done from here.... the object named location in this scope has the current location of the
+                            // driver...
+
 
                         }
                     }

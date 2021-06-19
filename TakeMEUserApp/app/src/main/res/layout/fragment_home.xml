@@ -63,7 +63,7 @@
         <FrameLayout
             android:id="@+id/bottomsheet1"
             android:layout_width="match_parent"
-            android:layout_height="265dp"
+            android:layout_height="270dp"
             android:layout_alignParentBottom="true"
 
             android:background="@color/black"
@@ -85,37 +85,36 @@
                 <TextView
                     android:id="@+id/bottom_sheet_text"
                     android:layout_width="wrap_content"
-                    android:layout_height="170dp"
-                    android:layout_centerInParent="true"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="30dp"
                     android:text="Welcome"
                     android:textColor="@color/white"
                     android:textSize="16dp" />
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/bottom_start_button"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="90dp"
                     android:layout_below="@+id/bottom_sheet_text"
                     android:background="@drawable/bg_waiting"
+                    android:enabled="false"
+                    android:layout_margin="8dp"
                     android:text="Start"
-                    android:layout_marginLeft="40dp"
-                    android:layout_marginBottom="10dp"
-                    android:visibility="invisible"
-                    android:enabled="false"/>
+                     />
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/bottom_cancel_button"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/bottom_sheet_text"
-                    android:layout_marginLeft="37dp"
-                    android:layout_toRightOf="@+id/bottom_start_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="90dp"
+                    android:layout_margin="8dp"
+                    android:layout_below="@+id/bottom_start_button"
                     android:background="@drawable/bg_waiting"
+                    android:enabled="false"
                     android:text="Cancel"
-                    android:layout_marginBottom="10dp"
-                    android:visibility="invisible"
-                    android:enabled="false"/>
-
+                     />
+<!--                android:visibility="invisible"-->
+<!--                android:visibility="invisible"-->
 
 
             </RelativeLayout>
