@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/tools"
+    android:id="@+id/fragment_home_constraint"
     app:ignore="NamespaceTypo">
 
     <com.mapbox.mapboxsdk.maps.MapView
@@ -94,14 +95,16 @@
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/bottom_start_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="90dp"
+                    android:layout_width="200dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_height="wrap_content"
                     android:layout_below="@+id/bottom_sheet_text"
                     android:background="@drawable/bg_waiting"
-                    android:enabled="false"
-                    android:layout_margin="8dp"
-                    android:text="Start"
-                     />
+                    android:layout_marginTop="20dp"
+                    android:text="Search for car"
+                    android:visibility="visible"
+                    android:enabled="true"
+                    />
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/bottom_cancel_button"
@@ -111,6 +114,7 @@
                     android:layout_below="@+id/bottom_start_button"
                     android:background="@drawable/bg_waiting"
                     android:enabled="false"
+                    android:visibility="invisible"
                     android:text="Cancel"
                      />
 <!--                android:visibility="invisible"-->

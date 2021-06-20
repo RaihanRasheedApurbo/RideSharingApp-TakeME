@@ -2,25 +2,35 @@ package com.example.takemeuserapp.ui.home;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.takemeuserapp.MainActivity;
 import com.example.takemeuserapp.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
@@ -121,15 +131,22 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     UserState userState;
 
     static View root = null;
+
     //Fahad's variable should start here....
     // Fahad's Variables
     FrameLayout frameLayout;
     BottomSheetBehavior bottomSheetBehavior;
     //int time_spent = 0;
     //ProgressDialog progressDialog;
+    int driver_choice = -1;
     TextView bottom_text;
-    Button bottom_start, bottom_cancel;
-
+    Button bottom_start, bottom_cancel, popup_confirm;
+    PopupWindow popupWindow;
+    ConstraintLayout constraintLayout;
+    ImageButton popup_close;
+    RadioGroup driver_selector_group;
+    RadioButton radioButton_driver_select;
+    LayoutInflater inflater1;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -145,9 +162,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 //        });
 //        return root;
         //Apurbo's code *****************
-
-
-
 
 
         Mapbox.getInstance(getActivity(), getString(R.string.mapbox_access_token));
@@ -214,8 +228,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         bottom_text = root.findViewById(R.id.bottom_sheet_text);
         bottom_start = root.findViewById(R.id.bottom_start_button);
         bottom_cancel = root.findViewById(R.id.bottom_cancel_button);
+        constraintLayout = root.findViewById(R.id.fragment_home_constraint);
 
+        inflater1 = inflater;
 
+        bottom_start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
 
         return root;
@@ -243,6 +265,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                         if(userState==UserState.RESTING)
                         {
                             System.out.println("searching");
+
+                            show_popup_window();
                             // you should call find driver api here....
                             // while finding driver you should show loading ui
                             // after getting all the information and driver location use updateDriverLocation function like below with coordinate to show the driver location
@@ -250,6 +274,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                             //then inflate all the information in the bottom card
                             // then change userState to picking
                             userState = UserState.PICKING;
+                            System.out.println("hello world");
 
                         }
 
@@ -260,6 +285,65 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         });
     }
 
+
+    public void show_popup_window()
+    {
+
+        //LayoutInflater layoutInflater = (LayoutInflater) root.getInstance().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View customView = inflater1.inflate(R.layout.popup_driver_select,null);
+
+        //instantiate popup window
+        //popupWindow = new PopupWindow(customView, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        popupWindow = new PopupWindow(customView, 900, 1600);
+
+        //display the popup window
+        popupWindow.showAtLocation(constraintLayout, Gravity.CENTER, 0, 0);
+
+        popup_close = customView.findViewById(R.id.imageButton_close_popup);
+        popup_confirm = customView.findViewById(R.id.popup_button_confirm);
+
+        driver_selector_group = customView.findViewById(R.id.radio_group);
+
+        // confirm button
+        popup_confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                int selectedId = driver_selector_group.getCheckedRadioButtonId();
+                //radioButton_driver_select = (RadioButton)customView.findViewById(selectedId);
+
+                if(selectedId == customView.findViewById(R.id.radioButton1).getId())
+                {
+                    driver_choice = 1;
+                    System.out.println("Exp driver selected");
+                }
+                else if(selectedId == customView.findViewById(R.id.radioButton2).getId())
+                {
+                    driver_choice = 2;
+                    System.out.println("Nearest driver selected");
+                }
+                else if(selectedId == customView.findViewById(R.id.radioButton3).getId())
+                {
+                    driver_choice = 3;
+                    System.out.println("New driver selected");
+                }
+
+                //System.out.println(radioButton_driver_select.getText());
+
+                popupWindow.dismiss();
+
+            }
+        });
+
+        // cross button
+        popup_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+
+    }
 
     public void updatePassengerDestination(double lon, double lat)
     {
@@ -509,8 +593,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 //
 //        return (int) (Math.round(AVERAGE_RADIUS_OF_EARTH_KM * c));
 //    }
-
-
 
 
 

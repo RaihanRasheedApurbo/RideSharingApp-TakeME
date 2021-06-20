@@ -78,6 +78,7 @@ public class ApiDataService {
      *  }
      *  }</pre>
      */
+
     public void userLoginData(String email, String password, VolleyResponseListener volleyResponseListener) {
 
         // Request a string response from the provided URL.
@@ -127,6 +128,7 @@ public class ApiDataService {
      * }
      *                               }</pre>
      */
+
     public void getDriverProfileData(String token, VolleyResponseListener volleyResponseListener) {
 
         // Request a string response from the provided URL.
