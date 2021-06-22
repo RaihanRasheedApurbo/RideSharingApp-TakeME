@@ -33,7 +33,7 @@ function arrayParse(arr) {
 }
 
 //function to pretify driver and vehicleInfo
-async function pretifyDriverInfo(data) {
+function pretifyDriverInfo(data) {
     console.log(data);
     return {
         driverID: data.driverID,
@@ -47,7 +47,7 @@ async function pretifyDriverInfo(data) {
 }
 
 //calculated geo distance between two geo coordinate
-async function calculateDistance(lat1, lon1, lat2, lon2) {
+function calculateDistance(lat1, lon1, lat2, lon2) {
     console.log(lat1, lon1, lat2, lon2);
     const R = 6371e3; // metres
     const φ1 = lat1 * Math.PI/180; // φ, λ in radians
