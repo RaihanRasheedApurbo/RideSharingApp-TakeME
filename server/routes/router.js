@@ -53,7 +53,6 @@ route.post('/api/driver/cancelMatch', verify, driverPoolController.cancelMatch);
 route.post('/api/driver/endRide', verify, driverPoolController.endRide);
 route.post('/api/passenger/cancelMatch', verify, driverPoolController.cancelMatch);
 route.post('/api/passenger/endRide', verify, driverPoolController.endRide);
-route.post('/api/passenger/searchNear', verify, driverPoolController.lookforNearestDriver); //may not be necessary
 route.post('/api/passenger/searchDriver', verify, driverPoolController.lookForDriver);
 route.post('/api/passenger/acceptDriver', verify, driverPoolController.acceptDriver); //under construction
 

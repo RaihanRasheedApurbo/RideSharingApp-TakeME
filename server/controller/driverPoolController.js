@@ -16,6 +16,9 @@ const CANCELLED = "cancelled";
 const DRIVER = "driver";
 const PASSENGER = "passenger";
 
+const NEAR = "nearest";
+const MOST_RIDE = "most_ride";
+
 
 //function to array parse
 function arrayParse(arr) {
@@ -30,7 +33,7 @@ function arrayParse(arr) {
 }
 
 //function to pretify driver and vehicleInfo
-function pretifyDriverInfo(data) {
+async function pretifyDriverInfo(data) {
     console.log(data);
     return {
         driverID: data.driverID,
@@ -44,7 +47,7 @@ function pretifyDriverInfo(data) {
 }
 
 //calculated geo distance between two geo coordinate
-function calculateDistance(lat1, lon1, lat2, lon2) {
+async function calculateDistance(lat1, lon1, lat2, lon2) {
     console.log(lat1, lon1, lat2, lon2);
     const R = 6371e3; // metres
     const φ1 = lat1 * Math.PI/180; // φ, λ in radians
@@ -64,7 +67,7 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 }
 
 //find the nearest driver
-function getNearestDriver(lat, lon, maxDist) {
+async function getNearestDriver(lat, lon, maxDist) {
     return DriverPool.find({
         status : SEARCHING,
         vehicleLocation : {
@@ -154,7 +157,6 @@ async function customDriverMatch(passengerID, pickUpPoint, dropOutPoint) {
     return {"message": "Driver Matched", "distance": dist, driverInfo};
 }
 
-
 //passenger match with driver
 async function matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint) {
     try {
@@ -177,7 +179,7 @@ async function matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint) 
     }
 }
 
-//passengerSearchAlt
+//passengerSearch(driver call)
 exports.lookForPassenger = async(req, res) => {
     try {
         let driverID = req.data._id;
@@ -242,7 +244,7 @@ exports.lookForPassenger = async(req, res) => {
     }
 }
 
-//stop searching for passenger
+//stop searching for passenger(driver call)
 exports.stopPassengerSearch = (req, res) => {
     DriverPool.findOneAndDelete({'driverID': req.data._id})
         .then(data => {
@@ -254,6 +256,7 @@ exports.stopPassengerSearch = (req, res) => {
         });
 }
 
+//cancel match with matched entity
 exports.cancelMatch = async(req, res) => {
     try {
         let entity = req.body.entity;
@@ -291,6 +294,7 @@ exports.cancelMatch = async(req, res) => {
     }
 }
 
+//end ride with riding passenger(only driver can call)
 exports.startRide = async(req, res) => {
     try {
         let filter = {"driverID": req.data._id, "status": MATCHED};
@@ -306,6 +310,7 @@ exports.startRide = async(req, res) => {
     }
 }
 
+//end ride with riding entity
 exports.endRide = async(req, res) => {
     try {
         let entity = req.body.entity;
@@ -352,7 +357,7 @@ exports.endRide = async(req, res) => {
     }
 }
 
-//lookForDriver
+//lookForDriver(passenger call)
 exports.lookForDriver = async(req, res) => {
     try {
         let passengerID = req.data._id;
@@ -422,86 +427,6 @@ exports.lookForDriver = async(req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).send({message: 'error occurred'});
-    }
-}
-
-//driverSearchWithDist
-exports.lookforNearestDriver = async(req, res) => {
-    
-    try {
-        let passengerID = req.data._id;
-        let pickUpPoint = arrayParse(req.body.pickUpPoint);
-        let dropOutPoint = arrayParse(req.body.dropOutPoint);
-        //console.log(pickUpPoint, dropOutPoint, typeof(pickUpPoint), typeof(dropOutPoint));
-
-        let entry = await DriverPool.findOne({passengerID: passengerID});
-        if(entry && entry.driverID !== undefined) {
-            console.log("exists");
-            let driverLocation = entry.vehicleInfo.location.coordinates;
-            let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
-                
-            let driverInfo = pretifyDriverInfo(entry);
-            return res.status(200).send({"message": "Driver Matched", "distance": dist, driverInfo});
-        }
-        else if(entry && entry.status === DENIED) {
-            console.log("should i delete now?");
-            let removedData = await DriverPool.findOneAndDelete({passengerID: passengerID});
-            return res.status(200).send({message: "driver denied the ride", status: data.status, removedData});
-        }
-        else {
-            let drivers = await getNearestDriver(pickUpPoint[0], pickUpPoint[1], 5000);
-            if(drivers.length > 0) {
-                let driverID = drivers[0].driverID;
-                let driverLocation = drivers[0].vehicleLocation.coordinates;
-                let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
-                console.log(dist);
-
-                entryData = await matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint);
-                
-                if(entryData && Object.keys(entryData).length) {
-                    let driverInfo = pretifyDriverInfo(entryData);
-                    res.status(200).send({"message": "Driver Matched", "distance": dist, driverInfo});
-                } 
-                else throw new Error("couldn't update entry");
-            } else {
-                //if(n%2) res.status(200).send({message: "no preferable driver found"});
-                console.log("custom match");
-                let driverID = mongoose.Types.ObjectId("607478178c29c1408cfad295");
-                
-                let getDriverData = Driver.findById(driverID);
-                let getPassengerData = Passenger.findById(passengerID);
-                let getVehicleData = Vehicle.findOne({driverID: driverID});
-
-                let data = await Promise.all([getDriverData, getPassengerData, getVehicleData]);
-                let driverInfo = data[0];
-                let vehicleInfo = data[2];
-                let vehicleLocation = data[2].location;
-                let passengerInfo = {
-                    passengerData: data[1],
-                    pickUpPoint: pickUpPoint,
-                    dropOutPoint: dropOutPoint
-                }
-                
-                let entry = new DriverPool({
-                    driverID: driverID,
-                    passengerID: passengerID,
-                    driverInfo: driverInfo,
-                    passengerInfo: passengerInfo,
-                    vehicleInfo: vehicleInfo,
-                    vehicleLocation: vehicleLocation,
-                    status: MATCHED
-                });
-                
-                let entryInfo = await entry.save();
-                driverInfo = pretifyDriverInfo(entryInfo);
-                
-                let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], vehicleLocation.coordinates[1], vehicleLocation.coordinates[0]);
-                return res.status(200).send({"message": "Driver Matched", "distance": dist, driverInfo});
-            }
-        }
-        
-    } catch (error) {
-        res.status(200).send({message: error});
     }
 }
 
