@@ -169,8 +169,8 @@ public class ApiDataService {
      *
      *          JSONArray driverLocation = (JSONArray) driverInfo.get("vehicleLocation");
      *
-     *          double lat = Double.parseDouble(driverLocation.getString(0));
-     *          double lon = Double.parseDouble(driverLocation.getString(1));
+     *          double lat = Double.parseDouble(driverLocation.getString(1));
+     *          double lon = Double.parseDouble(driverLocation.getString(0));
      *
      *          System.out.println("driverInfo: " + driverInfo);
      *          System.out.println("driverLocation: " + lat + " , " + lon);
