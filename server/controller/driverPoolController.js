@@ -152,9 +152,10 @@ async function customDriverMatch(passengerID, pickUpPoint, dropOutPoint) {
     
     let entryInfo = await entry.save();
     driverInfo = pretifyDriverInfo(entryInfo);
+    let status = entryInfo.status;
     
     let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], vehicleLocation.coordinates[1], vehicleLocation.coordinates[0]);
-    return {"message": "Driver Matched", "distance": dist, driverInfo};
+    return {"message": "Driver Matched", "distance": dist, "status": status, driverInfo};
 }
 
 //passenger match with driver
@@ -377,8 +378,9 @@ exports.lookForDriver = async(req, res) => {
             console.log(journeyDist);
 
             let driverInfo = pretifyDriverInfo(entry);
+            let status = entry.status;
             console.log("hello\n\n", dist, driverInfo);
-            res.status(200).send({"message": "Driver Matched", "distance": dist, "estimatedCost": estimatedCost, driverInfo});
+            res.status(200).send({"message": "Driver Matched", "distance": dist, "estimatedCost": estimatedCost, "status": status, driverInfo});
         }
         else if(entry && entry.status === DENIED) {
             console.log("should i delete now?");
@@ -402,9 +404,10 @@ exports.lookForDriver = async(req, res) => {
                     entryData = await matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint);
                     
                     if(entryData && Object.keys(entryData).length) {
+                        let status = entry.status;
                         let driverInfo = pretifyDriverInfo(entryData);
                         console.log(dist, driverInfo);
-                        res.status(200).send({"message": "Driver Matched", "distance": dist, "estimatedCost": estimatedCost, driverInfo});
+                        res.status(200).send({"message": "Driver Matched", "distance": dist, "estimatedCost": estimatedCost, "status": status, driverInfo});
                     } 
                     else throw new Error("couldn't update entry");
                 } else {
@@ -425,8 +428,10 @@ exports.lookForDriver = async(req, res) => {
                     let journeyDist = calculateDistance(pickUpPoint[0], pickUpPoint[1], dropOutPoint[0], dropOutPoint[1]);
                     let estimatedCost = journeyDist/100.0;
                     console.log(journeyDist);
+                    
+                    let status = entryData.status;
 
-                    res.status(200).send({"message": "Driver Matched", "distance": dist, "estimatedCost": estimatedCost, driverInfo});
+                    res.status(200).send({"message": "Driver Matched", "distance": dist, "estimatedCost": estimatedCost, "status": status, driverInfo});
                 } else {
                     //res.status(200).send({message: "no driver found"});
                     let retBody = await customDriverMatch(passengerID, pickUpPoint, dropOutPoint);
