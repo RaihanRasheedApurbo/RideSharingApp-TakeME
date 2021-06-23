@@ -177,12 +177,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     Toast.makeText(getApplicationContext(),distance_now + " feets away",Toast.LENGTH_SHORT).show();
                 else
                 {
+                    System.out.println("calling start ride");
                     // fahad instead of creating a toast we need to call backend api and find passenger destination
                     // then change the ui so that start ride and cancel button vanishes, and we create a button called end ride between
                     // those vanished button. Then we have to change the map.... leave that to me... I will do that....
-                    bottom_text.setText("Destination: \nLat: " + curr_dest_lat + "\nLon: " + curr_dest_long);
+//                    bottom_text.setText("Destination: \nLat: " + curr_dest_lat + "\nLon: " + curr_dest_long);
                     start_ride();
-                    Toast.makeText(getApplicationContext(),"Ride Started",Toast.LENGTH_SHORT).show();
+
                 }
 
             }
@@ -203,6 +204,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                 // fahad call backend here..... to cancel the ride....
 
                                 cancel_ride();
+                                locationEngine.removeLocationUpdates(callback);
                                 Intent intent = getActivity().getIntent();
                                 getActivity().finish();
                                 startActivity(intent);
@@ -227,9 +229,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             public void onClick(View v) {
                 Toast.makeText(getApplicationContext(),"Ride Ended",Toast.LENGTH_SHORT).show();
                 end_ride();
-                reset_passenger();
-                bottom_end_ride.setVisibility(View.INVISIBLE);
-                bottom_end_ride.setEnabled(false);
+                locationEngine.removeLocationUpdates(callback);
+                Intent intent = getActivity().getIntent();
+                getActivity().finish();
+                startActivity(intent);
+//                reset_passenger();
+//                bottom_end_ride.setVisibility(View.INVISIBLE);
+//                bottom_end_ride.setEnabled(false);
             }
         });
         return root;
@@ -426,6 +432,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             @Override
             public void onError(Object message) {
                 System.out.println("Problem in starting ride");
+                Toast.makeText(getApplicationContext(),"Problem in starting ride so canceling and restarting the app",Toast.LENGTH_SHORT).show();
+                end_ride();
+                locationEngine.removeLocationUpdates(callback);
+                Intent intent = getActivity().getIntent();
+                getActivity().finish();
+                startActivity(intent);
             }
 
             @Override
@@ -433,23 +445,41 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
                 try {
                     JSONObject responseData = new JSONObject(responseObject.toString());
-                    System.out.println("Ride Started by driver");
                     System.out.println(responseData);
+                    String message = (String) responseData.get("message");
+                    System.out.println("message: "+message);
+                    JSONArray latLang = (JSONArray) responseData.get("dropOutPoint");
+                    double lat = (Double) latLang.get(0);
+                    double lang = (Double) latLang.get(1);
+                    System.out.println(latLang.get(0)+ " "+ latLang.get(1));
+                    update_marker_passenger(lang,lat);
+                    System.out.println("Ride Started by driver");
+
+
+
+                    bottom_start.setVisibility(View.INVISIBLE);
+                    bottom_start.setEnabled(false);
+
+                    bottom_cancel.setVisibility(View.INVISIBLE);
+                    bottom_cancel.setEnabled(false);
+
+                    bottom_end_ride.setVisibility(View.VISIBLE);
+                    bottom_end_ride.setEnabled(true);
+                    bottom_end_ride.setText("End Ride");
+                    Toast.makeText(getApplicationContext(),"Ride Started",Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     System.out.println(e);
+                    Toast.makeText(getApplicationContext(),"Problem in starting ride so canceling and restarting the app",Toast.LENGTH_SHORT).show();
+                    end_ride();
+                    locationEngine.removeLocationUpdates(callback);
+                    Intent intent = getActivity().getIntent();
+                    getActivity().finish();
+                    startActivity(intent);
                 }
             }
         });
 
-        bottom_start.setVisibility(View.INVISIBLE);
-        bottom_start.setEnabled(false);
 
-        bottom_cancel.setVisibility(View.INVISIBLE);
-        bottom_cancel.setEnabled(false);
-
-        bottom_end_ride.setVisibility(View.VISIBLE);
-        bottom_end_ride.setEnabled(true);
-        bottom_end_ride.setText("End Ride");
 
 
     }
@@ -479,15 +509,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             }
         });
 
-        bottom_start.setVisibility(View.INVISIBLE);
-        bottom_start.setEnabled(false);
-
-        bottom_cancel.setVisibility(View.INVISIBLE);
-        bottom_cancel.setEnabled(false);
-
-        bottom_end_ride.setVisibility(View.VISIBLE);
-        bottom_end_ride.setEnabled(true);
-        bottom_end_ride.setText("End Ride");
+//        bottom_start.setVisibility(View.INVISIBLE);
+//        bottom_start.setEnabled(false);
+//
+//        bottom_cancel.setVisibility(View.INVISIBLE);
+//        bottom_cancel.setEnabled(false);
+//
+//        bottom_end_ride.setVisibility(View.VISIBLE);
+//        bottom_end_ride.setEnabled(true);
+//        bottom_end_ride.setText("End Ride");
 
 
     }
