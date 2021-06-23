@@ -196,8 +196,8 @@ exports.lookForPassenger = async(req, res) => {
                     let removedData = await DriverPool.findOneAndDelete({'driverID': req.data._id});
                     res.status(200).send({"message": "passenger cancelled the ride", status: data.status, removedData});
                 } else {
-                    res.status(200).send({"message": "No match found "+n});
                     let n = Math.floor(Math.random()*10);
+                    res.status(200).send({"message": "No match found "+n});
                     /*if(n%2) {
                         //let passengers = ["607478178c29c1408cfad290", "607478178c29c1408cfad292", "607478178c29c1408cfad297", "607478188c29c1408cfad29b", "607478188c29c1408cfad2a1"];
                         let passengers = ["607478178c29c1408cfad290"];
