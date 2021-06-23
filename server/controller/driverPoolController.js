@@ -516,7 +516,7 @@ exports.deletePool = (req, res) => {
 }
 
 //cleanPool
-exports.deletePool = (req, res) => {
+exports.cleanPool = (req, res) => {
     DriverPool.deleteMany({})
     .then(data => {
         res.status(200).send(data);
