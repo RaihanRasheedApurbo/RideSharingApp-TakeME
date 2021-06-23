@@ -514,3 +514,15 @@ exports.deletePool = (req, res) => {
         res.status(500).send(err);
     });
 }
+
+//cleanPool
+exports.deletePool = (req, res) => {
+    DriverPool.deleteMany({})
+    .then(data => {
+        res.status(200).send(data);
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).send(err);
+    });
+}
