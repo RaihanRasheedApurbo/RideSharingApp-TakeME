@@ -653,13 +653,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                             {
                                 System.out.println("canceling ride after driver canceled");
                                 // fahad show a popup here and then do something like below
-                                locationEngine.removeLocationUpdates(callback); // this should be stoped otherwise two callback will be present after restarting the activity
+                                 // this should be stoped otherwise two callback will be present after restarting the activity
 
                                 DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         switch (which){
                                             case DialogInterface.BUTTON_POSITIVE:
+                                                locationEngine.removeLocationUpdates(callback);
+                                                Intent intent = getActivity().getIntent();
+                                                getActivity().finish();
+                                                startActivity(intent);
                                                 break;
                                         }
                                     }
@@ -668,9 +672,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                                 builder.setMessage("Sorry!\nRide cancelled by driver").setPositiveButton("ok", dialogClickListener).show();
 
-                                Intent intent = getActivity().getIntent();
-                                getActivity().finish();
-                                startActivity(intent);
+
                             }
                         }
 
