@@ -108,7 +108,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     // Variables needed to listen to location updates
     private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
     private MapboxNavigation mapboxNavigation;
-    private Location prevLocation;
+    private Location prevDriverLocation;
 
 
 
@@ -279,7 +279,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     bottom_text.append("\nYour Driver is on the way!");
                     bottom_start_end.setText("End Ride");
                 }
-                else if(userState==UserState.PICKING)
+                else if(userState==UserState.PICKING || userState==UserState.RIDING)
                 {
                     //bottom_text.setText("Welcome");
                     locationEngine.removeLocationUpdates(callback);
@@ -497,7 +497,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     if(responseData.has("driverInfo"))
                     {
                         JSONObject driverInfo = (JSONObject) responseData.get("driverInfo");
-
+                        System.out.println(responseData);
                         JSONArray driverLocation = (JSONArray) driverInfo.get("vehicleLocation");
 
                         double lat = Double.parseDouble(driverLocation.getString(1));
@@ -567,10 +567,60 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     public void onResponse(Object responseObject)
                     {
 
-                        try
+
+                    try{
+
+                        JSONObject responseData = new JSONObject(responseObject.toString());
+                        //System.out.println(responseData);
+
+                        if(responseData.has("driverInfo"))
                         {
-                            JSONObject responseData = new JSONObject(responseObject.toString());
-                            System.out.println(responseData);
+                            JSONObject driverInfo = (JSONObject) responseData.get("driverInfo");
+                            //System.out.println(responseData);
+                            JSONArray driverLocation = (JSONArray) driverInfo.get("vehicleLocation");
+                            //System.out.println(responseData.getString("status"));
+                            String status = responseData.getString("status");
+                            double lat = Double.parseDouble(driverLocation.getString(1));
+                            double lon = Double.parseDouble(driverLocation.getString(0));
+                            Location currentDriverLocation = new Location("");
+                            currentDriverLocation.setLatitude(lat);
+                            currentDriverLocation.setLongitude(lon);
+                            //System.out.println("driverInfo: " + driverInfo);
+                            //System.out.println("driverLocation: " + lat + " , " + lon);
+
+                            if(prevDriverLocation != null)
+                            {
+                                boolean notNear = Math.abs(prevDriverLocation.getLatitude()-currentDriverLocation.getLatitude()) > 0.001 || Math.abs(prevDriverLocation.getLongitude()-currentDriverLocation.getLongitude()) > 0.001;
+
+                                if(notNear)
+                                {
+                                    prevDriverLocation = currentDriverLocation;
+                                    updateDriverLocation(lon, lat);
+                                }
+
+                            }
+                            else
+                            {
+                                prevDriverLocation = currentDriverLocation;
+                            }
+
+
+                            if(status.contains("riding") && userState!=UserState.RIDING)
+                            {
+                                System.out.println("state synchronization is happening in fetch ride details");
+//                                bottom_cancel.setText("Cancel Ride");
+                                bottom_cancel.setVisibility(View.INVISIBLE);
+                                bottom_cancel.setEnabled(false);
+                                userState = UserState.RIDING;
+
+                                bottom_start_end.setVisibility(View.VISIBLE);
+                                bottom_start_end.setEnabled(true);
+                                bottom_start_end.setText("End Ride");
+
+                            }
+                        }
+
+
 
 //                            if(responseData.has("driverInfo"))
 //                            {
@@ -630,9 +680,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 
 
-        bottom_start_end.setVisibility(View.VISIBLE);
-        bottom_start_end.setEnabled(true);
-        bottom_start_end.setText("Confirm Driver");
+//        bottom_start_end.setVisibility(View.VISIBLE);
+//        bottom_start_end.setEnabled(true);
+//        bottom_start_end.setText("Confirm Driver");
+
+        userState = UserState.PICKING;
 
         bottom_cancel.setText("Cancel Ride");
         bottom_cancel.setVisibility(View.VISIBLE);
@@ -892,7 +944,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     return;
                 }
 
-                System.out.println("kill meh");
+//                System.out.println("kill meh");
                 System.out.println("userstate: " + fragment.userState);
                 if (fragment.userState == UserState.FINDING)
                 {

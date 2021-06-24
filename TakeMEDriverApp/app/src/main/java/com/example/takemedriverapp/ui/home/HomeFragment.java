@@ -813,6 +813,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
                     if(notNear)
                     {
+
+                        fragment.sendLocation(location);
+
                         fragment.prevLocation = location;
                         if(fragment.driverState == DriverState.PICKING || fragment.driverState == DriverState.RIDING)
                         {
@@ -884,6 +887,37 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             Toast.makeText(getActivity(), R.string.user_location_permission_not_granted, Toast.LENGTH_LONG).show();
             //finish();
         }
+    }
+    public void sendLocation(Location location)
+    {
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+
+        apiDataService.updateLocation(MainActivity2.main_token,location.getLatitude(),location.getLongitude(), new ApiDataService.VolleyResponseListener() {
+
+            @Override
+            public void onError(Object message) {
+                System.out.println("Problem in updating location");
+            }
+
+            @Override
+            public void onResponse(Object responseObject)
+            {
+
+                try
+                {
+                    JSONObject responseData = new JSONObject(responseObject.toString());
+                    System.out.println(responseData);
+
+
+
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+
+            }
+        });
     }
 
 //    @Override
