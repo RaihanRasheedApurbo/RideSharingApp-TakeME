@@ -32,8 +32,9 @@ module.exports = function (req, res, next) {
         req.data = verified;
         next();
     }catch (err) {
-        let headers = req.header;
-        let message = err.message + "invalid";
-        res.status(400).send({ message: message, header: headers });
+        let request = req;
+        let headers = req.headers;
+        let message = err.message + " invalid token: " + token;
+        res.status(400).send({ message, request, headers });
     }
 }
