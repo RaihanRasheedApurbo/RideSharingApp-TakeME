@@ -618,6 +618,26 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                 bottom_start_end.setText("End Ride");
 
                             }
+
+                            if(status.contains("ended"))
+                            {
+                                System.out.println("ride ended");
+                                // fahad show a popup window where that will say to user that the ride has eneded and he or she
+                                // have to pay 50 tk or something like that.....
+                                locationEngine.removeLocationUpdates(callback); // this should be stoped otherwise two callback will be present after restarting the activity
+                                Intent intent = getActivity().getIntent();
+                                getActivity().finish();
+                                startActivity(intent);
+                            }
+                            if(status.contains("denied"))
+                            {
+                                System.out.println("canceling ride after driver canceled");
+                                // fahad show a popup here and then do something like below
+                                locationEngine.removeLocationUpdates(callback); // this should be stoped otherwise two callback will be present after restarting the activity
+                                Intent intent = getActivity().getIntent();
+                                getActivity().finish();
+                                startActivity(intent);
+                            }
                         }
 
 

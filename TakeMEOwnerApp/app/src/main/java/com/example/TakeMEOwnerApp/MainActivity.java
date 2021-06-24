@@ -75,7 +75,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
-        frameLayout = findViewById(R.id.bottomsheet1);
+
+                frameLayout = findViewById(R.id.bottomsheet1);
         bottomSheetBehavior = BottomSheetBehavior.from(frameLayout);
         bottomSheetBehavior.setPeekHeight(200);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -163,6 +164,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onMapReady(MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
+
+        mapboxMap.addOnCameraIdleListener(new MapboxMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                System.out.println("sitting idle");
+            }
+        });
+
 //        mapboxMap.addMarker(new MarkerOptions()
 //                .position(new LatLng(48.85819, 2.29458))
 //                .title("Eiffel Tower"));

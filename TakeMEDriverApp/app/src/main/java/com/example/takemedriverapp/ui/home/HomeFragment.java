@@ -848,10 +848,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     fragment.prevLocation = location;
                 }
 
+                if(fragment.driverState == DriverState.PICKING || fragment.driverState == DriverState.RIDING)
+                {
+                    fragment.fetchRideDetails();
+                }
+
 
 
             }
         }
+
+
 
         /**
          * The LocationEngineCallback interface's method which fires when the device's location can not be captured
@@ -868,6 +875,63 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             }
         }
     }
+
+    public void fetchRideDetails()
+    {
+
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+
+        apiDataService.searchPassenger(MainActivity2.main_token,
+                new ApiDataService.VolleyResponseListener() {
+
+                    @Override
+                    public void onError(Object message) {
+                        System.out.println("fetching ride info");
+                        System.out.println("Problem in ride info");
+//                        userState = UserState.RESTING;
+//                        progressDialog.dismiss();
+                    }
+
+                    @Override
+                    public void onResponse(Object responseObject)
+                    {
+
+
+                        try{
+
+                            JSONObject responseData = new JSONObject(responseObject.toString());
+                            //System.out.println(responseData);
+
+                            System.out.println(responseData);
+                            String status = responseData.getString("status");
+                            System.out.println("status: "+status);
+                            if(status.contains("cancelled"))
+                            {
+                                System.out.println("ride has been canceled");
+                                //fahad show a popup and restart the whole thing after
+                                // after the user press ok do below stuff....
+                                locationEngine.removeLocationUpdates(callback);
+                                Intent intent = getActivity().getIntent();
+                                getActivity().finish();
+                                startActivity(intent);
+                            }
+
+
+
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+
+
+    }
+
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -905,6 +969,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
                 try
                 {
+                    System.out.println("sending location in backend");
                     JSONObject responseData = new JSONObject(responseObject.toString());
                     System.out.println(responseData);
 

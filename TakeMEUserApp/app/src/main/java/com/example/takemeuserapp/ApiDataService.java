@@ -201,7 +201,7 @@ public class ApiDataService {
             JSONArray pick = new JSONArray(Arrays.toString(pickUpPoint));
             JSONArray drop = new JSONArray(Arrays.toString(dropOutPoint));
 
-            System.out.println("pick: "+ pick + " drop: " + drop);
+            //System.out.println("pick: "+ pick + " drop: " + drop);
             params.put("pickUpPoint", pick.toString());
             params.put("dropOutPoint", drop.toString());
         } catch (JSONException e) {
