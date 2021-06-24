@@ -29,6 +29,9 @@ const DriverPoolSchema = new mongoose.Schema({
     startTime : {
         type : Date,
         default: Date.now
+    },
+    rideInfo : {
+        type: Object
     }
 });
 
