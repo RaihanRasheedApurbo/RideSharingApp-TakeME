@@ -134,13 +134,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     int time_spent = 0;
     ProgressDialog progressDialog;
     String driver_choice = "any";
+    String car_choice = "any";
     TextView bottom_text;
     Button bottom_cancel, bottom_start_end, popup_confirm;
     PopupWindow popupWindow;
     ConstraintLayout constraintLayout;
     ImageButton popup_close;
-    RadioGroup driver_selector_group;
-    RadioButton radioButton_driver_select;
+    RadioGroup driver_selector_group, car_selector_group;
+    RadioButton radioButton_driver_select, radioButton_car_select;
     LayoutInflater inflater1;
     double user_lat, user_long, dest_lat, dest_long, driver_lat, driver_long;
 
@@ -353,6 +354,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         popup_confirm = customView.findViewById(R.id.popup_button_confirm);
 
         driver_selector_group = customView.findViewById(R.id.radio_group);
+        car_selector_group = customView.findViewById(R.id.radio_group_2);
 
         // confirm button
         popup_confirm.setOnClickListener(new View.OnClickListener() {
@@ -360,6 +362,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             public void onClick(View v) {
 
                 int selectedId = driver_selector_group.getCheckedRadioButtonId();
+                int selectedId2 = car_selector_group.getCheckedRadioButtonId();
                 //radioButton_driver_select = (RadioButton)customView.findViewById(selectedId);
 
                 if(selectedId == customView.findViewById(R.id.radioButton1).getId())
@@ -376,6 +379,22 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 {
                     driver_choice = "new";
                     System.out.println("New driver selected");
+                }
+
+                if(selectedId2 == customView.findViewById(R.id.radioButton_car_1).getId())
+                {
+                    car_choice = "economy";
+                    System.out.println("economy car selected");
+                }
+                else if(selectedId2 == customView.findViewById(R.id.radioButton_car_2).getId())
+                {
+                    car_choice = "budget";
+                    System.out.println("budget car selected");
+                }
+                else if(selectedId2 == customView.findViewById(R.id.radioButton_car_3).getId())
+                {
+                    car_choice = "premium";
+                    System.out.println("premium car selected");
                 }
 
                 popupWindow.dismiss();
@@ -965,7 +984,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 }
 
 //                System.out.println("kill meh");
-                System.out.println("userstate: " + fragment.userState);
+                //System.out.println("userstate: " + fragment.userState);
                 if (fragment.userState == UserState.FINDING)
                 {
 

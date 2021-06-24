@@ -7,7 +7,7 @@
     android:gravity="center">
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:padding="20dp"
         android:orientation="vertical"
@@ -63,31 +63,73 @@
                 android:buttonTint="@color/white"/>
         </RadioGroup>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Car Type"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:textColor="@color/white"/>
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="137dp"
+            android:id="@+id/radio_group_2"
+            >
+
+            <RadioButton
+                android:id="@+id/radioButton_car_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Economy"
+                android:textColor="@color/white"
+                android:buttonTint="@color/white"/>
+
+            <RadioButton
+                android:id="@+id/radioButton_car_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Budget"
+                android:textColor="@color/white"
+                android:buttonTint="@color/white"/>
+
+            <RadioButton
+                android:id="@+id/radioButton_car_3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Premium"
+                android:textColor="@color/white"
+                android:buttonTint="@color/white"/>
+        </RadioGroup>
+
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/popup_button_confirm"
             android:layout_width="180dp"
             android:layout_height="35dp"
             android:text="Confirm"
             android:background="@drawable/bg_waiting"
-            android:layout_marginTop="10dp"/>
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="15dp"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Safety Guidelines"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:layout_marginTop="25dp"
-            android:textColor="@color/white"/>
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Safety Guidelines"-->
+<!--            android:textStyle="bold"-->
+<!--            android:textSize="18sp"-->
+<!--            android:layout_marginTop="25dp"-->
+<!--            android:textColor="@color/white"/>-->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Please use seat belt\nDon't share location with driver
-\nDon't share personal information \nwith driver"
-            android:textSize="18sp"
-            android:layout_marginTop="10dp"
-            android:textColor="@color/white"/>
+<!--        <TextView-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Please use seat belt\nDon't share location with driver-->
+<!--\nDon't share personal information \nwith driver"-->
+<!--            android:textSize="18sp"-->
+<!--            android:layout_marginTop="10dp"-->
+<!--            android:textColor="@color/white"/>-->
 
 
 
