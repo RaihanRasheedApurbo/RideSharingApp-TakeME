@@ -910,10 +910,27 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                 System.out.println("ride has been canceled");
                                 //fahad show a popup and restart the whole thing after
                                 // after the user press ok do below stuff....
-                                locationEngine.removeLocationUpdates(callback);
-                                Intent intent = getActivity().getIntent();
-                                getActivity().finish();
-                                startActivity(intent);
+
+                                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        switch (which){
+                                            case DialogInterface.BUTTON_POSITIVE:
+                                                locationEngine.removeLocationUpdates(callback);
+                                                Intent intent = getActivity().getIntent();
+                                                getActivity().finish();
+                                                startActivity(intent);
+                                                break;
+                                        }
+                                    }
+                                };
+
+                                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                builder.setMessage("Sorry!\nRide cancelled by driver").setPositiveButton("ok", dialogClickListener).show();
+
+
+
+
                             }
 
 
