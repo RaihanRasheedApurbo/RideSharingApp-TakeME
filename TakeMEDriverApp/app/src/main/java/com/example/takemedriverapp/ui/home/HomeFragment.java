@@ -926,7 +926,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                 };
 
                                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                                builder.setMessage("Sorry!\nRide cancelled by driver").setPositiveButton("ok", dialogClickListener).show();
+                                builder.setMessage("Sorry!\nRide cancelled by passenger").setPositiveButton("ok", dialogClickListener).show();
 
 
 
