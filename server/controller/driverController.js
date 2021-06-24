@@ -2,6 +2,8 @@ const jwt = require('jsonwebtoken');
 const Ride = require('../model/ride');
 const Driver = require('../model/driver');
 const Vehicle = require('../model/vehicle');
+const DriverPool = require('../model/driverPool');
+
 const mongoose = require('mongoose');
 
 const secret = process.env.TOKEN_SECRET || "TakeMeSecret";
@@ -186,7 +188,7 @@ exports.showEarning = (req, res) => {
 }
 
 //update Location
-exports.updateLocation = (req, res) => {
+exports.updateLocation = async (req, res) => {
     let vehicleLocation = null;
     try {
         console.log("JSON parsing");
@@ -203,20 +205,29 @@ exports.updateLocation = (req, res) => {
             'driverID': mongoose.Types.ObjectId(req.data._id)
         };
         
-        const updateBody = {
+        const vehicleUpdateBody = {
             $set: {
                 'location.coordinates': [vehicleLocation[1], vehicleLocation[0]]
             }
         };
-        //console.log(updateBody);
+        const poolUpdateBody = {
+            $set: {
+                'vehicleLocation.coordinates': [vehicleLocation[1], vehicleLocation[0]]
+            }
+        };
+        console.log(vehicleUpdateBody, poolUpdateBody);
 
-        Vehicle.findOneAndUpdate(filter, updateBody, { useFindAndModify: false, new: true })
+        let vehicleUpdate = Vehicle.findOneAndUpdate(filter, vehicleUpdateBody, { useFindAndModify: false, new: true });
+        let poolUpdate = DriverPool.findOneAndUpdate(filter, poolUpdateBody, { useFindAndModify: false, new: true });
+        
+        Promise.all([vehicleUpdate, poolUpdate])
         .then(data => {
-            //console.log(data);
-            res.status(200).send(data);
+            console.log(data);
+            if(data.length>1) console.log(data[1], "vehicleLocation: ", data[1].vehicleLocation.coordinates);
+            res.status(200).send(data[0]);
         })
         .catch(err => {
-            //console.log(err);
+            console.log(err);
             res.status(500).send(err);
         });
     }

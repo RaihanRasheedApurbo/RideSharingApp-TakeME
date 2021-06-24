@@ -42,7 +42,7 @@ function pretifyDriverInfo(data) {
         driverPhone: data.driverInfo.phone,
         vehicleName: data.vehicleInfo.model,
         vehicleType: data.vehicleInfo.type,
-        vehicleLocation: data.vehicleInfo.location.coordinates
+        vehicleLocation: data.vehicleLocation.coordinates
     }
 }
 
@@ -371,7 +371,7 @@ exports.lookForDriver = async(req, res) => {
         let entry = await DriverPool.findOne({passengerID: passengerID});
         if(entry && entry.driverID !== undefined) {
             console.log("exists");
-            let driverLocation = entry.vehicleInfo.location.coordinates;
+            let driverLocation = entry.vehicleLocation.coordinates;
             let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
             let journeyDist = calculateDistance(pickUpPoint[0], pickUpPoint[1], dropOutPoint[0], dropOutPoint[1]);
             let estimatedCost = journeyDist/100.0;
