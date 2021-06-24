@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/tools"
+    android:id="@+id/fragment_home_constraint"
     app:ignore="NamespaceTypo">
 
     <com.mapbox.mapboxsdk.maps.MapView
@@ -65,8 +66,7 @@
             android:layout_width="match_parent"
             android:layout_height="270dp"
             android:layout_alignParentBottom="true"
-
-            android:background="@color/black"
+            android:background="@color/white"
             mapbox:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
             <RelativeLayout
@@ -87,34 +87,36 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerHorizontal="true"
-                    android:layout_marginTop="30dp"
+                    android:layout_marginTop="45dp"
                     android:text="Welcome"
-                    android:textColor="@color/white"
                     android:textSize="16dp" />
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/bottom_start_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="90dp"
+                    android:layout_width="200dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_height="wrap_content"
                     android:layout_below="@+id/bottom_sheet_text"
                     android:background="@drawable/bg_waiting"
+                    android:layout_marginTop="20dp"
+                    android:text="Search for car"
+                    android:visibility="invisible"
                     android:enabled="false"
-                    android:layout_margin="8dp"
-                    android:text="Start"
-                     />
+                    />
 
                 <androidx.appcompat.widget.AppCompatButton
                     android:id="@+id/bottom_cancel_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="90dp"
-                    android:layout_margin="8dp"
-                    android:layout_below="@+id/bottom_start_button"
+                    android:layout_width="230dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/bg_waiting"
+                    android:layout_marginTop="20dp"
+                    android:layout_below="@+id/bottom_start_button"
                     android:enabled="false"
-                    android:text="Cancel"
+                    android:visibility="invisible"
+                    android:text="Confirm Driver"
                      />
-<!--                android:visibility="invisible"-->
-<!--                android:visibility="invisible"-->
+
 
 
             </RelativeLayout>

@@ -2,25 +2,32 @@ package com.example.takemeuserapp.ui.home;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.PopupWindow;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
 
+import com.example.takemeuserapp.ApiDataService;
+import com.example.takemeuserapp.MainActivity;
 import com.example.takemeuserapp.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
@@ -52,8 +59,6 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
-import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
@@ -103,7 +108,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     // Variables needed to listen to location updates
     private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
     private MapboxNavigation mapboxNavigation;
-    private Location prevLocation;
+    private Location prevDriverLocation;
 
 
 
@@ -121,15 +126,23 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     UserState userState;
 
     static View root = null;
+
     //Fahad's variable should start here....
     // Fahad's Variables
     FrameLayout frameLayout;
     BottomSheetBehavior bottomSheetBehavior;
-    //int time_spent = 0;
-    //ProgressDialog progressDialog;
+    int time_spent = 0;
+    ProgressDialog progressDialog;
+    String driver_choice = "any";
     TextView bottom_text;
-    Button bottom_start, bottom_cancel;
-
+    Button bottom_cancel, bottom_start_end, popup_confirm;
+    PopupWindow popupWindow;
+    ConstraintLayout constraintLayout;
+    ImageButton popup_close;
+    RadioGroup driver_selector_group;
+    RadioButton radioButton_driver_select;
+    LayoutInflater inflater1;
+    double user_lat, user_long, dest_lat, dest_long, driver_lat, driver_long;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -147,9 +160,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         //Apurbo's code *****************
 
 
-
-
-
         Mapbox.getInstance(getActivity(), getString(R.string.mapbox_access_token));
         root = inflater.inflate(R.layout.fragment_home, container, false);
         mapView = root.findViewById(R.id.mapView);
@@ -158,6 +168,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         userState = UserState.RESTING;
         startButton = root.findViewById(R.id.startButton);
         startButton.setVisibility(View.GONE);
+
 //        startButton.setText("Search Passenger");
 //        startButton.setEnabled(true);
         Places.initialize(getApplicationContext(), getString(R.string.apiKey));
@@ -179,6 +190,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             public void onPlaceSelected(@NonNull Place place) {
                 // TODO: Get info about the selected place.
                 Log.i(TAG, "Place: " + place.getName() + ", " + place.getLatLng());
+
+                dest_lat = place.getLatLng().latitude;
+                dest_long = place.getLatLng().longitude;
+
                 updatePassengerDestination(place.getLatLng().longitude,place.getLatLng().latitude);
                 autocompleteFragment.getView().setVisibility(View.GONE);
                         startButton.setText("Find Driver");
@@ -212,16 +227,79 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         bottomSheetBehavior.setPeekHeight(200);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         bottom_text = root.findViewById(R.id.bottom_sheet_text);
-        bottom_start = root.findViewById(R.id.bottom_start_button);
-        bottom_cancel = root.findViewById(R.id.bottom_cancel_button);
+        bottom_cancel = root.findViewById(R.id.bottom_start_button);
+        bottom_start_end = root.findViewById(R.id.bottom_cancel_button);
+        constraintLayout = root.findViewById(R.id.fragment_home_constraint);
 
+        inflater1 = inflater;
 
+        bottom_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
+                                //Yes button clicked // Reset Things
+                                //reset_passenger();
+                                // we have to call backend here and update backend so that it knows ride has been canceld by driver
+                                // fahad call backend here..... to cancel the ride....
+
+                                cancel_match();
+                                locationEngine.removeLocationUpdates(callback); // this should be stoped otherwise two callback will be present after restarting the activity
+                                Intent intent = getActivity().getIntent();
+                                getActivity().finish();
+                                startActivity(intent);
+                                break;
+
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                //No button clicked
+                                break;
+                        }
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
+                        .setNegativeButton("No", dialogClickListener).show();
+
+            }
+        });
+
+        bottom_start_end.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(userState == UserState.FINDING)
+                {
+                    userState = UserState.PICKING;
+                    bottom_cancel.setVisibility(View.INVISIBLE);
+                    bottom_cancel.setEnabled(false);
+                    bottom_text.append("\nYour Driver is on the way!");
+                    bottom_start_end.setText("End Ride");
+                }
+                else if(userState==UserState.PICKING || userState==UserState.RIDING)
+                {
+                    //bottom_text.setText("Welcome");
+                    locationEngine.removeLocationUpdates(callback);
+                    // after finishing the activity the location engine doesn't stop... so we need to stop it
+                    // otherwise we will have two callback thread
+                    Intent intent = getActivity().getIntent();
+                    getActivity().finish();
+                    startActivity(intent);
+                    end_ride();
+//                    userState = UserState.RESTING;
+//                    bottom_cancel.setVisibility(View.INVISIBLE);
+//                    bottom_cancel.setEnabled(false);
+                }
+
+            }
+        });
 
 
         return root;
     }
-
-
 
 
     @Override
@@ -243,13 +321,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                         if(userState==UserState.RESTING)
                         {
                             System.out.println("searching");
-                            // you should call find driver api here....
-                            // while finding driver you should show loading ui
-                            // after getting all the information and driver location use updateDriverLocation function like below with coordinate to show the driver location
-                            updateDriverLocation(90.37609,23.83287);
-                            //then inflate all the information in the bottom card
-                            // then change userState to picking
-                            userState = UserState.PICKING;
+                            user_long = locationComponent.getLastKnownLocation().getLongitude();
+                            user_lat = locationComponent.getLastKnownLocation().getLatitude();
+
+                            show_popup_window();
 
                         }
 
@@ -260,6 +335,72 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         });
     }
 
+
+    public void show_popup_window()
+    {
+
+        //LayoutInflater layoutInflater = (LayoutInflater) root.getInstance().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View customView = inflater1.inflate(R.layout.popup_driver_select,null);
+
+        //instantiate popup window
+        //popupWindow = new PopupWindow(customView, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        popupWindow = new PopupWindow(customView, 900, 1600);
+
+        //display the popup window
+        popupWindow.showAtLocation(constraintLayout, Gravity.CENTER, 0, 0);
+
+        popup_close = customView.findViewById(R.id.imageButton_close_popup);
+        popup_confirm = customView.findViewById(R.id.popup_button_confirm);
+
+        driver_selector_group = customView.findViewById(R.id.radio_group);
+
+        // confirm button
+        popup_confirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                int selectedId = driver_selector_group.getCheckedRadioButtonId();
+                //radioButton_driver_select = (RadioButton)customView.findViewById(selectedId);
+
+                if(selectedId == customView.findViewById(R.id.radioButton1).getId())
+                {
+                    driver_choice = "experienced";
+                    System.out.println("Exp driver selected");
+                }
+                else if(selectedId == customView.findViewById(R.id.radioButton2).getId())
+                {
+                    driver_choice = "nearest";
+                    System.out.println("Nearest driver selected");
+                }
+                else if(selectedId == customView.findViewById(R.id.radioButton3).getId())
+                {
+                    driver_choice = "new";
+                    System.out.println("New driver selected");
+                }
+
+                popupWindow.dismiss();
+
+                progressDialog = new ProgressDialog(HomeFragment.super.getContext());
+                progressDialog.show();
+                progressDialog.setContentView(R.layout.waiting_screen);
+                progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+                time_spent = 0;
+                userState = UserState.FINDING;
+                api_call_driver_search();
+
+            }
+        });
+
+        // cross button
+        popup_close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                popupWindow.dismiss();
+            }
+        });
+
+    }
 
     public void updatePassengerDestination(double lon, double lat)
     {
@@ -328,80 +469,279 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     }
 
 
-//    public void api_call_passenger_search()
-//    {
-//
-//        ApiDataService apiDataService = new ApiDataService(this.getContext());
-//
-//        apiDataService.searchPassenger(MainActivity2.main_token, new ApiDataService.VolleyResponseListener() {
-//
-//            @Override
-//            public void onError(Object message) {
-//                System.out.println("Problem in finding Passenger");
-//            }
-//
-//            @Override
-//            public void onResponse(Object responseObject)
-//            {
-//
-//                try
-//                {
-//                    JSONObject responseData = new JSONObject(responseObject.toString());
-//                    //System.out.println(responseData);
-//
-//                    if(responseData.has("passengerInfo"))
-//                    {
-//                        JSONObject passengerInfo = (JSONObject) responseData.get("passengerInfo");
-//
-//                        JSONObject passengerData = (JSONObject) passengerInfo.get("passengerData");
-//                        JSONArray pickUpPoint = (JSONArray) passengerInfo.get("pickUpPoint");
-//
-//                        double lat = Double.parseDouble(pickUpPoint.getString(0));
-//                        double lon = Double.parseDouble(pickUpPoint.getString(1));
-//
-//
-//                        //System.out.println("passengerData: " + passengerData);
-//                        System.out.println(passengerData.get("name"));
-//                        System.out.println(passengerData.get("phone"));
-//                        System.out.println("pickUpPoint: " + lat + " , " + lon);
-//
-//                        update_bottom_slider(passengerData.get("name").toString(), passengerData.get("phone").toString());
-//                        update_marker_passenger(lon, lat);
-//
-//                        stop_searching();
+    public void api_call_driver_search()
+    {
+
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+
+        apiDataService.searchDriver(MainActivity.main_token,  driver_choice,
+                user_lat, user_long, dest_lat, dest_long,
+            new ApiDataService.VolleyResponseListener() {
+
+            @Override
+            public void onError(Object message) {
+                System.out.println("Problem in finding Driver");
+                userState = UserState.RESTING;
+                progressDialog.dismiss();
+            }
+
+            @Override
+            public void onResponse(Object responseObject)
+            {
+
+                try
+                {
+                    JSONObject responseData = new JSONObject(responseObject.toString());
+                    //System.out.println(responseData);
+
+                    if(responseData.has("driverInfo"))
+                    {
+                        JSONObject driverInfo = (JSONObject) responseData.get("driverInfo");
+                        System.out.println(responseData);
+                        JSONArray driverLocation = (JSONArray) driverInfo.get("vehicleLocation");
+
+                        double lat = Double.parseDouble(driverLocation.getString(1));
+                        double lon = Double.parseDouble(driverLocation.getString(0));
+
+                        System.out.println("driverInfo: " + driverInfo);
+                        System.out.println("driverLocation: " + lat + " , " + lon);
+
+                        updateDriverLocation(lon, lat);
+
+                        System.out.println(driverInfo.get("driverName"));
+                        System.out.println(driverInfo.get("driverPhone"));
+
+                        update_bottom_slider(driverInfo.get("driverName").toString(), driverInfo.get("driverPhone").toString());
+
+                        progressDialog.dismiss();
+
+                    }
+                    else
+                    {
+                        String message = (String) responseData.get("message");
+                        if(time_spent>12)
+                        {
+                            bottom_text.setText("No Driver Found!");
+                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                            //stop_searching();
+                            progressDialog.dismiss();
+                            return;
+                        }
+                        time_spent += 3;
+                        TimeUnit.SECONDS.sleep(3);
+                        api_call_driver_search();
+                        //first time or no match so nothing I guess
+                    }
+
+                }
+                catch (JSONException | InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
+
+    }
+
+
+    public void fetchRideDetails()
+    {
+
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+
+        apiDataService.searchDriver(MainActivity.main_token,  driver_choice,
+                user_lat, user_long, dest_lat, dest_long,
+                new ApiDataService.VolleyResponseListener() {
+
+                    @Override
+                    public void onError(Object message) {
+                        System.out.println("fetching driver info");
+                        System.out.println("Problem in finding Driver");
+//                        userState = UserState.RESTING;
 //                        progressDialog.dismiss();
-//
-//                    }
-//                    else
-//                    {
-//                        String message = (String) responseData.get("message");
-//                        if(time_spent>12)
-//                        {
-//                            bottom_text.setText("No Passenger Found!");
-//                            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-//                            stop_searching();
-//                            progressDialog.dismiss();
-//                            return;
-//                        }
-//                        time_spent += 3;
-//                        TimeUnit.SECONDS.sleep(3);
-//                        api_call_passenger_search();
-//                        //first time or no match so nothing I guess
-//                    }
-//
-//                }
-//                catch (JSONException | InterruptedException e)
-//                {
-//                    e.printStackTrace();
-//                }
-//
-//            }
-//        });
-//
-//
-//    }
+                    }
+
+                    @Override
+                    public void onResponse(Object responseObject)
+                    {
 
 
+                    try{
+
+                        JSONObject responseData = new JSONObject(responseObject.toString());
+                        //System.out.println(responseData);
+
+                        if(responseData.has("driverInfo"))
+                        {
+                            JSONObject driverInfo = (JSONObject) responseData.get("driverInfo");
+                            //System.out.println(responseData);
+                            JSONArray driverLocation = (JSONArray) driverInfo.get("vehicleLocation");
+                            //System.out.println(responseData.getString("status"));
+                            String status = responseData.getString("status");
+                            double lat = Double.parseDouble(driverLocation.getString(1));
+                            double lon = Double.parseDouble(driverLocation.getString(0));
+                            Location currentDriverLocation = new Location("");
+                            currentDriverLocation.setLatitude(lat);
+                            currentDriverLocation.setLongitude(lon);
+                            //System.out.println("driverInfo: " + driverInfo);
+                            //System.out.println("driverLocation: " + lat + " , " + lon);
+
+                            if(prevDriverLocation != null)
+                            {
+                                boolean notNear = Math.abs(prevDriverLocation.getLatitude()-currentDriverLocation.getLatitude()) > 0.001 || Math.abs(prevDriverLocation.getLongitude()-currentDriverLocation.getLongitude()) > 0.001;
+
+                                if(notNear)
+                                {
+                                    prevDriverLocation = currentDriverLocation;
+                                    updateDriverLocation(lon, lat);
+                                }
+
+                            }
+                            else
+                            {
+                                prevDriverLocation = currentDriverLocation;
+                            }
+
+
+                            if(status.contains("riding") && userState!=UserState.RIDING)
+                            {
+                                System.out.println("state synchronization is happening in fetch ride details");
+//                                bottom_cancel.setText("Cancel Ride");
+                                bottom_cancel.setVisibility(View.INVISIBLE);
+                                bottom_cancel.setEnabled(false);
+                                userState = UserState.RIDING;
+
+                                bottom_start_end.setVisibility(View.VISIBLE);
+                                bottom_start_end.setEnabled(true);
+                                bottom_start_end.setText("End Ride");
+
+                            }
+                        }
+
+
+
+//                            if(responseData.has("driverInfo"))
+//                            {
+//                                JSONObject driverInfo = (JSONObject) responseData.get("driverInfo");
+//
+//                                JSONArray driverLocation = (JSONArray) driverInfo.get("vehicleLocation");
+//
+//                                double lat = Double.parseDouble(driverLocation.getString(1));
+//                                double lon = Double.parseDouble(driverLocation.getString(0));
+//
+//                                System.out.println("driverInfo: " + driverInfo);
+//                                System.out.println("driverLocation: " + lat + " , " + lon);
+//
+//                                updateDriverLocation(lon, lat);
+//
+//                                System.out.println(driverInfo.get("driverName"));
+//                                System.out.println(driverInfo.get("driverPhone"));
+//
+//                                update_bottom_slider(driverInfo.get("driverName").toString(), driverInfo.get("driverPhone").toString());
+//
+//                                progressDialog.dismiss();
+//
+//                            }
+//                            else
+//                            {
+//                                String message = (String) responseData.get("message");
+//                                if(time_spent>12)
+//                                {
+//                                    bottom_text.setText("No Driver Found!");
+//                                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+//                                    //stop_searching();
+//                                    progressDialog.dismiss();
+//                                    return;
+//                                }
+//                                time_spent += 3;
+//                                TimeUnit.SECONDS.sleep(3);
+//                                api_call_driver_search();
+//                                //first time or no match so nothing I guess
+//                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+
+
+    }
+
+
+    public void update_bottom_slider(String name, String phone)
+    {
+        bottom_text.setText("You have been matched with a driver!\n" + "Name : " + name + "\nPhone : " + phone);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+
+
+//        bottom_start_end.setVisibility(View.VISIBLE);
+//        bottom_start_end.setEnabled(true);
+//        bottom_start_end.setText("Confirm Driver");
+
+        userState = UserState.PICKING;
+
+        bottom_cancel.setText("Cancel Ride");
+        bottom_cancel.setVisibility(View.VISIBLE);
+        bottom_cancel.setEnabled(true);
+
+    }
+
+    public void cancel_match()
+    {
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+
+        apiDataService.cancelMatch(MainActivity.main_token, new ApiDataService.VolleyResponseListener() {
+
+            @Override
+            public void onError(Object message) {
+                System.out.println("Problem in cancel ride");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+
+                try {
+                    JSONObject responseData = new JSONObject(responseObject.toString());
+                    System.out.println("Ride Cancelled by user");
+                    System.out.println(responseData);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+    }
+
+    public void end_ride() {
+        ApiDataService apiDataService = new ApiDataService(this.getContext());
+        double end_lat = locationComponent.getLastKnownLocation().getLatitude();
+        double end_long = locationComponent.getLastKnownLocation().getLongitude();
+        apiDataService.endRide(MainActivity.main_token, end_lat, end_long, new ApiDataService.VolleyResponseListener() {
+
+            @Override
+            public void onError(Object message) {
+                System.out.println("Problem in Ending ride");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+
+                try {
+                    JSONObject responseData = new JSONObject(responseObject.toString());
+                    System.out.println("Ride Ended");
+                    System.out.println(responseData);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
+        });
+
+    }
 //    public void stop_searching()
 //    {
 //        ApiDataService apiDataService = new ApiDataService(this.getContext());
@@ -424,54 +764,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 //                }
 //            }
 //        });
-//    }
-
-//    public void update_bottom_slider(String name, String phone)
-//    {
-//        bottom_text.setText("You have been matched with a passenger!\n" + "Name : " + name + "\nPhone : " + phone);
-//        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-//
-//        bottom_start.setVisibility(View.VISIBLE);
-//        bottom_start.setEnabled(true);
-//
-//        bottom_cancel.setVisibility(View.VISIBLE);
-//        bottom_cancel.setEnabled(true);
-//
-//    }
-//
-//
-//    public void update_marker_passenger(double lon, double lat)
-//    {
-//
-//        //Point destinationPoint = Point.fromLngLat(90.37609,23.83287);
-//
-//        passenger_long = lon;
-//        passenger_lat = lat;
-//
-//
-//        Point destinationPoint = Point.fromLngLat(lon,lat);
-//
-//        if(destinationPoint!=null)
-//        {
-//            Point originPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
-//                    locationComponent.getLastKnownLocation().getLatitude());
-//            GeoJsonSource source = mapboxMap.getStyle().getSourceAs("destination-source-id");
-//            if (source != null) {
-//                source.setGeoJson(Feature.fromGeometry(destinationPoint));
-//            }
-//
-//            getRoute(originPoint, destinationPoint);
-//
-//            startButton.setText("Start Navigation");
-//            startButton.setEnabled(true);
-//            startButton.setBackgroundResource(R.color.mapboxBlue);
-//
-//            driverState = DriverState.PICKING;
-//
-//
-//        }
-//
-//
 //    }
 //
 //
@@ -509,10 +801,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 //
 //        return (int) (Math.round(AVERAGE_RADIUS_OF_EARTH_KM * c));
 //    }
-
-
-
-
 
 
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
@@ -622,11 +910,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     @SuppressLint("MissingPermission")
     private void initLocationEngine() {
         locationEngine = LocationEngineProvider.getBestLocationEngine(getActivity());
-
+        System.out.println("initing location engine");
         LocationEngineRequest request = new LocationEngineRequest.Builder(DEFAULT_INTERVAL_IN_MILLISECONDS)
                 .setPriority(LocationEngineRequest.PRIORITY_NO_POWER)
                 .setMaxWaitTime(DEFAULT_MAX_WAIT_TIME).build();
-
         locationEngine.requestLocationUpdates(request, callback, getMainLooper());
         locationEngine.getLastLocation(callback);
     }
@@ -658,6 +945,23 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 }
 
 //                System.out.println("kill meh");
+                System.out.println("userstate: " + fragment.userState);
+                if (fragment.userState == UserState.FINDING)
+                {
+
+                }
+                else if(fragment.userState == UserState.PICKING)
+                {
+                    fragment.fetchRideDetails();
+                }
+                else if(fragment.userState == UserState.RIDING)
+                {
+                    fragment.fetchRideDetails();
+                }
+                else if(fragment.userState == UserState.RESTING)
+                {
+
+                }
 
 
 
