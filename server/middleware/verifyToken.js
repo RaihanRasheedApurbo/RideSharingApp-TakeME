@@ -24,13 +24,16 @@ module.exports = function (req, res, next) {
     const token = req.header('auth-token');
     //console.log("token: ", token);
     if(!token) {
-        return res.status(401).send({ messsage: "Access Denied" });
+        let headers = req.header;
+        return res.status(401).send({ messsage: "Access Denied", header: headers });
     }
     try{
         const verified = jwt.verify(token, secret);
         req.data = verified;
         next();
     }catch (err) {
-        res.status(400).send({ message: err.message || "invalid Token" });
+        let headers = req.header;
+        let message = err.message + "invalid";
+        res.status(400).send({ message: message, header: headers });
     }
 }
