@@ -1,0 +1,28 @@
+//variables
+@baseUrl = https://take-me-backend.herokuapp.com/api/passenger
+
+
+//user login
+###
+post {{baseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "ivifo@visinas.st",
+    "password":  "WXu25ufe"
+}
+
+//search driver
+###
+post {{baseUrl}}/searchDriver
+auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTIiLCJpYXQiOjE2MjQ1MzI1NTF9.rSW_C2nYnE9TfoltJ6RtP52dyAo2j9bTYVGgaoEXln0
+Content-Type: application/json
+
+{
+    "requirement": "nearest",
+    "pickUpPoint": "[23.784571240,90.34350]",
+    "dropOutPoint": "[23.7798586986,90.427278628]"
+}
+
+# 90.36542,
+#       23.8223483

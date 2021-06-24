@@ -1,0 +1,15 @@
+get https://take-me-backend.herokuapp.com/api/driver/pool/
+
+###
+
+post https://take-me-backend.herokuapp.com/api/owner/login
+Content-Type: application/json
+
+{
+    "email": "bruce@wayne.com",
+    "password":  "iAmBatman"
+}
+
+###
+get https://take-me-backend.herokuapp.com/api/owner/dashboard
+auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0Nzc5YWU3MGVmZTJlMjRjOTVjZDUiLCJpYXQiOjE2MjQ1MjEyMTJ9.EXpNA8Rk_Eh-M_A-yobWvYVZ3u8LtmIIYdUwoJeoTlM
