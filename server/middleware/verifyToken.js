@@ -29,13 +29,17 @@ module.exports = function (req, res, next) {
             req.data = verified;
             next();
         }catch (err) {
-            let headers = req.header;
+            const reqData = {
+                "headers": req.headers
+            };
             let message = err.message;
-            res.status(400).send({ message, headers });
+            res.status(400).send({ message, reqData });
         }
     }
     else {
-        let headers = req.header;
-        res.status(401).send({ messsage: "Access Denied", headers });
+        const reqData = {
+            "headers": req.headers
+        };
+        res.status(401).send({ messsage: "Access Denied", reqData });
     }
 }
