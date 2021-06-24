@@ -135,7 +135,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     ProgressDialog progressDialog;
     String driver_choice = "any";
     String car_choice = "any";
-    TextView bottom_text;
+    TextView bottom_text, textView_estimated_fare;
     Button bottom_cancel, bottom_start_end, popup_confirm;
     PopupWindow popupWindow;
     ConstraintLayout constraintLayout;
@@ -144,6 +144,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     RadioButton radioButton_driver_select, radioButton_car_select;
     LayoutInflater inflater1;
     double user_lat, user_long, dest_lat, dest_long, driver_lat, driver_long;
+    double estimated_fare = 0.0;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -356,6 +357,34 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
         driver_selector_group = customView.findViewById(R.id.radio_group);
         car_selector_group = customView.findViewById(R.id.radio_group_2);
+        textView_estimated_fare = customView.findViewById(R.id.text_estimated_fare);
+
+        //RadioGroup radioGroup = (RadioGroup) findViewById(R.id.yourRadioGroup);
+        String temp = "Estimated Fare : ";
+
+        driver_selector_group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                // checkedId is the RadioButton selected
+                if(checkedId == customView.findViewById(R.id.radioButton3).getId())
+                    textView_estimated_fare.setText(temp + "300");
+            }
+        });
+
+        car_selector_group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                // checkedId is the RadioButton selected
+                if(checkedId == customView.findViewById(R.id.radioButton_car_1).getId())
+                    textView_estimated_fare.setText(temp + "200");
+                else if(checkedId == customView.findViewById(R.id.radioButton_car_2).getId())
+                    textView_estimated_fare.setText(temp + "400");
+                else if(checkedId == customView.findViewById(R.id.radioButton_car_3).getId())
+                    textView_estimated_fare.setText(temp + "600");
+            }
+        });
 
         // confirm button
         popup_confirm.setOnClickListener(new View.OnClickListener() {

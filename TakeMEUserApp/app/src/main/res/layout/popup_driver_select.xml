@@ -107,6 +107,13 @@
                 android:buttonTint="@color/white"/>
         </RadioGroup>
 
+        <TextView
+            android:id="@+id/text_estimated_fare"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Estimated Fare : "
+            android:textColor="#00ff00"/>
+
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/popup_button_confirm"
             android:layout_width="180dp"
@@ -115,6 +122,7 @@
             android:background="@drawable/bg_waiting"
             android:layout_marginTop="20dp"
             android:layout_marginBottom="15dp"/>
+
 
 <!--        <TextView-->
 <!--            android:layout_width="wrap_content"-->
