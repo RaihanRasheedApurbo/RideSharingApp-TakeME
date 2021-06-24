@@ -23,18 +23,19 @@ module.exports = function (req, res, next) {
     
     const token = req.header('auth-token');
     //console.log("token: ", token);
-    if(!token) {
-        let headers = req.header;
-        return res.status(401).send({ messsage: "Access Denied", header: headers });
+    if(typeof token !== 'undefined') { 
+        try{
+            const verified = jwt.verify(token, secret);
+            req.data = verified;
+            next();
+        }catch (err) {
+            let headers = req.header;
+            let message = err.message;
+            res.status(400).send({ message, headers });
+        }
     }
-    try{
-        const verified = jwt.verify(token, secret);
-        req.data = verified;
-        next();
-    }catch (err) {
-        let request = req;
-        let headers = req.headers;
-        let message = err.message + " invalid token: " + token;
-        res.status(400).send({ message, request, headers });
+    else {
+        let headers = req.header;
+        res.status(401).send({ messsage: "Access Denied", headers });
     }
 }
