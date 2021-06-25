@@ -193,11 +193,11 @@ exports.showVehicleStatus = async(req, res) => {
                 }
             }
         }
-        console.log(passengerInfo);
+        //console.log(passengerInfo);
         res.status(200).send({vehicleInfo, vehicleLocation, driverInfo, status, passengerInfo});
     } catch (error) {
         console.log(error);
-        res.status(500).send({message: error.message, error});
+        res.status(200).send({message: error.message, error});
     }
 }
 

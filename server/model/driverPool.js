@@ -30,6 +30,9 @@ const DriverPoolSchema = new mongoose.Schema({
         type : Date,
         default: Date.now
     },
+    driverInitialLocation : {
+        type: Object
+    },
     rideInfo : {
         type: Object
     }
