@@ -12,7 +12,7 @@ const SEARCHING = "searching";
 const RIDING = "riding";
 const DENIED = "denied";
 const CANCELLED = "cancelled";
-const COMPLETED = "completed";
+const ENDED = "ended";
 
 const DRIVER = "driver";
 const PASSENGER = "passenger";
@@ -440,7 +440,7 @@ exports.endRide = async(req, res) => {
             let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], currentLocation[0], currentLocation[1]); 
             let total = dist/100.0;
             console.log(pickUpPoint, currentLocation);
-            let rideInfo = makeRideEntry(pickUpPoint, currentLocation, entryData.driverID, entryData.passengerID, entryData.vehicleInfo._id, entryData.startTime, total, COMPLETED);
+            let rideInfo = makeRideEntry(pickUpPoint, currentLocation, entryData.driverID, entryData.passengerID, entryData.vehicleInfo._id, entryData.startTime, total, ENDED);
             
             /*let d1 = Date.now();
             let d2 = new Date(entryData.startTime);
@@ -455,7 +455,7 @@ exports.endRide = async(req, res) => {
                 distance: dist,
                 source: pickUpPoint,
                 destination: currentLocation,
-                type: COMPLETED
+                type: ENDED
             });*/
             console.log(rideInfo);
             //res.status(200).send({ride});
@@ -463,7 +463,7 @@ exports.endRide = async(req, res) => {
             //let rideEntry = new Ride(rideInfo).save();
             let updateInfo = { 
                 $set: {
-                    status: COMPLETED,
+                    status: ENDED,
                     rideInfo: rideInfo
                 },
                 $unset: {
@@ -514,7 +514,7 @@ exports.lookForDriver = async(req, res) => {
             let removedData = await DriverPool.findOneAndDelete({passengerID: passengerID});
             res.status(200).send({message: "driver denied the ride", status: removedData.status, removedData});
         }
-        else if(entry && entry.status === COMPLETED) {
+        else if(entry && entry.status === ENDED) {
             console.log(entry);
             let removedData = await DriverPool.findOneAndDelete({passengerID: passengerID});
             let rideInfo = removedData.rideInfo;
