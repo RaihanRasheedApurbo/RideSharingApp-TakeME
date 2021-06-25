@@ -597,7 +597,6 @@ exports.lookForDriver = async(req, res) => {
                 }
             }
             else throw new Error("body parameter wrong");
-            
         }
 
     } catch (error) {
