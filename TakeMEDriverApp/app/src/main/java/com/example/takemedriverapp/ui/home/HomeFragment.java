@@ -229,6 +229,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             public void onClick(View v) {
                 Toast.makeText(getApplicationContext(),"Ride Ended",Toast.LENGTH_SHORT).show();
                 end_ride();
+                driverState = DriverState.RESTING;
                 locationEngine.removeLocationUpdates(callback);
                 Intent intent = getActivity().getIntent();
                 getActivity().finish();
@@ -920,6 +921,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                                 Intent intent = getActivity().getIntent();
                                                 getActivity().finish();
                                                 startActivity(intent);
+                                                driverState = DriverState.RESTING;
                                                 break;
                                         }
                                     }

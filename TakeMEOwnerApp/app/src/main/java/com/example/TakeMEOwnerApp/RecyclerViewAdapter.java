@@ -46,6 +46,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 // Go to new window instead of making toast
                 MainActivity activity = (MainActivity) context;
                 activity.setMarker(new LatLng(lat,lang),name);
+                activity.setCurrentDriver(itemPosition);
+//                System.out.println("inside RecyclerViewAdapter view.setOnClickListener");
 
 //                Toast.makeText( parent.getContext(), "Hello " + name, Toast.LENGTH_SHORT).show();
             }
