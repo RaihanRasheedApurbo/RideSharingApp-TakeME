@@ -687,10 +687,28 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                     System.out.println("ride ended");
                                     // fahad show a popup window where that will say to user that the ride has eneded and he or she
                                     // have to pay 50 tk or something like that.....
-                                    locationEngine.removeLocationUpdates(callback); // this should be stoped otherwise two callback will be present after restarting the activity
-                                    Intent intent = getActivity().getIntent();
-                                    getActivity().finish();
-                                    startActivity(intent);
+
+                                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            switch (which){
+                                                case DialogInterface.BUTTON_POSITIVE:
+
+                                                    locationEngine.removeLocationUpdates(callback); // this should be stoped otherwise two callback will be present after restarting the activity
+                                                    Intent intent = getActivity().getIntent();
+                                                    getActivity().finish();
+                                                    startActivity(intent);
+
+                                                    break;
+                                            }
+                                        }
+                                    };
+
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                    builder.setMessage("Your ride has ended\nPlease pay BDT 270.00 to the driver.").setPositiveButton("ok", dialogClickListener).show();
+
+
+
                                 }
                                 if(status.contains("denied"))
                                 {
