@@ -386,6 +386,7 @@ exports.cancelMatch = async(req, res) => {
         let estimatedArrivalTime = pickUpDist/10;
         console.log(cancelTime, estimatedArrivalTime);
 
+        let total = 0;
         if(entity === DRIVER) {
             total = 20+5*(Math.max(cancelTime-(estimatedArrivalTime/2), 0)/10);
         }
@@ -395,8 +396,6 @@ exports.cancelMatch = async(req, res) => {
         }
         
         console.log(pickUpDist, " ", cancelDist);
-        let total = 0;
-        if(addCost) total = 10;
         rideInfo = makeRideEntry(entryData.passengerInfo.pickUpPoint, entryData.passengerInfo.dropOutPoint, entryData.driverID, entryData.passengerID, entryData.vehicleInfo._id, entryData.startTime, total, cancelStatus);
         console.log(rideInfo);
 
