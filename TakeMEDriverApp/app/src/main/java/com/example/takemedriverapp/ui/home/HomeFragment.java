@@ -203,11 +203,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                 // we have to call backend here and update backend so that it knows ride has been canceld by driver
                                 // fahad call backend here..... to cancel the ride....
 
+                                progressDialog = new ProgressDialog(HomeFragment.super.getContext());
+                                progressDialog.show();
+                                progressDialog.setContentView(R.layout.waiting_screen);
+                                progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
                                 cancel_ride();
-                                locationEngine.removeLocationUpdates(callback);
-                                Intent intent = getActivity().getIntent();
-                                getActivity().finish();
-                                startActivity(intent);
+//                                locationEngine.removeLocationUpdates(callback);
+//                                Intent intent = getActivity().getIntent();
+//                                getActivity().finish();
+//                                startActivity(intent);
                                 break;
 
                             case DialogInterface.BUTTON_NEGATIVE:
@@ -407,15 +412,40 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             @Override
             public void onError(Object message) {
                 System.out.println("Problem in cancel ride");
+                System.out.println(message);
+                progressDialog.dismiss();
+
             }
 
             @Override
             public void onResponse(Object responseObject) {
-
                 try {
+
+                    progressDialog.dismiss();
+
+                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which){
+                                case DialogInterface.BUTTON_POSITIVE:
+                                    locationEngine.removeLocationUpdates(callback);
+                                    Intent intent = getActivity().getIntent();
+                                    getActivity().finish();
+                                    startActivity(intent);
+                                    driverState = DriverState.RESTING;
+                                    break;
+                            }
+                        }
+                    };
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setMessage("You have been fined BDT 20.00\nfor cancelling ride").setPositiveButton("ok", dialogClickListener).show();
+
+
                     JSONObject responseData = new JSONObject(responseObject.toString());
                     System.out.println("Ride Cancelled by driver");
                     System.out.println(responseData);
+
                 } catch (Exception e) {
                     System.out.println(e);
                 }
