@@ -1,6 +1,6 @@
 //variables
 @baseUrl = https://take-me-backend.herokuapp.com/api/passenger
-
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTIiLCJpYXQiOjE2MjQ1NDE4OTd9.GTFbWTs6eGNWoUuPD0on4XlQ0LPt3z9QyQVi1F45XXE
 
 //user login
 ###
@@ -15,7 +15,7 @@ Content-Type: application/json
 //search driver
 ###
 post {{baseUrl}}/searchDriver
-auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTIiLCJpYXQiOjE2MjQ1MzI1NTF9.rSW_C2nYnE9TfoltJ6RtP52dyAo2j9bTYVGgaoEXln0
+auth-token: {{token}}
 Content-Type: application/json
 
 {
@@ -24,5 +24,27 @@ Content-Type: application/json
     "dropOutPoint": "[23.7798586986,90.427278628]"
 }
 
-# 90.36542,
-#       23.8223483
+#  90.69696433,
+#       23.6995434
+
+//cancel ride
+###
+post {{baseUrl}}/cancelMatch
+auth-token: {{token}}
+Content-Type: application/json
+
+{
+    "entity": "passenger"
+}
+
+
+//end ride
+###
+post {{baseUrl}}/endRide
+auth-token: {{token}}
+Content-Type: application/json
+
+{
+    "entity": "passenger",
+    "location": "[0.00,0.000]"
+}
