@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         instance = this;
 
+
         Intent homeintent = new Intent(MainActivity.this, Waiting.class);
         startActivity(homeintent);
 
@@ -180,24 +181,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void updateStatus() {
         System.out.println("inside updateStatus");
+        System.out.println(drivers.size());
         for(int i=0;i<drivers.size();i++)
         {
             System.out.println(i);
             System.out.println(drivers.get(i).id);
             ApiDataService apiDataService = new ApiDataService(MainActivity.this);
-            apiDataService.viewDriver(MainActivity.main_token,drivers.get(i).id,new ApiDataService.VolleyResponseListener() {
+            apiDataService.viewDriver(MainActivity.main_token,vehicles.get(i).vehicle_id,new ApiDataService.VolleyResponseListener() {
                 @Override
                 public void onError(Object message) {
 
                     System.out.println(message);
+
                     System.out.println("Error in updateStatus");
                 }
 
                 @Override
                 public void onResponse(Object responseObject) {
                     try {
-
+                        System.out.println("response of updateStatus");
                         System.out.println(responseObject);
+//                        JSONObject obj = (JSONObject) responseObject;
+                        JSONObject responseData = new JSONObject(responseObject.toString());
+                        System.out.println(responseData.has("status"));
+                        System.out.println(responseData.has("status"));
+                        if(responseData.has("status"))
+                        {
+                            System.out.println(responseData.get("status"));
+                        }
+
 
                     } catch (Exception e) {
                         e.printStackTrace();

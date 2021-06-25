@@ -617,93 +617,107 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     {
 
 
-                    try{
+                        try{
 
-                        JSONObject responseData = new JSONObject(responseObject.toString());
-                        //System.out.println(responseData);
-
-                        if(responseData.has("driverInfo"))
-                        {
-                            JSONObject driverInfo = (JSONObject) responseData.get("driverInfo");
+                            JSONObject responseData = new JSONObject(responseObject.toString());
                             //System.out.println(responseData);
-                            JSONArray driverLocation = (JSONArray) driverInfo.get("vehicleLocation");
-                            //System.out.println(responseData.getString("status"));
-                            String status = responseData.getString("status");
-                            double lat = Double.parseDouble(driverLocation.getString(1));
-                            double lon = Double.parseDouble(driverLocation.getString(0));
-                            Location currentDriverLocation = new Location("");
-                            currentDriverLocation.setLatitude(lat);
-                            currentDriverLocation.setLongitude(lon);
-                            //System.out.println("driverInfo: " + driverInfo);
-                            //System.out.println("driverLocation: " + lat + " , " + lon);
 
-                            if(prevDriverLocation != null)
+                            if(responseData.has("driverInfo"))
                             {
-                                boolean notNear = Math.abs(prevDriverLocation.getLatitude()-currentDriverLocation.getLatitude()) > 0.001 || Math.abs(prevDriverLocation.getLongitude()-currentDriverLocation.getLongitude()) > 0.001;
+                                JSONObject driverInfo = (JSONObject) responseData.get("driverInfo");
+                                //System.out.println(responseData);
 
-                                if(notNear)
+                                //System.out.println(responseData.getString("status"));
+
+
+                                if(driverInfo.has("vehicleLocation"))
                                 {
-                                    prevDriverLocation = currentDriverLocation;
-                                    updateDriverLocation(lon, lat);
+                                    JSONArray driverLocation = (JSONArray) driverInfo.get("vehicleLocation");
+
+                                    double lat = Double.parseDouble(driverLocation.getString(1));
+                                    double lon = Double.parseDouble(driverLocation.getString(0));
+                                    Location currentDriverLocation = new Location("");
+                                    currentDriverLocation.setLatitude(lat);
+                                    currentDriverLocation.setLongitude(lon);
+                                    //System.out.println("driverInfo: " + driverInfo);
+                                    //System.out.println("driverLocation: " + lat + " , " + lon);
+
+                                    if(prevDriverLocation != null)
+                                    {
+                                        boolean notNear = Math.abs(prevDriverLocation.getLatitude()-currentDriverLocation.getLatitude()) > 0.001 || Math.abs(prevDriverLocation.getLongitude()-currentDriverLocation.getLongitude()) > 0.001;
+
+                                        if(notNear)
+                                        {
+                                            prevDriverLocation = currentDriverLocation;
+                                            updateDriverLocation(lon, lat);
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        prevDriverLocation = currentDriverLocation;
+                                    }
                                 }
 
-                            }
-                            else
-                            {
-                                prevDriverLocation = currentDriverLocation;
-                            }
 
-
-                            if(status.contains("riding") && userState!=UserState.RIDING)
-                            {
-                                System.out.println("state synchronization is happening in fetch ride details");
-//                                bottom_cancel.setText("Cancel Ride");
-                                bottom_cancel.setVisibility(View.INVISIBLE);
-                                bottom_cancel.setEnabled(false);
-                                userState = UserState.RIDING;
-
-                                bottom_start_end.setVisibility(View.VISIBLE);
-                                bottom_start_end.setEnabled(true);
-                                bottom_start_end.setText("End Ride");
 
                             }
 
-                            if(status.contains("ended"))
+                            if(responseData.has("status"))
                             {
-                                System.out.println("ride ended");
-                                // fahad show a popup window where that will say to user that the ride has eneded and he or she
-                                // have to pay 50 tk or something like that.....
-                                locationEngine.removeLocationUpdates(callback); // this should be stoped otherwise two callback will be present after restarting the activity
-                                Intent intent = getActivity().getIntent();
-                                getActivity().finish();
-                                startActivity(intent);
-                            }
-                            if(status.contains("denied"))
-                            {
-                                System.out.println("canceling ride after driver canceled");
-                                // fahad show a popup here and then do something like below
-                                 // this should be stoped otherwise two callback will be present after restarting the activity
+                                String status = responseData.getString("status");
+                                System.out.println("status: "+status);
 
-                                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        switch (which){
-                                            case DialogInterface.BUTTON_POSITIVE:
-                                                locationEngine.removeLocationUpdates(callback);
-                                                Intent intent = getActivity().getIntent();
-                                                getActivity().finish();
-                                                startActivity(intent);
-                                                break;
+                                if(status.contains("riding") && userState!=UserState.RIDING)
+                                {
+                                    System.out.println("state synchronization is happening in fetch ride details");
+    //                                bottom_cancel.setText("Cancel Ride");
+                                    bottom_cancel.setVisibility(View.INVISIBLE);
+                                    bottom_cancel.setEnabled(false);
+                                    userState = UserState.RIDING;
+
+                                    bottom_start_end.setVisibility(View.VISIBLE);
+                                    bottom_start_end.setEnabled(true);
+                                    bottom_start_end.setText("End Ride");
+
+                                }
+
+                                if(status.contains("ended"))
+                                {
+                                    System.out.println("ride ended");
+                                    // fahad show a popup window where that will say to user that the ride has eneded and he or she
+                                    // have to pay 50 tk or something like that.....
+                                    locationEngine.removeLocationUpdates(callback); // this should be stoped otherwise two callback will be present after restarting the activity
+                                    Intent intent = getActivity().getIntent();
+                                    getActivity().finish();
+                                    startActivity(intent);
+                                }
+                                if(status.contains("denied"))
+                                {
+                                    System.out.println("canceling ride after driver canceled");
+                                    // fahad show a popup here and then do something like below
+                                     // this should be stoped otherwise two callback will be present after restarting the activity
+
+                                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            switch (which){
+                                                case DialogInterface.BUTTON_POSITIVE:
+                                                    locationEngine.removeLocationUpdates(callback);
+                                                    Intent intent = getActivity().getIntent();
+                                                    getActivity().finish();
+                                                    startActivity(intent);
+                                                    break;
+                                            }
                                         }
-                                    }
-                                };
+                                    };
 
-                                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                                builder.setMessage("Sorry!\nRide cancelled by driver").setPositiveButton("ok", dialogClickListener).show();
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                    builder.setMessage("Sorry!\nRide cancelled by driver").setPositiveButton("ok", dialogClickListener).show();
 
 
+                                }
                             }
-                        }
 
 
 
