@@ -404,7 +404,7 @@ exports.cancelMatch = async(req, res) => {
         else throw new Error("This call was wrongfully made");
     } catch (error) {
         console.log(error);
-        res.status(500).send({message: error.message});
+        res.status(200).send({message: error.message});
     }
 }
 
@@ -481,7 +481,7 @@ exports.endRide = async(req, res) => {
         } 
         else throw new Error("This call was wrongfully made"); 
     } catch (error) {
-        res.status(500).send({message: error.message});
+        res.status(200).send({message: error.message});
     }
 }
 
