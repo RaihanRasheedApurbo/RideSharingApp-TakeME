@@ -1,0 +1,67 @@
+//variables
+@baseUrl = https://take-me-backend.herokuapp.com/api/driver
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTUiLCJpYXQiOjE2MjQ2NzU3NzJ9.Y8WIEM_pnj3SY5EZR6gYVfQvrkzSAupTU08B38UX-kk
+//driver login
+###
+post {{baseUrl}}/login
+Content-Type: application/json
+
+{
+    "email": "robin@loa.com",
+    "password":  "thisisrobin"
+}
+
+//search passenger
+###
+get {{baseUrl}}/search
+auth-token: {{token}}
+
+#  90.69696433,
+#       23.6995434
+//stop searching passenger
+###
+get {{baseUrl}}/stopSearch
+auth-token: {{token}}
+
+//cancel ride
+###
+post {{baseUrl}}/cancelMatch
+auth-token: {{token}}
+Content-Type: application/json
+
+{
+    "entity": "driver"
+}
+
+//start ride
+###
+post {{baseUrl}}/startRide
+auth-token: {{token}}
+Content-Type: application/json
+
+{
+    "entity": "driver"
+}
+
+//end ride
+###
+post {{baseUrl}}/endRide
+auth-token: {{token}}
+Content-Type: application/json
+
+{
+    "entity": "driver",
+    "location": "[0.00,0.000]"
+}
+
+//update location
+###
+post {{baseUrl}}/vehicle/location
+auth-token: {{token}}
+Content-Type: application/json
+
+{
+    "location": "[0.00,0.000]"
+}
+
+

@@ -1,7 +1,13 @@
+// show pool
 get https://take-me-backend.herokuapp.com/api/driver/pool/
 
+//delete pool
 ###
+get https://take-me-backend.herokuapp.com/api/driver/pool/clean
 
+
+//owner login
+###
 post https://take-me-backend.herokuapp.com/api/owner/login
 Content-Type: application/json
 
@@ -10,6 +16,7 @@ Content-Type: application/json
     "password":  "iAmBatman"
 }
 
+//owner dashboard
 ###
 get https://take-me-backend.herokuapp.com/api/owner/dashboard
 auth-token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0Nzc5YWU3MGVmZTJlMjRjOTVjZDUiLCJpYXQiOjE2MjQ1MjEyMTJ9.EXpNA8Rk_Eh-M_A-yobWvYVZ3u8LtmIIYdUwoJeoTlM
