@@ -56,64 +56,78 @@
 
         <RelativeLayout
             android:id="@+id/rel2"
-            android:layout_below="@+id/rel1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="15dp"
-            >
+            android:layout_below="@+id/rel1"
+            android:padding="0dp">
 
             <TextView
                 android:id="@+id/text_view_car_model"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
-                android:text="Vehicle Model:   "/>
+                android:text="Vehicle Model:   " />
 
             <TextView
                 android:id="@+id/text_view_car_model_value"
-                android:layout_toRightOf="@+id/text_view_car_model"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/text_view_car_model"
                 android:padding="5dp"
-                android:text="value"/>
+                android:text="value" />
 
 
             <TextView
                 android:id="@+id/text_view_car_reg_no"
-                android:layout_below="@id/text_view_car_model"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/text_view_car_model"
                 android:padding="5dp"
-                android:text="Vehicle Reg No: "/>
+                android:text="Vehicle Reg No: " />
 
             <TextView
                 android:id="@+id/text_view_car_reg_no_value"
-                android:layout_toRightOf="@+id/text_view_car_reg_no"
-                android:layout_below="@id/text_view_car_model"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/text_view_car_model"
+                android:layout_toRightOf="@+id/text_view_car_reg_no"
                 android:padding="5dp"
-                android:text="value"/>
+                android:text="value" />
 
             <TextView
                 android:id="@+id/text_view_driver_earning"
-                android:layout_below="@+id/text_view_car_reg_no"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/text_view_car_reg_no"
                 android:padding="5dp"
-                android:textStyle="bold"
-                android:text="Total Earning:    "/>
+                android:text="Total Earning:    "
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/text_view_driver_earning_value"
-                android:layout_toRightOf="@+id/text_view_driver_earning"
-                android:layout_below="@+id/text_view_car_reg_no"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@+id/text_view_car_reg_no"
+                android:layout_toRightOf="@+id/text_view_driver_earning"
                 android:padding="5dp"
-                android:textStyle="bold"
-                android:text="0.00"/>
+                android:text="0.00"
+                android:textStyle="bold" />
 
+            <TextView
+                android:id="@+id/text_view_car_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/text_view_driver_earning_value"
+                android:padding="5dp"
+                android:text="hello" />
+
+            <TextView
+                android:id="@+id/text_view_car_coordinate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/text_view_car_status"
+                android:padding="5dp"
+                android:text="hi" />
 
 
         </RelativeLayout>

@@ -64,6 +64,35 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.textView3.setText( Integer.toString(drivers.get(position).vehicle.reg_no) );
         holder.textView4.setText( drivers.get(position).vehicle.model );
         holder.textView5.setText( drivers.get(position).income.toString() );
+        holder.textView6.setText( "hello" );
+        holder.textView7.setText( "hi" );
+        if(!drivers.get(position).status.equalsIgnoreCase(""))
+        {
+
+            if(drivers.get(position).status.contains("riding"))
+            {
+                holder.textView6.setText("Status: Riding with passenger");
+                holder.textView7.setText("Destination Point: "+drivers.get(position).destLat+" "+drivers.get(position).destLang);
+            }
+            else if(drivers.get(position).status.contains("matched"))
+            {
+                holder.textView6.setText("Status: Picking up passenger");
+                holder.textView7.setText("Pickup Point: "+drivers.get(position).destLat+" "+drivers.get(position).destLang);
+            }
+            else if(drivers.get(position).status.contains("searching"))
+            {
+                holder.textView6.setText("Status: Searching for Passenger");
+            }
+            else if(drivers.get(position).status.contains("cancelled"))
+            {
+                holder.textView6.setText("Status: Last ride got cancelled!");
+            }
+
+        }
+        else
+        {
+            holder.textView6.setText("Status: Offline");
+        }
 
     }
 
@@ -74,7 +103,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        TextView textView1, textView2, textView3, textView4, textView5;
+        TextView textView1, textView2, textView3, textView4, textView5,textView6,textView7;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -83,6 +112,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             textView3 = itemView.findViewById(R.id.text_view_car_reg_no_value);
             textView4 = itemView.findViewById(R.id.text_view_car_model_value);
             textView5 = itemView.findViewById(R.id.text_view_driver_earning_value);
+            textView6 = itemView.findViewById(R.id.text_view_car_status);
+            textView7 = itemView.findViewById(R.id.text_view_car_coordinate);
+
+
 
 
         }

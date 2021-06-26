@@ -201,13 +201,62 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     try {
                         System.out.println("response of updateStatus");
                         System.out.println(responseObject);
-//                        JSONObject obj = (JSONObject) responseObject;
-                        JSONObject responseData = new JSONObject(responseObject.toString());
+                        JSONObject responseData = new JSONObject(responseObject.toString()) ;
+                        int currentIndex = -1;
+                        System.out.println(responseData.has("vehicleInfo"));
+                        if(responseData.has("vehicleInfo"))
+                        {
+                            JSONObject vehicleInfo = responseData.getJSONObject("vehicleInfo");
+                            int currentRegNo = Integer.parseInt(vehicleInfo.get("regNo").toString());
+
+                            System.out.println("currentRegNo: "+currentRegNo);
+
+                            for(int i=0;i<drivers.size();i++)
+                            {
+                                System.out.println(drivers.get(i).vehicle.reg_no);
+                                if(drivers.get(i).vehicle.reg_no==currentRegNo)
+                                {
+                                    currentIndex = i;
+                                    break;
+                                }
+                            }
+                        }
+
                         System.out.println(responseData.has("status"));
-                        System.out.println(responseData.has("status"));
+//                        System.out.println(responseData.has("status"));
                         if(responseData.has("status"))
                         {
+                            String currentStatus = responseData.get("status").toString();
                             System.out.println(responseData.get("status"));
+
+                            if(currentIndex!=-1)
+                            {
+                                if(!drivers.get(currentIndex).status.equalsIgnoreCase(currentStatus))
+                                {
+                                    drivers.get(currentIndex).status = currentStatus;
+                                    recyclerViewAdapter.drivers.set(currentIndex, drivers.get(currentIndex));
+                                    recyclerViewAdapter.notifyItemChanged(currentIndex);
+                                    System.out.println("status changed! for "+currentIndex+" "+drivers.get(currentIndex).status);
+                                }
+                            }
+
+
+
+                        }
+                        else
+                        {
+                            String currentStatus = "";
+
+                            if(currentIndex!=-1)
+                            {
+                                if(!drivers.get(currentIndex).status.equalsIgnoreCase(currentStatus))
+                                {
+                                    drivers.get(currentIndex).status = currentStatus;
+                                    recyclerViewAdapter.drivers.set(currentIndex, drivers.get(currentIndex));
+                                    recyclerViewAdapter.notifyItemChanged(currentIndex);
+                                    System.out.println("status changed! for "+currentIndex+" "+drivers.get(currentIndex).status);
+                                }
+                            }
                         }
 
 
