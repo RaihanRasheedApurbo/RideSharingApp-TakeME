@@ -844,10 +844,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     };
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                    builder.setMessage("You have been fined BDT 30.00\nfor cancelling match").setPositiveButton("ok", dialogClickListener).show();
-
-
                     JSONObject responseData = new JSONObject(responseObject.toString());
+                    String penalty = ((Integer) responseData.get("penaltyCost")).toString();
+                    builder.setMessage("You have been fined BDT "+penalty+".00\nfor cancelling match").setPositiveButton("ok", dialogClickListener).show();
+
+
+
                     System.out.println("Ride Cancelled by user");
                     System.out.println(responseData);
                 } catch (Exception e) {
