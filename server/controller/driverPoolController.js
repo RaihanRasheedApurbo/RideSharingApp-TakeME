@@ -388,11 +388,15 @@ exports.cancelMatch = async(req, res) => {
 
         let total = 0;
         if(entity === DRIVER) {
-            total = 20+5*(Math.max(cancelTime-(estimatedArrivalTime/2), 0)/10);
+            let fineDuration = Math.max(cancelTime - (estimatedArrivalTime/2), 0);
+            total = 30+5*(fineDuration/10);
         }
         if(entity === PASSENGER) {
             if(cancelTime > estimatedArrivalTime*1.5) total = 0;
-            else total = driverTravelledDist/100;
+            else {
+                if(cancelDist < pickUpDist) total = driverTravelledDist/100;
+                else total = driverTravelledDist/200;
+            }
         }
         
         console.log(pickUpDist, " ", cancelDist);
