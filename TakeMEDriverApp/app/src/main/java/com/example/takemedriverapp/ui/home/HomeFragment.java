@@ -95,6 +95,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     private NavigationMapRoute navigationMapRoute;
     // variables needed to initialize navigation
     private Button startButton;
+    private boolean lastResponseReceived = true;
 
 
     // boiler plate code of mapbox ended ... Apurbo's code starts from below...
@@ -406,7 +407,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     public void cancel_ride()
     {
         ApiDataService apiDataService = new ApiDataService(this.getContext());
-
+        driverState = DriverState.RESTING;
         apiDataService.cancelMatch(MainActivity2.main_token, new ApiDataService.VolleyResponseListener() {
 
             @Override
@@ -517,6 +518,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
     public void end_ride()
     {
+        driverState = DriverState.RESTING;
         ApiDataService apiDataService = new ApiDataService(this.getContext());
         double end_lat = locationComponent.getLastKnownLocation().getLatitude();
         double end_long = locationComponent.getLastKnownLocation().getLongitude();
@@ -881,7 +883,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
                 if(fragment.driverState == DriverState.PICKING || fragment.driverState == DriverState.RIDING)
                 {
-                    fragment.fetchRideDetails();
+                    if(fragment.lastResponseReceived)
+                    {
+                        fragment.lastResponseReceived = false;
+                        fragment.fetchRideDetails();
+
+                    }
+
+
                 }
 
 
@@ -917,6 +926,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
                     @Override
                     public void onError(Object message) {
+                        lastResponseReceived = true;
                         System.out.println("fetching ride info");
                         System.out.println("Problem in ride info");
 //                        userState = UserState.RESTING;
@@ -926,7 +936,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     @Override
                     public void onResponse(Object responseObject)
                     {
-
+                        lastResponseReceived = true;
 
                         try{
 
@@ -939,6 +949,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                             if(status.contains("cancelled"))
                             {
                                 System.out.println("ride has been canceled");
+                                driverState = DriverState.RESTING;
                                 //fahad show a popup and restart the whole thing after
                                 // after the user press ok do below stuff....
 

@@ -109,10 +109,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
     private MapboxNavigation mapboxNavigation;
     private Location prevDriverLocation;
-
-
-
-
+    private boolean lastResponseReceived = true;
 
 
     // boiler plate code of mapbox ended ... Apurbo's code starts from below...
@@ -610,14 +607,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     public void onError(Object message) {
                         System.out.println("fetching driver info");
                         System.out.println("Problem in finding Driver");
+                        lastResponseReceived = true;
 //                        userState = UserState.RESTING;
 //                        progressDialog.dismiss();
+
                     }
 
                     @Override
                     public void onResponse(Object responseObject)
                     {
-
+                        lastResponseReceived = true;
 
                         try{
 
@@ -715,6 +714,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                 if(status.contains("denied"))
                                 {
                                     System.out.println("canceling ride after driver canceled");
+                                    userState = UserState.RESTING;
                                     // fahad show a popup here and then do something like below
                                      // this should be stoped otherwise two callback will be present after restarting the activity
 
@@ -813,6 +813,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
     public void cancel_match()
     {
+        userState = UserState.RESTING;
         ApiDataService apiDataService = new ApiDataService(this.getContext());
 
         apiDataService.cancelMatch(MainActivity.main_token, new ApiDataService.VolleyResponseListener() {
@@ -1089,12 +1090,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 {
 
                 }
-                else if(fragment.userState == UserState.PICKING)
+                else if(fragment.userState == UserState.PICKING && fragment.lastResponseReceived)
                 {
+                    fragment.lastResponseReceived = false;
                     fragment.fetchRideDetails();
                 }
                 else if(fragment.userState == UserState.RIDING)
                 {
+                    fragment.lastResponseReceived = false;
                     fragment.fetchRideDetails();
                 }
                 else if(fragment.userState == UserState.RESTING)
