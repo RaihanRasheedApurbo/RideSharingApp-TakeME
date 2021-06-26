@@ -165,8 +165,8 @@ exports.showVehicleInfo = (req, res) => {
 
 exports.showVehicleStatus = async(req, res) => {
     try {
-        const ownerID = req.data._id;
-        const vehicleID = req.params.id;
+        const ownerID = mongoose.Types.ObjectId(req.data._id);
+        const vehicleID = mongoose.Types.ObjectId(req.params.id);
 
         let filter = {_id: vehicleID, ownerID: ownerID};
         vehicleInfo = await Vehicle.findOne(filter);
@@ -193,11 +193,11 @@ exports.showVehicleStatus = async(req, res) => {
                 }
             }
         }
-        console.log(passengerInfo);
+        //console.log(passengerInfo);
         res.status(200).send({vehicleInfo, vehicleLocation, driverInfo, status, passengerInfo});
     } catch (error) {
         console.log(error);
-        res.status(500).send({message: error.message, error});
+        res.status(200).send({message: error.message, error});
     }
 }
 

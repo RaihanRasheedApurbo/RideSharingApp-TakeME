@@ -12,7 +12,7 @@ const SEARCHING = "searching";
 const RIDING = "riding";
 const DENIED = "denied";
 const CANCELLED = "cancelled";
-const COMPLETED = "completed";
+const ENDED = "ended";
 
 const DRIVER = "driver";
 const PASSENGER = "passenger";
@@ -65,7 +65,7 @@ function pretifyPassengerData(data) {
 
 
 function makeRideEntry(pickUpPoint, currentLocation, driverID, passengerID, vehicleID, startTime, total, status) {
-    console.log(pickUpPoint, currentLocation, status);
+    //console.log(pickUpPoint, currentLocation, status);
     let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], currentLocation[0], currentLocation[1]); 
     //let total = dist/100.0;  //change the total based on ...
     
@@ -89,7 +89,7 @@ function makeRideEntry(pickUpPoint, currentLocation, driverID, passengerID, vehi
 
 //calculated geo distance between two geo coordinate
 function calculateDistance(lat1, lon1, lat2, lon2) {
-    console.log(lat1, lon1, lat2, lon2);
+    //console.log(lat1, lon1, lat2, lon2);
     const R = 6371e3; // metres
     const φ1 = lat1 * Math.PI/180; // φ, λ in radians
     const φ2 = lat2 * Math.PI/180;
@@ -250,7 +250,11 @@ async function matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint) 
         //console.log(passengerData);
 
         const filter = {driverID : driverID};
-        const updateInfo = {passengerInfo: passengerInfo, status: MATCHED, passengerID: passengerData._id};
+
+        let getDriverVehicle = await Vehicle.findOne(filter);
+        let driverCurrentLocation = getDriverVehicle.location.coordinates;
+        
+        const updateInfo = {passengerInfo: passengerInfo, status: MATCHED, passengerID: passengerData._id, startTime: Date.now(), driverInitialLocation: driverCurrentLocation};
         console.log(updateInfo);
 
         return DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true });
@@ -372,16 +376,34 @@ exports.cancelMatch = async(req, res) => {
         console.log(filter, updateInfo);
         entryData = await DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false});    
         
+        let pickUpDist = calculateDistance(entryData.passengerInfo.pickUpPoint[0], entryData.passengerInfo.pickUpPoint[1], entryData.driverInitialLocation[1], entryData.driverInitialLocation[0]);
+        let cancelDist = calculateDistance(entryData.passengerInfo.pickUpPoint[0], entryData.passengerInfo.pickUpPoint[1], entryData.vehicleLocation.coordinates[1], entryData.vehicleLocation.coordinates[0]);
+        let driverTravelledDist = calculateDistance(entryData.driverInitialLocation[1], entryData.driverInitialLocation[0], entryData.vehicleLocation.coordinates[1], entryData.vehicleLocation.coordinates[0]);
+        
+        let currentTime = Date.now();
+        let startTime = entryData.startTime;
+        let cancelTime = (currentTime-startTime)/1000;
+        let estimatedArrivalTime = pickUpDist/10;
+        console.log(cancelTime, estimatedArrivalTime);
+
         let total = 0;
-        if(addCost) total = 10;
+        if(entity === DRIVER) {
+            total = 20+5*(Math.max(cancelTime-(estimatedArrivalTime/2), 0)/10);
+        }
+        if(entity === PASSENGER) {
+            if(cancelTime > estimatedArrivalTime*1.5) total = 0;
+            else total = driverTravelledDist/100;
+        }
+        
+        console.log(pickUpDist, " ", cancelDist);
         rideInfo = makeRideEntry(entryData.passengerInfo.pickUpPoint, entryData.passengerInfo.dropOutPoint, entryData.driverID, entryData.passengerID, entryData.vehicleInfo._id, entryData.startTime, total, cancelStatus);
         console.log(rideInfo);
 
-        if(entity && entryData && Object.keys(entryData).length) res.send({message: "You cancelled the ride", entryData});
+        if(entity && entryData && Object.keys(entryData).length) res.send({message: "You cancelled the ride", penaltyCost: total, entryData});
         else throw new Error("This call was wrongfully made");
     } catch (error) {
         console.log(error);
-        res.status(500).send({message: error.message});
+        res.status(200).send({message: error.message});
     }
 }
 
@@ -417,7 +439,7 @@ exports.endRide = async(req, res) => {
             let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], currentLocation[0], currentLocation[1]); 
             let total = dist/100.0;
             console.log(pickUpPoint, currentLocation);
-            let rideInfo = makeRideEntry(pickUpPoint, currentLocation, entryData.driverID, entryData.passengerID, entryData.vehicleInfo._id, entryData.startTime, total, COMPLETED);
+            let rideInfo = makeRideEntry(pickUpPoint, currentLocation, entryData.driverID, entryData.passengerID, entryData.vehicleInfo._id, entryData.startTime, total, ENDED);
             
             /*let d1 = Date.now();
             let d2 = new Date(entryData.startTime);
@@ -432,7 +454,7 @@ exports.endRide = async(req, res) => {
                 distance: dist,
                 source: pickUpPoint,
                 destination: currentLocation,
-                type: COMPLETED
+                type: ENDED
             });*/
             console.log(rideInfo);
             //res.status(200).send({ride});
@@ -440,7 +462,7 @@ exports.endRide = async(req, res) => {
             //let rideEntry = new Ride(rideInfo).save();
             let updateInfo = { 
                 $set: {
-                    status: COMPLETED,
+                    status: ENDED,
                     rideInfo: rideInfo
                 },
                 $unset: {
@@ -458,7 +480,7 @@ exports.endRide = async(req, res) => {
         } 
         else throw new Error("This call was wrongfully made"); 
     } catch (error) {
-        res.status(500).send({message: error.message});
+        res.status(200).send({message: error.message});
     }
 }
 
@@ -491,7 +513,7 @@ exports.lookForDriver = async(req, res) => {
             let removedData = await DriverPool.findOneAndDelete({passengerID: passengerID});
             res.status(200).send({message: "driver denied the ride", status: removedData.status, removedData});
         }
-        else if(entry && entry.status === COMPLETED) {
+        else if(entry && entry.status === ENDED) {
             console.log(entry);
             let removedData = await DriverPool.findOneAndDelete({passengerID: passengerID});
             let rideInfo = removedData.rideInfo;
@@ -574,7 +596,6 @@ exports.lookForDriver = async(req, res) => {
                 }
             }
             else throw new Error("body parameter wrong");
-            
         }
 
     } catch (error) {

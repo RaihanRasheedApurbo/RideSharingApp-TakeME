@@ -223,7 +223,7 @@ exports.updateLocation = async (req, res) => {
         Promise.all([vehicleUpdate, poolUpdate])
         .then(data => {
             console.log(data);
-            if(data.length>1) console.log(data[1], "vehicleLocation: ", data[1].vehicleLocation.coordinates);
+            //if(data.length>1) console.log(data[1], "vehicleLocation: ", data[1].vehicleLocation.coordinates);
             res.status(200).send(data[0]);
         })
         .catch(err => {
