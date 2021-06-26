@@ -232,16 +232,33 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         bottom_end_ride.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(),"Ride Ended",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(),"Ride Ended",Toast.LENGTH_SHORT).show();
                 end_ride();
-                driverState = DriverState.RESTING;
-                locationEngine.removeLocationUpdates(callback);
-                Intent intent = getActivity().getIntent();
-                getActivity().finish();
-                startActivity(intent);
-//                reset_passenger();
-//                bottom_end_ride.setVisibility(View.INVISIBLE);
-//                bottom_end_ride.setEnabled(false);
+
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
+
+                                driverState = DriverState.RESTING;
+                                locationEngine.removeLocationUpdates(callback);
+                                Intent intent = getActivity().getIntent();
+                                getActivity().finish();
+                                startActivity(intent);
+                                break;
+
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                //No button clicked
+                                break;
+                        }
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setMessage("Ride ended.\nCollect BDT 270.00 from the passenger")
+                        .setPositiveButton("Ok", dialogClickListener)
+                        .show();
             }
         });
         return root;
