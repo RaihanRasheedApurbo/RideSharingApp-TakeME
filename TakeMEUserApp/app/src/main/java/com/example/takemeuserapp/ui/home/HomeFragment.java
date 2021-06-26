@@ -556,6 +556,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
                         updateDriverLocation(lon, lat);
 
+                        startButton.setEnabled(false);
+                        startButton.setVisibility(View.INVISIBLE);
+
                         System.out.println(driverInfo.get("driverName"));
                         System.out.println(driverInfo.get("driverPhone"));
 
@@ -677,9 +680,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                     bottom_cancel.setEnabled(false);
                                     userState = UserState.RIDING;
 
-                                    bottom_start_end.setVisibility(View.VISIBLE);
-                                    bottom_start_end.setEnabled(true);
-                                    bottom_start_end.setText("End Ride");
+                                    //bottom_start_end.setVisibility(View.VISIBLE);
+                                    //bottom_start_end.setEnabled(true);
+                                    //bottom_start_end.setText("End Ride");
 
                                 }
 
