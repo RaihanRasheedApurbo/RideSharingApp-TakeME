@@ -111,7 +111,6 @@ exports.showVehicleInfo = (req, res) => {
 exports.showRideHistory = async (req, res) => {
     try {
         const driverID = mongoose.Types.ObjectId(req.data._id);
-        let filter = {'driverID': driverID};
         let getRideHistory = null, getTotalEarning = null;
 
         if(req.query.duration) {
@@ -122,23 +121,24 @@ exports.showRideHistory = async (req, res) => {
             let end = d.toISOString();
 
             getRideHistory = Ride.aggregate([
-                { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
+                { $match : { 'driverID': driverID, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
             ]);
             getTotalEarning = Ride.aggregate([
-                { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+                { $match : { 'driverID': driverID, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
                 { $group: { '_id': '$driverID', 'total': {$sum: '$fare'}}}
             ]);
         }
         else {
-            getRideHistory = Ride.find({ filter });
+            getRideHistory = Ride.find({ 'driverID': driverID });
             getTotalEarning = Ride.aggregate([
+                { $match : { 'driverID': driverID } },
                 { $group: { '_id': '$driverID', 'total': {$sum: '$fare'}}}
             ]);
         }
 
         let info = await Promise.all([getRideHistory, getTotalEarning]);
         let rideHistory = info[0];
-        let earning = info[1];
+        let earning = info[1][0].total;
         res.status(200).send({ride: rideHistory, count: rideHistory.length, total: earning});
     } catch (error) {
         res.send({message: error.message});

@@ -1,4 +1,5 @@
 const Passenger = require('../model/passenger');
+const Ride = require('../model/ride');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
@@ -86,7 +87,6 @@ exports.showDashboard = (req, res) => {
 exports.showRideHistory = async (req, res) => {
     try {
         const passengerID = mongoose.Types.ObjectId(req.data._id);
-        let filter = {'passengerID': passengerID};
         let getRideHistory = null, getTotalSpent = null;
 
         if(req.query.duration) {
@@ -97,23 +97,24 @@ exports.showRideHistory = async (req, res) => {
             let end = d.toISOString();
 
             getRideHistory = Ride.aggregate([
-                { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
+                { $match : { 'passengerID': passengerID, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
             ]);
             getTotalSpent = Ride.aggregate([
-                { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+                { $match : { 'passengerID': passengerID, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
                 { $group: { '_id': '$passengerID', 'total': {$sum: '$fare'}}}
             ]);
         }
         else {
-            getRideHistory = Ride.find({ filter });
+            getRideHistory = Ride.find({ 'passengerID': passengerID });
             getTotalSpent = Ride.aggregate([
+                { $match : { 'passengerID': passengerID } },
                 { $group: { '_id': '$passengerID', 'total': {$sum: '$fare'}}}
             ]);
         }
 
         let info = await Promise.all([getRideHistory, getTotalSpent]);
         let rideHistory = info[0];
-        let spent = info[1];
+        let spent = info[1][0].total;
         res.status(200).send({ride: rideHistory, count: rideHistory.length, total: spent});
     } catch (error) {
         res.send({message: error.message});

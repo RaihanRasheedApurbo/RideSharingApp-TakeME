@@ -222,7 +222,7 @@ exports.updateVehicleInfo =(req, res) => {
 }
 
 //ride history for one vehicle
-exports.showRideHistory = (req, res) => { 
+exports.showRideHistory = async (req, res) => { 
     try {
         let ownerID = req.data._id;
         let vehicleID = req.params.id;
@@ -232,9 +232,8 @@ exports.showRideHistory = (req, res) => {
         }
 
         let vehicle = await Vehicle.findOne(checkFilter);
+        console.log(vehicle);
         if (vehicle) {
-            let vehicleID = mongoose.Types.ObjectId(vehicle._id);
-            let filter = {'vehicleID': vehicleID};
             let getRideHistory = null, getTotalEarning = null;
 
             if(req.query.duration) {
@@ -245,23 +244,24 @@ exports.showRideHistory = (req, res) => {
                 let end = d.toISOString();
 
                 getRideHistory = Ride.aggregate([
-                    { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
+                    { $match : { 'vehicleID': vehicle._id, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
                 ]);
                 getTotalEarning = Ride.aggregate([
-                    { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+                    { $match : { 'vehicleID': vehicle._id, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
                     { $group: { '_id': '$vehicleID', 'total': {$sum: '$fare'}}}
                 ]);
             }
             else {
-                getRideHistory = Ride.find({ filter });
+                getRideHistory = Ride.find({ 'vehicleID': vehicle._id });
                 getTotalEarning = Ride.aggregate([
+                    { $match : { 'vehicleID': vehicle._id } },
                     { $group: { '_id': '$vehicleID', 'total': {$sum: '$fare'}}}
                 ]);
             }
 
             let info = await Promise.all([getRideHistory, getTotalEarning]);
             let rideHistory = info[0];
-            let earning = info[1];
+            let earning = info[1][0].total;
             res.status(200).send({ride: rideHistory, count: rideHistory.length, total: earning});
         }else {
             throw new Error("vehicle not found");
