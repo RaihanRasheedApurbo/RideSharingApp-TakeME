@@ -222,43 +222,53 @@ exports.updateVehicleInfo =(req, res) => {
 }
 
 //ride history for one vehicle
-exports.showRideHistory = (req, res) => {
-    
-    const ownerID = req.data._id;
-    const vehicleID = req.params.id;
-    const filter = {
-        vehicleID: mongoose.Types.ObjectId(vehicleID)
+exports.showRideHistory = (req, res) => { 
+    try {
+        let ownerID = req.data._id;
+        let vehicleID = req.params.id;
+        let checkFilter = {
+            _id: mongoose.Types.ObjectId(vehicleID),
+            ownerID: mongoose.Types.ObjectId(ownerID)
+        }
+
+        let vehicle = await Vehicle.findOne(checkFilter);
+        if (vehicle) {
+            let vehicleID = mongoose.Types.ObjectId(vehicle._id);
+            let filter = {'vehicleID': vehicleID};
+            let getRideHistory = null, getTotalEarning = null;
+
+            if(req.query.duration) {
+                const duration = parseInt(req.query.duration);
+
+                let d = new Date();
+                let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
+                let end = d.toISOString();
+
+                getRideHistory = Ride.aggregate([
+                    { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
+                ]);
+                getTotalEarning = Ride.aggregate([
+                    { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+                    { $group: { '_id': '$vehicleID', 'total': {$sum: '$fare'}}}
+                ]);
+            }
+            else {
+                getRideHistory = Ride.find({ filter });
+                getTotalEarning = Ride.aggregate([
+                    { $group: { '_id': '$vehicleID', 'total': {$sum: '$fare'}}}
+                ]);
+            }
+
+            let info = await Promise.all([getRideHistory, getTotalEarning]);
+            let rideHistory = info[0];
+            let earning = info[1];
+            res.status(200).send({ride: rideHistory, count: rideHistory.length, total: earning});
+        }else {
+            throw new Error("vehicle not found");
+        }
+    } catch (error) {
+        res.send({message: error.message});
     }
-
-    let getRideHistory = null;
-
-    if(req.query.duration) {
-        const duration = parseInt(req.query.duration);
-
-        let d = new Date();
-        let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
-        let end = d.toISOString();
-
-        //console.log("start: ", start);
-        //console.log("end: ", end);
-        
-        getRideHistory = Ride.aggregate([
-            { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
-        ]);
-    }
-    else {
-        console.log(filter);
-        getRideHistory = Ride.find(filter);
-    }
-
-    getRideHistory
-    .then(data => {
-        res.status(200).send(data);
-    })
-    .catch(err => {
-        //console.log(err);
-        res.status(500).send({message: err.message});
-    });
 }
 
 //driverAddFunction

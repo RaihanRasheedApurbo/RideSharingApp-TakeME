@@ -1,5 +1,6 @@
 const Passenger = require('../model/passenger');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 const secret = process.env.TOKEN_SECRET || "TakeMeSecret";
 
@@ -79,6 +80,44 @@ exports.showDashboard = (req, res) => {
     .catch(err =>{
         res.status(500).send({ message: err.message || "Error retrieving passenger with id " + id})
     })
+}
+
+//show Ride History
+exports.showRideHistory = async (req, res) => {
+    try {
+        const passengerID = mongoose.Types.ObjectId(req.data._id);
+        let filter = {'passengerID': passengerID};
+        let getRideHistory = null, getTotalSpent = null;
+
+        if(req.query.duration) {
+            const duration = parseInt(req.query.duration);
+
+            let d = new Date();
+            let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
+            let end = d.toISOString();
+
+            getRideHistory = Ride.aggregate([
+                { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
+            ]);
+            getTotalSpent = Ride.aggregate([
+                { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+                { $group: { '_id': '$passengerID', 'total': {$sum: '$fare'}}}
+            ]);
+        }
+        else {
+            getRideHistory = Ride.find({ filter });
+            getTotalSpent = Ride.aggregate([
+                { $group: { '_id': '$passengerID', 'total': {$sum: '$fare'}}}
+            ]);
+        }
+
+        let info = await Promise.all([getRideHistory, getTotalSpent]);
+        let rideHistory = info[0];
+        let spent = info[1];
+        res.status(200).send({ride: rideHistory, count: rideHistory.length, total: spent});
+    } catch (error) {
+        res.send({message: error.message});
+    }   
 }
 
 exports.getAllPassengers = (req, res) => {

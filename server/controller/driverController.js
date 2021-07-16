@@ -108,36 +108,41 @@ exports.showVehicleInfo = (req, res) => {
 }
 
 //show Ride History
-exports.showRideHistory = (req, res) => {
-    const driverID = mongoose.Types.ObjectId(req.data._id);
-    let getRideHistory = null;
+exports.showRideHistory = async (req, res) => {
+    try {
+        const driverID = mongoose.Types.ObjectId(req.data._id);
+        let filter = {'driverID': driverID};
+        let getRideHistory = null, getTotalEarning = null;
 
-    if(req.query.duration) {
-        const duration = parseInt(req.query.duration);
+        if(req.query.duration) {
+            const duration = parseInt(req.query.duration);
 
-        let d = new Date();
-        let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
-        let end = d.toISOString();
+            let d = new Date();
+            let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
+            let end = d.toISOString();
 
-        //console.log("start: ", start);
-        //console.log("end: ", end);
-        
-        getRideHistory = Ride.aggregate([
-            { $match : { 'driverID': driverID, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
-        ]);
-    }
-    else {
-        getRideHistory = Ride.find({ 'driverID': driverID });
-    }
+            getRideHistory = Ride.aggregate([
+                { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
+            ]);
+            getTotalEarning = Ride.aggregate([
+                { $match : { filter, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+                { $group: { '_id': '$driverID', 'total': {$sum: '$fare'}}}
+            ]);
+        }
+        else {
+            getRideHistory = Ride.find({ filter });
+            getTotalEarning = Ride.aggregate([
+                { $group: { '_id': '$driverID', 'total': {$sum: '$fare'}}}
+            ]);
+        }
 
-    getRideHistory
-    .then(data => {
-        res.status(200).send(data);
-    })
-    .catch(err => {
-        //console.log(err);
-        res.status(500).send({message: err.message});
-    });
+        let info = await Promise.all([getRideHistory, getTotalEarning]);
+        let rideHistory = info[0];
+        let earning = info[1];
+        res.status(200).send({ride: rideHistory, count: rideHistory.length, total: earning});
+    } catch (error) {
+        res.send({message: error.message});
+    }   
 }
 
 //show Earning
