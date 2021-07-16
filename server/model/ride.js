@@ -29,27 +29,18 @@ const RideSchema = new mongoose.Schema({
         type : Number,
         required: true
     },
+    penaltyCost : {
+        type: Number
+    },
     distance : {
         type : Number
     },
     source : {
         type : Object,
-        name : {
-            type: String
-        },
-        location : {
-            type: Object
-        },
         required: true
     },
     destination : {
         type : Object,
-        name : {
-            type: String
-        },
-        location : {
-            type: Object
-        },
         required: true
     },
     status : {

@@ -64,7 +64,7 @@ route.get('/api/vehicle/driverID/:id', vehicleController.findByDriverID); //unde
 route.get('/api/vehicle/getAll', vehicleController.getAllVehicles); //test purpose only
 
 
-route.post('/api/ride/add', verify, rideController.addRide); //under construction, might be unnecessary
+route.post('/api/ride/add', rideController.addRide); //under construction, might be unnecessary
 route.get('/api/ride/id/', rideController.find); //under construction, might be unnecessary
 route.get('/api/ride/passengerID/', rideController.findByPassengerID); //under construction, might be unnecessary
 route.get('/api/ride/driverID/', rideController.findByDriverID); //under construction, might be unnecessary

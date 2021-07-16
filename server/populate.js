@@ -1,12 +1,16 @@
 const Chance = require("chance");
+const mongoose = require('mongoose');
 const axios = require("axios");
 
 const Owner = require('./model/owner');
 const Driver = require('./model/driver');
 const Vehicle = require('./model/vehicle');
+const Passenger = require('./model/passenger');
 const pointSchema = require("./model/point");
+const Ride = require('./model/ride');
 
 let chance = new Chance();
+const base_address = 'https://take-me-backend.herokuapp.com/';
 const address = 'http://localhost:3000/api/';
 
 let header_data = {
@@ -88,78 +92,6 @@ function generateVehicle() {
         regNo: chance.ssn({ dashes: false }),
         capacity: chance.pickone([2, 4, 7])      
     };
-}
-
-function generateRide(did, pid, vid) {
-    return {
-        driverID: did,
-        passengerID: pid,
-        vehicleID: vid,
-        duration: chance.minute(),
-        fare: chance.floating({min: 40, max: 500, fixed: 2}),
-        source: {
-            name: chance.address(),
-            latitude: chance.floating({min: 23.1, max: 23.9, fixed: 7}),
-            longitude: chance.floating({min: 90.1, max: 90.9, fixed: 7})
-        },
-        destination: {
-            name: chance.address(),
-            latitude: chance.floating({min: 23.1, max: 23.9, fixed: 7}),
-            longitude: chance.floating({min: 90.1, max: 90.9, fixed: 7})
-        }
-    };
-}
-
-function ridePopulate(rideCount) {
-    getDrivers = axios.get(address+'driver/getAll');
-    getPassengers = axios.get(address+'passenger/getAll');
-
-    Promise.all([getDrivers, getPassengers])
-    .then(data => {
-        drivers = data[0].data;
-        passengers = data[1].data;
-        
-        for (let index = 0; index < rideCount; index++) {
-            let passengerIndex = Math.floor(Math.random() * passengers.length);
-            
-            let passengerCred = {
-                email: passengers[passengerIndex].email,
-                password: passengers[passengerIndex].password  
-            };
-
-            let driverIndex = null;
-            while(true) {
-                driverIndex = Math.floor(Math.random() * drivers.length);
-                if(drivers[driverIndex].vehicleID) break;
-            }
-            
-            const passengerID = passengers[passengerIndex]._id;
-            const driverID = drivers[driverIndex]._id; 
-            const vehicleID = drivers[driverIndex].vehicleID;
-
-            let rideInfo = generateRide(driverID, passengerID, vehicleID);
-            console.log("rideInfo: ", rideInfo);
-            
-            axios.post(address+'passenger/login', passengerCred)
-                .then(res => {
-                    header_data['auth-token'] = res.headers['auth-token'];
-        
-                    axios.post(address+'passenger/addRide', rideInfo, {headers: header_data})
-                    .then( data => {
-                        console.log("success", index);
-                    })
-                    .catch(err => {
-                        console.log(err);
-                    })
-                })
-                .catch( err => {
-                    console.log(err);
-                });
-        }
-    })
-    .catch( err=> {
-        console.log(err);
-    });
 }
 
 function driverPopulate() {
@@ -359,7 +291,7 @@ function vehicleLocationUpdate() {
                 const vehicleID = ownerVehicleList[j];
                 
                 //console.log(vehicleID, typeof(vehicleID));
-                const latitude = chance.floating({min: 23.7, max: 23.85, fixed: 9});
+                const latitude = chance.floating({min: 23.72, max: 23.85, fixed: 9});
                 const longitude = chance.floating({min: 90.35, max: 90.4, fixed: 9});
                     
                 const newLocation = {
@@ -388,46 +320,38 @@ function vehicleLocationUpdate() {
     });
 }
 
-function makeDriverAvailable() {
-    let count = 0;
-    axios.get(address+'driver/getAll')
-    .then(data => {
-        drivers = data.data;
-        //console.log(drivers);
-        for (let index = 0; index < drivers.length; index++) {
-            let driver = drivers[index];
-            console.log("driver.vehicleID: ", driver.vehicleID);
-            
-            let n = Math.floor(Math.random() * 16);
-            if (n%3 && driver.vehicleID) {
+async function putDriverOnPool() {
+    try {
+        let poolInfo = await axios.get(address+'driver/pool');
+        let pool = poolInfo.data.pool;
+        
+        let info = await axios.get(address+'driver/getAll');
+        let drivers = info.data;
+        let driverCount = drivers.length;
+        
+        let successCount = 0;
+        for (let i = 0; i < 10; i++) {
+            let driverIndex = Math.floor(Math.random() * driverCount);
+            let driver = drivers[driverIndex];
+            if(driver.vehicleID) console.log("valid ", driver._id);
+            if(driver.vehicleID && pool.filter(d => d.driverID === driver._id).length === 0) {
                 let driverCred = {
                     email: driver.email,
                     password: driver.password  
                 };
+                let loginInfo = await axios.post(address+'driver/login', driverCred);
                 
-                axios.post(address+'driver/login', driverCred)
-                .then(res => {
-                    header_data['auth-token'] = res.headers['auth-token'];
+                header_data['auth-token'] = loginInfo.headers['auth-token'];
         
-                    axios.get(address+'driver/search', {headers: header_data})
-                    .then( data => {
-                        console.log("success", count++, data.data);
-                    })
-                    .catch(err => {
-                        console.log("update error", err.message);
-                    });
-                })
-                .catch(err => {
-                    console.log("login error", err.message);
-                });
-            }
+                let searchData = await axios.get(address+'driver/search', {headers: header_data});
+                if(searchData) successCount++;
+            } 
         }
-    })
-    .catch(err => {
-        console.log("get all error", err.message);
-    });
+        console.log(successCount);
+    } catch (error) {
+        console.log({message: error.message});
+    }
 }
-
 
 function driverCheck() {
     let count = 0;
@@ -462,6 +386,156 @@ function driverCheck() {
     });    
 }
 
+//calculated geo distance between two geo coordinate
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    //console.log(lat1, lon1, lat2, lon2);
+    const R = 6371e3; // metres
+    const φ1 = lat1 * Math.PI/180; // φ, λ in radians
+    const φ2 = lat2 * Math.PI/180;
+    const Δφ = (lat2-lat1) * Math.PI/180;
+    const Δλ = (lon2-lon1) * Math.PI/180;
+
+    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    const d = R * c; // in metres
+
+    //console.log(d);
+    return d;
+}
+
+function generateRandomDate() {
+    let date = new Date();
+    let differ = Math.floor(Math.random() * 30);
+    let hour = Math.floor(Math.random() * (23-0)) + 0;
+    let minute = Math.floor(Math.random() * 59);
+    let second = Math.floor(Math.random() * 59);
+    let time = new Date(date.getFullYear(), date.getMonth(), date.getDate()-differ, hour, minute, second);
+    
+    return time;
+}
+
+async function generateRide(driverID, vehicleID, passengerID) {
+    /*console.log(typeof(driverID), typeof(vehicleID), typeof(passengerID));
+    let getDriverInfo = axios.get(address+'driver/getAll/');
+    let getVehicleInfo = axios.get(address+'vehicle/getAll/');
+    let getPassengerInfo = axios.get(address+'passenger/getAll/');
+    let info = await Promise.all([getDriverInfo, getVehicleInfo, getPassengerInfo]);
+    let allDrivers = info[0].data;
+    let allVehicles = info[1].data;
+    let allPassengers = info[2].data;
+
+    console.log(2);
+    let driverInfo = allDrivers.find(x => x._id == driverID);
+    let vehicleInfo = allVehicles.find(x => x._id == vehicleID);
+    let passengerInfo = allPassengers.find(x => x._id == passengerID);
+    
+    console.log(driverInfo, vehicleInfo, passengerInfo);*/
+
+    let lat, lon;
+    
+    lat = chance.floating({min: 23.72, max: 23.86, fixed: 9});
+    lon = chance.floating({min: 90.35, max: 90.42, fixed: 9});
+    let pickUpPoint = [lat, lon];
+
+    lat = chance.floating({min: 23.72, max: 23.86, fixed: 9});
+    lon = chance.floating({min: 90.35, max: 90.42, fixed: 9});
+    let currentLocation = [lat, lon];
+    
+    let status = "ended";
+    //console.log(pickUpPoint, currentLocation, status);
+    let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], currentLocation[0], currentLocation[1]); 
+    //let total = dist/100.0;  //change the total based on ...
+    
+    let time = generateRandomDate();
+    let duration = (dist/1000)*7;
+    duration = Math.round((duration + Number.EPSILON) * 1000) / 1000;
+    
+    let total = (dist/1000)*25 + duration*0.01;
+    total = Math.round((total + Number.EPSILON) * 100) / 100;
+    
+    let ride = {
+        driverID: driverID,
+        passengerID: passengerID,
+        vehicleID: vehicleID,
+        time: time,
+        duration: duration,
+        fare: total,
+        distance: dist,
+        source: pickUpPoint,
+        destination: currentLocation,
+        status: status,
+        extraInfo: "hello there"
+    };
+    //console.log(ride);
+    return ride;
+}
+
+async function generatedRideHistory() {
+    try {
+        let info, drivers = [], passengers = [];
+        //let allPassengers = axios.get(base_address+'api/passenger/getAll/');
+        //let allDrivers = axios.get(base_address+'api/driver/getAll/');
+        
+        //info = await Promise.all([allPassengers, allDrivers]);
+        //passengers = info[0].data;
+        //drivers = info[1].data;
+        
+        passengers = [
+            {
+                _id: mongoose.Types.ObjectId('607478178c29c1408cfad290')
+            },
+            {
+                _id: mongoose.Types.ObjectId('607478178c29c1408cfad292')
+            }
+        ];
+
+        drivers = [
+            {
+                _id: mongoose.Types.ObjectId('607478178c29c1408cfad298'),
+                vehicleID: mongoose.Types.ObjectId('6074779be70efe2e24c95ce8')
+            },
+            {
+                _id: mongoose.Types.ObjectId('607478178c29c1408cfad295'),
+                vehicleID: mongoose.Types.ObjectId('6074779be70efe2e24c95ce5')
+            },
+            {
+                _id: mongoose.Types.ObjectId('607478188c29c1408cfad2b0'),
+                vehicleID: mongoose.Types.ObjectId('6074779be70efe2e24c95ce6')
+            },
+            {
+                _id: mongoose.Types.ObjectId('607478198c29c1408cfad2c1'),
+                vehicleID: mongoose.Types.ObjectId('6074779be70efe2e24c95ce7')
+            }
+        ];
+        let passengerCount = passengers.length
+        let driverCount = drivers.length;
+
+        let passengerIndex, driverIndex;
+        let successCount = 0;
+        for (let i = 0; i < 1; i++) {
+            passengerIndex = Math.floor(Math.random() * passengerCount);
+            driverIndex = Math.floor(Math.random() * driverCount);
+            
+            let passenger = passengers[passengerIndex];
+            let driver = drivers[driverIndex];
+
+            if(driver.vehicleID) {
+                successCount++;
+                let rideEntry = await generateRide(driver._id, driver.vehicleID, passenger._id);
+                //console.log("rideEntry:\n", rideEntry);
+                let savedRide = await axios.post(address+'ride/add', rideEntry);
+                //console.log("savedEntry:\n", savedRide.data);
+            }
+        }
+        console.log(successCount);
+    } catch (error) {
+        console.log("error ocurred", error.message);
+    }
+}
+
 //driverAssign();
 
 
@@ -476,7 +550,7 @@ for (let index = 0; index < n; index++) {
 //show();
 //ridePopulate(10);
 //driverCheck();
-makeDriverAvailable();
+//makeDriverAvailable();
 //vehicleLocationUpdate();
 
 /*let duration = 60;
@@ -487,3 +561,7 @@ let end = d.toISOString();
 console.log(start);
 console.log(end);*/
 //console.log(generateOwner());
+
+//generateRide(10, 20, 30);
+generatedRideHistory();
+//putDriverOnPool();

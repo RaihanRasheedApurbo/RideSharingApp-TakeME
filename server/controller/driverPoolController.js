@@ -71,14 +71,26 @@ function makeRideEntry(pickUpPoint, currentLocation, driverID, passengerID, vehi
     
     let d1 = Date.now();
     let d2 = new Date(startTime);
-    let duration = (d1-d2)/1000;
+    let duration = (d1-d2)/6000;
+    duration = Math.round((duration + Number.EPSILON) * 1000) / 1000;
+    
+    let fare = 0, penaltyCost = 0;
+    if (status === ENDED) {
+        fare = total;
+        penaltyCost = 0;
+    }else {
+        fare = 0;
+        penaltyCost = total;
+    }
+    total = Math.round((total + Number.EPSILON) * 100) / 100;
     
     let ride = {
         driverID: driverID,
         passengerID: passengerID,
         vehicleID: vehicleID,
         duration: duration,
-        fare: total,
+        fare: fare,
+        penaltyCost: penaltyCost,
         distance: dist,
         source: pickUpPoint,
         destination: currentLocation,
@@ -441,7 +453,7 @@ exports.endRide = async(req, res) => {
         if(entryData && Object.keys(entryData).length) {
             let pickUpPoint = entryData.passengerInfo.pickUpPoint;
             let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], currentLocation[0], currentLocation[1]); 
-            let total = dist/100.0;
+            let total = (dist/1000)*25;
             console.log(pickUpPoint, currentLocation);
             let rideInfo = makeRideEntry(pickUpPoint, currentLocation, entryData.driverID, entryData.passengerID, entryData.vehicleInfo._id, entryData.startTime, total, ENDED);
             

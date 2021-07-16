@@ -13,17 +13,19 @@ exports.addRide = (req, res) => {
         driverID : req.body.driverID,
         passengerID : req.body.passengerID,
         vehicleID : req.body.vehicleID,
+        time: req.body.time,
         duration : req.body.duration,
         fare : req.body.fare,
+        distance: req.body.distance,
         source : req.body.source,
-        destination : req.body.destination
+        destination : req.body.destination,
+        status: req.body.status
     });
 
     // save ride in the database
     ride.save()
         .then(data => {
-            res.send(data)
-            //res.redirect('/add-user');
+            res.send(data);
         })
         .catch(err =>{
             res.status(500).send({
@@ -168,7 +170,7 @@ exports.findByVehicleID = (req, res) => {
 exports.getAllRides = (req, res) => {
     Ride.find({})
     .then(data => {
-        res.send(data);
+        res.send({data, total: data.lenth});
     })
     .catch(err => {
         res.status(400).send(err);
