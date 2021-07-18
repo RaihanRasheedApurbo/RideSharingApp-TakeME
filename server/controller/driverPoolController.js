@@ -212,6 +212,70 @@ async function getMostRatedDriver(passengerID, pickUpPoint, dropOutPoint, type) 
     }
 }
 
+async function scoreDriver(type, pickUpPoint, choice) {
+    try {
+        let poolDrivers = await DriverPool.find({ 
+            'vehicleInfo.type': type,
+            status : SEARCHING 
+        } );
+    
+        console.log(poolDrivers.length);
+        for (let index = 0; index < poolDrivers.length; index++) {
+            const driver = poolDrivers[index];
+            let driverID = driver.driverID;
+            let driverLocation = driver.vehicleLocation.coordinates;
+            let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
+            let rating = driver.driverInfo.rating;
+            
+            let d = new Date(), duration = 30;
+            let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
+            let end = d.toISOString();
+            let rideCount = await Ride.aggregate([
+                { $match : { 'driverID': driverID, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
+            ]);
+
+            let rateCount = await Ride.aggregate([
+                { $match : { 'driverID': driverID, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+                { $group: { '_id': '$driverID', 'total': {$sum: '$rating'}}}
+            ]);
+
+            rideCount = rideCount.length;
+            rateCount = rideCount === 0? 0 : rateCount[0].total/rideCount;
+            console.log(rating, rateCount, rideCount);
+
+            //discuss these weights and scores
+            let weights = [0.5, 0.25, 0.25];
+            let distWeight = weights[0];
+            let ratingWeight = weights[1];
+            let rideCountWeight = weights[2];
+            
+            if (choice === NEAR) {
+                
+            }
+            
+            let distScore = (dist/1000)*distWeight;
+            let ratingScore = rating*ratingWeight;
+            let lastRatingScore = rateCount*ratingWeight;
+            let rideCountScore  = rideCount*ratingWeight;;
+            let score = distScore+ratingScore+lastRatingScore+rideCountScore;
+
+            //calculate the score
+            let updateBody = {
+                $set: { score: score }
+            }
+            let updatedEntry = await DriverPool.findOneAndUpdate({driverID: driverID}, updateBody, { useFindAndModify: false, new: true });
+            console.log("updated score: ", updatedEntry.score);
+        }
+        let topDriver = await DriverPool.aggregate([
+            { $match : { 'vehicleInfo.type': type, status : SEARCHING } },
+            { $sort : { 'score' : -1, '_id': 1} }
+        ]);
+        console.log("found driver:\n", topDriver[0].driverInfo);
+    } catch (error) {
+        console.log(error.message);   
+    }
+}
+
 //custom driver match(temporary for testing purpose)
 async function customDriverMatch(passengerID, pickUpPoint, dropOutPoint) {
     //if(n%2) res.status(200).send({message: "no preferable driver found"});
@@ -504,6 +568,8 @@ exports.lookForDriver = async(req, res) => {
         let dropOutPoint = arrayParse(req.body.dropOutPoint);
         //console.log(pickUpPoint, dropOutPoint, typeof(pickUpPoint), typeof(dropOutPoint));
 
+        scoreDriver(vehicleType, pickUpPoint, requirement);
+
         let entry = await DriverPool.findOne({passengerID: passengerID});
         if(entry && entry.driverID !== undefined) {
             console.log("exists");
@@ -534,7 +600,7 @@ exports.lookForDriver = async(req, res) => {
             console.log(savedEntry);
             //upadate driver's rating
             
-            res.status(200).send({message: "ride was completed", status: removedData.status, rideInfo});
+            res.status(200).send({message: "ride was completed", status: removedData.status, rideInfo: savedEntry});
         }
         else {
             if(requirement === NEAR) {

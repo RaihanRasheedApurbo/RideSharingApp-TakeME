@@ -33,6 +33,9 @@ const DriverPoolSchema = new mongoose.Schema({
     driverInitialLocation : {
         type: Object
     },
+    score : {
+        type : Number
+    },
     rideInfo : {
         type: Object
     }

@@ -43,6 +43,7 @@ route.post('/api/passenger/register', passengerController.register);
 route.post('/api/passenger/login', passengerController.login);
 route.get('/api/passenger/dashboard', verify, passengerController.showDashboard);
 route.get('/api/passenger/rideHistory', verify, passengerController.showRideHistory);
+route.post('/api/passenger/ride/:id', verify, rideController.rateRide);
 route.post('/api/passenger/addRide', verify, rideController.addRide); //under construction
 route.get('/api/passenger/getAll', passengerController.getAllPassengers); //test purpose only
 
@@ -55,8 +56,6 @@ route.post('/api/driver/endRide', verify, driverPoolController.endRide);
 route.post('/api/passenger/cancelMatch', verify, driverPoolController.cancelMatch);
 route.post('/api/passenger/endRide', verify, driverPoolController.endRide);
 route.post('/api/passenger/searchDriver', verify, driverPoolController.lookForDriver);
-route.post('/api/passenger/acceptDriver', verify, driverPoolController.acceptDriver); //under construction
-
 
 route.post('/api/vehicle/register', verify, vehicleController.addVehicle); //under construction, might be unnecessary
 route.get('/api/vehicle/id/', vehicleController.find); //under construction, might be unnecessary

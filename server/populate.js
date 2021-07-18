@@ -322,15 +322,16 @@ function vehicleLocationUpdate() {
 
 async function putDriverOnPool() {
     try {
-        let poolInfo = await axios.get(address+'driver/pool');
-        let pool = poolInfo.data.pool;
+        let poolInfo = axios.get(address+'driver/pool');
+        let driverInfo = axios.get(address+'driver/getAll');
+        let info = await Promise.all([poolInfo, driverInfo]);
         
-        let info = await axios.get(address+'driver/getAll');
-        let drivers = info.data;
+        let pool = info[0].data.pool;
+        let drivers = info[1].data;
         let driverCount = drivers.length;
         
         let successCount = 0;
-        for (let i = 0; i < 10; i++) {
+        while (true) {
             let driverIndex = Math.floor(Math.random() * driverCount);
             let driver = drivers[driverIndex];
             if(driver.vehicleID) console.log("valid ", driver._id);
@@ -344,7 +345,8 @@ async function putDriverOnPool() {
                 header_data['auth-token'] = loginInfo.headers['auth-token'];
         
                 let searchData = await axios.get(address+'driver/search', {headers: header_data});
-                if(searchData) successCount++;
+                if(searchData.data.message.includes("added to pool")) successCount++;
+                if(successCount == 10) break;
             } 
         }
         console.log(successCount);
@@ -455,6 +457,9 @@ async function generateRide(driverID, vehicleID, passengerID) {
     
     let total = (dist/1000)*25 + duration*0.01;
     total = Math.round((total + Number.EPSILON) * 100) / 100;
+
+    let rating = 4 + Math.random();
+    rating = Math.round((rating + Number.EPSILON) * 100) / 100;
     
     let ride = {
         driverID: driverID,
@@ -467,7 +472,7 @@ async function generateRide(driverID, vehicleID, passengerID) {
         source: pickUpPoint,
         destination: currentLocation,
         status: status,
-        extraInfo: "hello there"
+        rating: rating
     };
     //console.log(ride);
     return ride;
@@ -476,14 +481,14 @@ async function generateRide(driverID, vehicleID, passengerID) {
 async function generatedRideHistory() {
     try {
         let info, drivers = [], passengers = [];
-        //let allPassengers = axios.get(base_address+'api/passenger/getAll/');
-        //let allDrivers = axios.get(base_address+'api/driver/getAll/');
+        let allPassengers = axios.get(base_address+'api/passenger/getAll/');
+        let allDrivers = axios.get(base_address+'api/driver/getAll/');
         
-        //info = await Promise.all([allPassengers, allDrivers]);
-        //passengers = info[0].data;
-        //drivers = info[1].data;
+        info = await Promise.all([allPassengers, allDrivers]);
+        passengers = info[0].data;
+        drivers = info[1].data;
         
-        passengers = [
+        /*passengers = [
             {
                 _id: mongoose.Types.ObjectId('607478178c29c1408cfad290')
             },
@@ -509,13 +514,13 @@ async function generatedRideHistory() {
                 _id: mongoose.Types.ObjectId('607478198c29c1408cfad2c1'),
                 vehicleID: mongoose.Types.ObjectId('6074779be70efe2e24c95ce7')
             }
-        ];
+        ];*/
         let passengerCount = passengers.length
         let driverCount = drivers.length;
 
         let passengerIndex, driverIndex;
         let successCount = 0;
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < 10; i++) {
             passengerIndex = Math.floor(Math.random() * passengerCount);
             driverIndex = Math.floor(Math.random() * driverCount);
             
@@ -568,34 +573,47 @@ async function vehicleTypeUpdate() {
     }
 }
 
-//driverAssign();
+async function rateRides() {
+    try {
+        let info = await Promise.all([
+            axios.get(address+'ride/getAll'),
+            axios.get(address+'passenger/getAll')
+        ])
+        let rides = info[0].data.data;
+        let passengers = info[1].data;
+        console.log(rides[0]);
+    
+        for (let i = 0; i < rides.length; i++) {
+            const ride = rides[i];
+            const rideID = ride._id;
+            const passengerID = ride.passengerID;
+    
+            const passenger = passengers.filter(p => p._id == passengerID)[0];
+            let passengerCred = {
+                email: passenger.email,
+                password: passenger.password 
+            };
+            let loginInfo = await axios.post(address+'passenger/login', passengerCred);
+            
+            header_data['auth-token'] = loginInfo.headers['auth-token'];
+    
+            let rating = 4+Math.random();
 
-
-//get a random driver to put on the vehicle
-
-/*let n = 40;
-for (let index = 0; index < n; index++) {
-    driverPopulate();
-    passengerPopulate();
-}*/
+            let updatedEntry = await axios.post(address+'passenger/ride/'+rideID, {rating: rating}, {headers: header_data});
+            console.log(updatedEntry.data.rating);
+        }
+    } catch (error) {
+        console.log(error.message);    
+    }
+} 
 
 //show();
-//ridePopulate(10);
 //driverCheck();
-//makeDriverAvailable();
 //vehicleLocationUpdate();
 
-/*let duration = 60;
-let d = new Date();
-let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
-let end = d.toISOString();
-
-console.log(start);
-console.log(end);*/
-//console.log(generateOwner());
-
-vehicleTypeUpdate();
+//vehicleTypeUpdate();
 
 //generateRide(10, 20, 30);
-//generatedRideHistory();
+generatedRideHistory();
 //putDriverOnPool();
+//rateRides();

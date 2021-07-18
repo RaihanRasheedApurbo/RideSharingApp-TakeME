@@ -1,4 +1,6 @@
 const Ride = require('../model/ride');
+const Passenger = require('../model/passenger');
+const Driver = require('../model/driver')
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
@@ -34,6 +36,44 @@ exports.addRide = (req, res) => {
             });
         });
 }
+
+//rateRide by passenger
+exports.rateRide = async (req, res) => {
+    try {
+        const passengerID = mongoose.Types.ObjectId(req.data._id);
+        const _id = mongoose.Types.ObjectId(req.params.id);
+        let rating = Number(req.body.rating);
+
+        if (rating === NaN || rating === 0) throw new Error("got invalid rating as parameter");
+        rating = Math.round((rating + Number.EPSILON) * 100) / 100;
+
+        let filter = { _id, passengerID };
+        let updateBody = {
+            $set: {rating: rating}
+        };
+        let updateRideEntry = await Ride.findOneAndUpdate(filter, updateBody, { useFindAndModify: false, new: true });
+        console.log("ride rating: ", updateRideEntry.rating);
+        //res.send(updateRideEntry);
+        
+        //think how to update rating of the driver
+        const driverID = updateRideEntry.driverID;
+        let info = await Driver.findById(driverID);
+        let driverRating = info.rating;
+        let driverRides = await Ride.find({ 'driverID': driverID });
+        let driverRideCount = driverRides.length;
+        let newRating = (driverRating*(driverRideCount-1) + rating)/driverRideCount;
+        newRating = Math.round((newRating + Number.EPSILON) * 100) / 100;
+    
+        let updatedDriverEntry = await Driver.findByIdAndUpdate(driverID, {$set: {rating: newRating}}, { useFindAndModify: false, new: true });
+        console.log("driver new rating: ", updatedDriverEntry.rating);
+
+        res.send(updateRideEntry);
+    } catch (error) {
+        console.log(error.message);
+        res.send(error.message);
+    }
+}
+
 
 //find
 exports.find = (req, res) => {
