@@ -63,6 +63,7 @@ route.get('/api/vehicle/id/', vehicleController.find); //under construction, mig
 route.get('/api/vehicle/ownerID/', vehicleController.findByOwnerID); //under construction, might be unnecessary
 route.get('/api/vehicle/driverID/:id', vehicleController.findByDriverID); //under construction, might be unnecessary
 route.get('/api/vehicle/getAll', vehicleController.getAllVehicles); //test purpose only
+route.post('/api/vehicle/typeUpdate', vehicleController.updateVehicleType); //test purpose only
 
 
 route.post('/api/ride/add', rideController.addRide); //under construction, might be unnecessary

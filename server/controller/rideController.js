@@ -19,7 +19,8 @@ exports.addRide = (req, res) => {
         distance: req.body.distance,
         source : req.body.source,
         destination : req.body.destination,
-        status: req.body.status
+        status: req.body.status,
+        rating: req.body.rating
     });
 
     // save ride in the database

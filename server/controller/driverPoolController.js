@@ -22,9 +22,9 @@ const MOST_RIDE = "most_ride";
 const NEW_RIDE = "new";
 const RATED = "rate";
 
-const BUDGET = "standard";
-const ECONOMY = "premium";
-const PREMIUM = "delux";
+const BUDGET = "budget";
+const ECONOMY = "economy";
+const PREMIUM = "premium";
 
 
 //function to array parse
@@ -71,8 +71,7 @@ function makeRideEntry(pickUpPoint, currentLocation, driverID, passengerID, vehi
     
     let d1 = Date.now();
     let d2 = new Date(startTime);
-    let duration = (d1-d2)/6000;
-    duration = Math.round((duration + Number.EPSILON) * 1000) / 1000;
+    let duration = (d1-d2)/60000;
     
     let fare = 0, penaltyCost = 0;
     if (status === ENDED) {
@@ -82,7 +81,9 @@ function makeRideEntry(pickUpPoint, currentLocation, driverID, passengerID, vehi
         fare = 0;
         penaltyCost = total;
     }
-    total = Math.round((total + Number.EPSILON) * 100) / 100;
+    fare = Math.round((fare + Number.EPSILON) * 100) / 100;
+    dist = Math.round((dist + Number.EPSILON) * 1000) / 1000;
+    duration = Math.round((duration + Number.EPSILON) * 1000) / 1000;
     
     let ride = {
         driverID: driverID,
@@ -358,7 +359,6 @@ exports.stopPassengerSearch = (req, res) => {
 exports.cancelMatch = async(req, res) => {
     try {
         let entity = req.body.entity;
-        let addCost = req.body.addCost === undefined ? false : true;
         let cancelStatus = null;
         let filter, updateInfo;
         if(entity === DRIVER) {
@@ -415,8 +415,10 @@ exports.cancelMatch = async(req, res) => {
         rideInfo = makeRideEntry(entryData.passengerInfo.pickUpPoint, entryData.passengerInfo.dropOutPoint, entryData.driverID, entryData.passengerID, entryData.vehicleInfo._id, entryData.startTime, total, cancelStatus);
         console.log(rideInfo);
 
-        if(entity && entryData && Object.keys(entryData).length) res.send({message: "You cancelled the ride", penaltyCost: total, entryData});
-        else throw new Error("This call was wrongfully made");
+        if(entity && entryData && Object.keys(entryData).length) {
+            //save the ride here
+            res.send({message: "You cancelled the ride", penaltyCost: total, entryData});
+        }else throw new Error("This call was wrongfully made");
     } catch (error) {
         console.log(error);
         res.status(200).send({message: error.message});
@@ -453,29 +455,15 @@ exports.endRide = async(req, res) => {
         if(entryData && Object.keys(entryData).length) {
             let pickUpPoint = entryData.passengerInfo.pickUpPoint;
             let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], currentLocation[0], currentLocation[1]); 
-            let total = (dist/1000)*25;
-            console.log(pickUpPoint, currentLocation);
+            
+            let vehicleCharge = 1, vehicleType = entryData.vehicleInfo.type === undefined ? ECONOMY : entryData.vehicleInfo.type;
+            if(vehicleType === ECONOMY) vehicleCharge = 1;
+            else if(vehicleType === BUDGET) vehicleCharge = 1.25;
+            else if(vehicleType === PREMIUM) vehicleCharge = 1.5;
+            let total = (dist/1000)*25*vehicleCharge;
             let rideInfo = makeRideEntry(pickUpPoint, currentLocation, entryData.driverID, entryData.passengerID, entryData.vehicleInfo._id, entryData.startTime, total, ENDED);
-            
-            /*let d1 = Date.now();
-            let d2 = new Date(entryData.startTime);
-            let duration = (d1-d2)/1000;
-            
-            let ride = new Ride({
-                driverID: entryData.driverID,
-                passengerID: entryData.passengerID,
-                vehicleID: entryData.vehicleInfo._id,
-                duration: duration,
-                fare: total,
-                distance: dist,
-                source: pickUpPoint,
-                destination: currentLocation,
-                type: ENDED
-            });*/
             console.log(rideInfo);
-            //res.status(200).send({ride});
-
-            //let rideEntry = new Ride(rideInfo).save();
+            
             let updateInfo = { 
                 $set: {
                     status: ENDED,
@@ -505,7 +493,13 @@ exports.lookForDriver = async(req, res) => {
     try {
         let passengerID = req.data._id;
         let requirement = req.body.requirement;
-        let vehicleType = req.body.vehicleType === undefined ? "Delux" : req.body.vehicleType;
+        let vehicleType = req.body.vehicleType === undefined ? PREMIUM : req.body.vehicleType;
+        
+        let vehicleCharge = 1;
+        if(vehicleType === ECONOMY) vehicleCharge = 1;
+        else if(vehicleType === BUDGET) vehicleCharge = 1.25;
+        else if(vehicleType === PREMIUM) vehicleCharge = 1.5;
+
         let pickUpPoint = arrayParse(req.body.pickUpPoint);
         let dropOutPoint = arrayParse(req.body.dropOutPoint);
         //console.log(pickUpPoint, dropOutPoint, typeof(pickUpPoint), typeof(dropOutPoint));
@@ -516,7 +510,7 @@ exports.lookForDriver = async(req, res) => {
             let driverLocation = entry.vehicleLocation.coordinates;
             let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
             let journeyDist = calculateDistance(pickUpPoint[0], pickUpPoint[1], dropOutPoint[0], dropOutPoint[1]);
-            let estimatedCost = journeyDist/100.0;
+            let estimatedCost = (journeyDist/1000.0)*25*vehicleCharge;
             console.log(journeyDist);
 
             let driverInfo = pretifyDriverInfo(entry);
@@ -533,6 +527,13 @@ exports.lookForDriver = async(req, res) => {
             console.log(entry);
             let removedData = await DriverPool.findOneAndDelete({passengerID: passengerID});
             let rideInfo = removedData.rideInfo;
+            
+            //save the ride
+            const ride = new Ride(rideInfo);
+            let savedEntry = await ride.save();
+            console.log(savedEntry);
+            //upadate driver's rating
+            
             res.status(200).send({message: "ride was completed", status: removedData.status, rideInfo});
         }
         else {
@@ -546,7 +547,7 @@ exports.lookForDriver = async(req, res) => {
                     console.log(dist);
 
                     let journeyDist = calculateDistance(pickUpPoint[0], pickUpPoint[1], dropOutPoint[0], dropOutPoint[1]);
-                    let estimatedCost = journeyDist/100.0;
+                    let estimatedCost = (journeyDist/1000.0)*25*vehicleCharge;
                     console.log(journeyDist);
 
                     entryData = await matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint);
@@ -576,7 +577,7 @@ exports.lookForDriver = async(req, res) => {
                     let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
                     
                     let journeyDist = calculateDistance(pickUpPoint[0], pickUpPoint[1], dropOutPoint[0], dropOutPoint[1]);
-                    let estimatedCost = journeyDist/100.0;
+                    let estimatedCost = (journeyDist/1000.0)*25*vehicleCharge;
                     console.log(journeyDist);
                     
                     let status = entryData.status;
@@ -599,7 +600,7 @@ exports.lookForDriver = async(req, res) => {
                     let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
                     
                     let journeyDist = calculateDistance(pickUpPoint[0], pickUpPoint[1], dropOutPoint[0], dropOutPoint[1]);
-                    let estimatedCost = journeyDist/100.0;
+                    let estimatedCost = (journeyDist/1000.0)*25*vehicleCharge;
                     console.log(journeyDist);
                     
                     let status = entryData.status;

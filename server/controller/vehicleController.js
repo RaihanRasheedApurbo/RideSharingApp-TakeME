@@ -1,5 +1,6 @@
 const Vehicle = require('../model/vehicle');
 const Owner = require('../model/owner');
+const mongoose = require('mongoose');
 
 exports.addVehicle = (req, res) => {
     // validate request
@@ -110,4 +111,23 @@ exports.getAllVehicles = (req, res) => {
     .catch(err => {
         res.status(400).send(err);
     });
+}
+
+exports.updateVehicleType = async (req, res) => {
+    try {
+        let id = mongoose.Types.ObjectId(req.body._id);
+        let vehicleType = req.body.type;
+
+        const vehicleUpdateBody = {
+            $set: {
+                'type': vehicleType
+            }
+        };
+        
+        let savedEntry = await Vehicle.findByIdAndUpdate(id, vehicleUpdateBody, { useFindAndModify: false, new: true });
+        res.send(savedEntry);
+    } catch (error) {
+        console.log(error.message);
+        res.send(error.message);
+    }
 }

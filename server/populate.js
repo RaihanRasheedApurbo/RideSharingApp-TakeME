@@ -536,6 +536,38 @@ async function generatedRideHistory() {
     }
 }
 
+async function vehicleTypeUpdate() {
+    try {
+        let info, vehicles = [];
+        info = await axios.get(address+'vehicle/getAll/');
+        vehicles = info.data;
+
+        const BUDGET = "budget";
+        const ECONOMY = "economy";
+        const PREMIUM = "premium";
+
+        let vehicleType = "premium";
+
+        for (let i = 0; i < vehicles.length; i++) {
+            const vehicle = vehicles[i];
+            console.log(vehicle.type);
+            if(vehicle.type === "Standard") vehicleType = ECONOMY;
+            else if(vehicle.type === "Premium") vehicleType = BUDGET;
+            else if(vehicle.type === "Delux") vehicleType = PREMIUM;
+            
+            const postBody = {
+                _id: vehicle._id,
+                type: vehicleType
+            };
+            
+            let savedEntry = await axios.post(address+'vehicle/typeUpdate', postBody);
+            console.log(savedEntry.data);
+        }
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+
 //driverAssign();
 
 
@@ -562,6 +594,8 @@ console.log(start);
 console.log(end);*/
 //console.log(generateOwner());
 
+vehicleTypeUpdate();
+
 //generateRide(10, 20, 30);
-generatedRideHistory();
+//generatedRideHistory();
 //putDriverOnPool();

@@ -244,7 +244,8 @@ exports.showRideHistory = async (req, res) => {
                 let end = d.toISOString();
 
                 getRideHistory = Ride.aggregate([
-                    { $match : { 'vehicleID': vehicle._id, 'time': {$gte: new Date(start), $lte: new Date(end)} } }
+                    { $match : { 'vehicleID': vehicle._id, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+                    { $sort : { 'time' : -1, '_id': 1} }
                 ]);
                 getTotalEarning = Ride.aggregate([
                     { $match : { 'vehicleID': vehicle._id, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
@@ -252,7 +253,10 @@ exports.showRideHistory = async (req, res) => {
                 ]);
             }
             else {
-                getRideHistory = Ride.find({ 'vehicleID': vehicle._id });
+                getRideHistory = Ride.aggregate([
+                    { $match : { 'vehicleID': vehicle._id } },
+                    { $sort : { 'time' : -1, '_id': 1} }
+                ])
                 getTotalEarning = Ride.aggregate([
                     { $match : { 'vehicleID': vehicle._id } },
                     { $group: { '_id': '$vehicleID', 'total': {$sum: '$fare'}}}

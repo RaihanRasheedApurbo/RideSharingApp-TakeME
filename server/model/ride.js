@@ -45,6 +45,9 @@ const RideSchema = new mongoose.Schema({
     },
     status : {
         type : String
+    },
+    rating : {
+        type: Number
     }
 })
 
