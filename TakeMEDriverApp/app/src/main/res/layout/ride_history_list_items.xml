@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="15dp"
+    android:background="@drawable/bg_waiting"
+    >
+
+
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="100dp"
+        android:src="@mipmap/more"
+        android:id="@+id/ride_history_item_image"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Banani"
+        android:id="@+id/ride_history_item_from"
+        android:layout_toRightOf="@+id/ride_history_item_image"
+        android:layout_marginLeft="10dp"
+        android:textSize="20dp"/>
+
+    <TextView
+        android:id="@+id/ride_history_item_to"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ride_history_item_from"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="46dp"
+        android:layout_toRightOf="@+id/ride_history_item_image"
+        android:text="Uttara"
+        android:textSize="20dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:text="-\n-\n-"
+        android:layout_marginLeft="25dp"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/ride_history_fare"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/ride_history_item_from"
+        android:layout_marginLeft="150dp"
+        android:layout_marginTop="1dp"
+        android:layout_toRightOf="@+id/ride_history_item_image"
+        android:text="BDT 20.00"
+        android:textSize="20dp" />
+
+    <ImageView
+        android:layout_width="13dp"
+        android:layout_height="13dp"
+        android:src="@mipmap/circle"
+        android:layout_marginLeft="21dp"/>
+
+
+    <ImageView
+        android:layout_width="13dp"
+        android:layout_height="13dp"
+        android:src="@mipmap/circle"
+        android:layout_marginLeft="21dp"
+        android:layout_marginTop="84dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:text="To"
+        android:layout_toRightOf="@+id/ride_history_item_image"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="36dp"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ride_history_item_date_time"
+        android:text="12:06 - 20.07.2021"
+        android:layout_above="@id/ride_history_fare"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="223dp"/>
+
+
+</RelativeLayout>
