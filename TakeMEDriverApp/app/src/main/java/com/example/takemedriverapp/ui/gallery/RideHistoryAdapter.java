@@ -35,9 +35,15 @@ public class RideHistoryAdapter extends ArrayAdapter<RideHistory> {
 
         TextView source = convertView.findViewById(R.id.ride_history_item_from);
         TextView dest = convertView.findViewById(R.id.ride_history_item_to);
+        TextView fare = convertView.findViewById(R.id.ride_history_fare);
+        TextView date_time = convertView.findViewById(R.id.ride_history_item_date_time);
+
 
         source.setText(getItem(position).getSource());
         dest.setText(getItem(position).getDestination());
+        fare.setText("BDT " + getItem(position).getFare().toString());
+        date_time.setText(getItem(position).getDate());
+
         return convertView;
     }
 }

@@ -30,16 +30,13 @@ public class RideHistory {
     }
 
     public String getDate() {
-        return date;
+        return time + " " + date;
     }
 
     public void setDate(String date) {
         this.date = date;
     }
 
-    public String getTime() {
-        return time;
-    }
 
     public void setTime(String time) {
         this.time = time;

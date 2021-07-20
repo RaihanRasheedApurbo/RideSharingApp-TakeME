@@ -45,14 +45,14 @@
 
     <Button
         android:id="@+id/ride_history_fare"
-        android:layout_width="wrap_content"
+        android:layout_width="140dp"
         android:layout_height="wrap_content"
         android:layout_below="@+id/ride_history_item_from"
-        android:layout_marginLeft="150dp"
+        android:layout_marginLeft="152dp"
         android:layout_marginTop="1dp"
         android:layout_toRightOf="@+id/ride_history_item_image"
-        android:text="BDT 20.00"
-        android:textSize="20dp" />
+        android:text="BDT 200.00"
+        android:textSize="17dp" />
 
     <ImageView
         android:layout_width="13dp"
