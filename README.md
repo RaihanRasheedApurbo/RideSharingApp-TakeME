@@ -471,6 +471,27 @@ you receive
 }
 ```
 
+## Ride History  
+
+Driver `/api/driver/rideHistory?duration={duration}`  
+Passenger `/api/passenger/rideHistory?duration={duration}`  
+Owner `/api/owner/vehicle/{vehicleID}/rideHistory?duration={duration}`  
+
+`duration` is an integer denoting the days
+
+I receive  
+`{'auth-token': token}` inside **req.headers**  
+
+you receive  
+
+```javascript
+{
+    ride: <Array>,
+    count: <int>
+    total: <double>
+}
+```
+
 ## Sample Credentials
 
 A sample driver credential
