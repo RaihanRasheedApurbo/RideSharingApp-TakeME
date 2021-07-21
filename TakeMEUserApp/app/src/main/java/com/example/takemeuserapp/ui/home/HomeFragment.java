@@ -29,6 +29,7 @@ import androidx.fragment.app.Fragment;
 import com.example.takemeuserapp.ApiDataService;
 import com.example.takemeuserapp.MainActivity;
 import com.example.takemeuserapp.R;
+import com.example.takemeuserapp.RideRating;
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
@@ -109,10 +110,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
     private MapboxNavigation mapboxNavigation;
     private Location prevDriverLocation;
-
-
-
-
+    private boolean lastResponseReceived = true;
 
 
     // boiler plate code of mapbox ended ... Apurbo's code starts from below...
@@ -134,15 +132,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     int time_spent = 0;
     ProgressDialog progressDialog;
     String driver_choice = "any";
-    TextView bottom_text;
+    String car_choice = "any";
+    TextView bottom_text, textView_estimated_fare;
     Button bottom_cancel, bottom_start_end, popup_confirm;
     PopupWindow popupWindow;
     ConstraintLayout constraintLayout;
     ImageButton popup_close;
-    RadioGroup driver_selector_group;
-    RadioButton radioButton_driver_select;
+    RadioGroup driver_selector_group, car_selector_group;
+    RadioButton radioButton_driver_select, radioButton_car_select;
     LayoutInflater inflater1;
     double user_lat, user_long, dest_lat, dest_long, driver_lat, driver_long;
+    double estimated_fare = 0.0;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -247,11 +247,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                 // we have to call backend here and update backend so that it knows ride has been canceld by driver
                                 // fahad call backend here..... to cancel the ride....
 
+                                progressDialog = new ProgressDialog(HomeFragment.super.getContext());
+                                progressDialog.show();
+                                progressDialog.setContentView(R.layout.waiting_screen);
+                                progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
                                 cancel_match();
-                                locationEngine.removeLocationUpdates(callback); // this should be stoped otherwise two callback will be present after restarting the activity
-                                Intent intent = getActivity().getIntent();
-                                getActivity().finish();
-                                startActivity(intent);
+
                                 break;
 
                             case DialogInterface.BUTTON_NEGATIVE:
@@ -264,6 +266,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                 builder.setMessage("Are you sure?").setPositiveButton("Yes", dialogClickListener)
                         .setNegativeButton("No", dialogClickListener).show();
+
 
             }
         });
@@ -353,6 +356,35 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         popup_confirm = customView.findViewById(R.id.popup_button_confirm);
 
         driver_selector_group = customView.findViewById(R.id.radio_group);
+        car_selector_group = customView.findViewById(R.id.radio_group_2);
+        textView_estimated_fare = customView.findViewById(R.id.text_estimated_fare);
+
+        //RadioGroup radioGroup = (RadioGroup) findViewById(R.id.yourRadioGroup);
+        String temp = "Estimated Fare : ";
+
+        driver_selector_group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                // checkedId is the RadioButton selected
+                if(checkedId == customView.findViewById(R.id.radioButton3).getId())
+                    textView_estimated_fare.setText(temp + "300");
+            }
+        });
+
+        car_selector_group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                // checkedId is the RadioButton selected
+                if(checkedId == customView.findViewById(R.id.radioButton_car_1).getId())
+                    textView_estimated_fare.setText(temp + "200");
+                else if(checkedId == customView.findViewById(R.id.radioButton_car_2).getId())
+                    textView_estimated_fare.setText(temp + "400");
+                else if(checkedId == customView.findViewById(R.id.radioButton_car_3).getId())
+                    textView_estimated_fare.setText(temp + "600");
+            }
+        });
 
         // confirm button
         popup_confirm.setOnClickListener(new View.OnClickListener() {
@@ -360,6 +392,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             public void onClick(View v) {
 
                 int selectedId = driver_selector_group.getCheckedRadioButtonId();
+                int selectedId2 = car_selector_group.getCheckedRadioButtonId();
                 //radioButton_driver_select = (RadioButton)customView.findViewById(selectedId);
 
                 if(selectedId == customView.findViewById(R.id.radioButton1).getId())
@@ -376,6 +409,22 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 {
                     driver_choice = "new";
                     System.out.println("New driver selected");
+                }
+
+                if(selectedId2 == customView.findViewById(R.id.radioButton_car_1).getId())
+                {
+                    car_choice = "economy";
+                    System.out.println("economy car selected");
+                }
+                else if(selectedId2 == customView.findViewById(R.id.radioButton_car_2).getId())
+                {
+                    car_choice = "budget";
+                    System.out.println("budget car selected");
+                }
+                else if(selectedId2 == customView.findViewById(R.id.radioButton_car_3).getId())
+                {
+                    car_choice = "premium";
+                    System.out.println("premium car selected");
                 }
 
                 popupWindow.dismiss();
@@ -508,6 +557,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
                         updateDriverLocation(lon, lat);
 
+                        startButton.setEnabled(false);
+                        startButton.setVisibility(View.INVISIBLE);
+
                         System.out.println(driverInfo.get("driverName"));
                         System.out.println(driverInfo.get("driverPhone"));
 
@@ -559,86 +611,132 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     public void onError(Object message) {
                         System.out.println("fetching driver info");
                         System.out.println("Problem in finding Driver");
+                        lastResponseReceived = true;
 //                        userState = UserState.RESTING;
 //                        progressDialog.dismiss();
+
                     }
 
                     @Override
                     public void onResponse(Object responseObject)
                     {
+                        lastResponseReceived = true;
 
+                        try{
 
-                    try{
-
-                        JSONObject responseData = new JSONObject(responseObject.toString());
-                        //System.out.println(responseData);
-
-                        if(responseData.has("driverInfo"))
-                        {
-                            JSONObject driverInfo = (JSONObject) responseData.get("driverInfo");
+                            JSONObject responseData = new JSONObject(responseObject.toString());
                             //System.out.println(responseData);
-                            JSONArray driverLocation = (JSONArray) driverInfo.get("vehicleLocation");
-                            //System.out.println(responseData.getString("status"));
-                            String status = responseData.getString("status");
-                            double lat = Double.parseDouble(driverLocation.getString(1));
-                            double lon = Double.parseDouble(driverLocation.getString(0));
-                            Location currentDriverLocation = new Location("");
-                            currentDriverLocation.setLatitude(lat);
-                            currentDriverLocation.setLongitude(lon);
-                            //System.out.println("driverInfo: " + driverInfo);
-                            //System.out.println("driverLocation: " + lat + " , " + lon);
 
-                            if(prevDriverLocation != null)
+                            if(responseData.has("driverInfo"))
                             {
-                                boolean notNear = Math.abs(prevDriverLocation.getLatitude()-currentDriverLocation.getLatitude()) > 0.001 || Math.abs(prevDriverLocation.getLongitude()-currentDriverLocation.getLongitude()) > 0.001;
+                                JSONObject driverInfo = (JSONObject) responseData.get("driverInfo");
+                                //System.out.println(responseData);
 
-                                if(notNear)
+                                //System.out.println(responseData.getString("status"));
+
+
+                                if(driverInfo.has("vehicleLocation"))
                                 {
-                                    prevDriverLocation = currentDriverLocation;
-                                    updateDriverLocation(lon, lat);
+                                    JSONArray driverLocation = (JSONArray) driverInfo.get("vehicleLocation");
+
+                                    double lat = Double.parseDouble(driverLocation.getString(1));
+                                    double lon = Double.parseDouble(driverLocation.getString(0));
+                                    Location currentDriverLocation = new Location("");
+                                    currentDriverLocation.setLatitude(lat);
+                                    currentDriverLocation.setLongitude(lon);
+                                    //System.out.println("driverInfo: " + driverInfo);
+                                    //System.out.println("driverLocation: " + lat + " , " + lon);
+
+                                    if(prevDriverLocation != null)
+                                    {
+                                        boolean notNear = Math.abs(prevDriverLocation.getLatitude()-currentDriverLocation.getLatitude()) > 0.001 || Math.abs(prevDriverLocation.getLongitude()-currentDriverLocation.getLongitude()) > 0.001;
+
+                                        if(notNear)
+                                        {
+                                            prevDriverLocation = currentDriverLocation;
+                                            updateDriverLocation(lon, lat);
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        prevDriverLocation = currentDriverLocation;
+                                    }
                                 }
 
+
+
                             }
-                            else
+
+                            if(responseData.has("status"))
                             {
-                                prevDriverLocation = currentDriverLocation;
+                                String status = responseData.getString("status");
+                                System.out.println("status: "+status);
+
+                                if(status.contains("riding") && userState!=UserState.RIDING)
+                                {
+                                    System.out.println("state synchronization is happening in fetch ride details");
+    //                                bottom_cancel.setText("Cancel Ride");
+                                    bottom_cancel.setVisibility(View.INVISIBLE);
+                                    bottom_cancel.setEnabled(false);
+                                    userState = UserState.RIDING;
+
+                                    //bottom_start_end.setVisibility(View.VISIBLE);
+                                    //bottom_start_end.setEnabled(true);
+                                    //bottom_start_end.setText("End Ride");
+
+                                }
+
+                                if(status.contains("ended"))
+                                {
+                                    System.out.println("ride ended");
+                                    // fahad show a popup window where that will say to user that the ride has eneded and he or she
+                                    // have to pay 50 tk or something like that.....
+                                    userState = UserState.RESTING;
+
+
+
+                                    System.out.println("ride ended response object:");
+                                    System.out.println(responseObject.toString());
+                                    locationEngine.removeLocationUpdates(callback);
+
+                                    Intent intent = new Intent(getActivity(), RideRating.class);
+
+                                    String rideID = ((JSONObject) responseData.get("rideInfo")).getString("_id");
+                                    String fareString = ((JSONObject) responseData.get("rideInfo")).getString("fare");
+                                    float fare = Float.parseFloat(fareString);
+                                    String msg = "Your ride has ended\nPlease pay BDT "+fare+" to the driver.";
+                                    intent.putExtra("msg",msg);
+//                                    System.out.println("rideID:");
+//                                    System.out.println(rideID);
+                                    intent.putExtra("rideID",rideID);
+                                    getActivity().finish();
+                                    startActivity(intent);
+
+
+
+                                }
+                                if(status.contains("denied"))
+                                {
+                                    System.out.println("canceling ride after driver canceled");
+                                    userState = UserState.RESTING;
+
+
+                                    locationEngine.removeLocationUpdates(callback);
+                                    String msg = "Sorry!\nRide cancelled by driver";
+                                    Intent intent = new Intent(getActivity(), RideRating.class);
+                                    intent.putExtra("msg",msg);
+                                    String rideID = ((JSONObject) responseData.get("rideInfo")).getString("_id");
+                                    System.out.println("rideID:");
+                                    System.out.println(rideID);
+                                    intent.putExtra("rideID",rideID);
+                                    getActivity().finish();
+                                    startActivity(intent);
+
+
+
+                                }
                             }
-
-
-                            if(status.contains("riding") && userState!=UserState.RIDING)
-                            {
-                                System.out.println("state synchronization is happening in fetch ride details");
-//                                bottom_cancel.setText("Cancel Ride");
-                                bottom_cancel.setVisibility(View.INVISIBLE);
-                                bottom_cancel.setEnabled(false);
-                                userState = UserState.RIDING;
-
-                                bottom_start_end.setVisibility(View.VISIBLE);
-                                bottom_start_end.setEnabled(true);
-                                bottom_start_end.setText("End Ride");
-
-                            }
-
-                            if(status.contains("ended"))
-                            {
-                                System.out.println("ride ended");
-                                // fahad show a popup window where that will say to user that the ride has eneded and he or she
-                                // have to pay 50 tk or something like that.....
-                                locationEngine.removeLocationUpdates(callback); // this should be stoped otherwise two callback will be present after restarting the activity
-                                Intent intent = getActivity().getIntent();
-                                getActivity().finish();
-                                startActivity(intent);
-                            }
-                            if(status.contains("denied"))
-                            {
-                                System.out.println("canceling ride after driver canceled");
-                                // fahad show a popup here and then do something like below
-                                locationEngine.removeLocationUpdates(callback); // this should be stoped otherwise two callback will be present after restarting the activity
-                                Intent intent = getActivity().getIntent();
-                                getActivity().finish();
-                                startActivity(intent);
-                            }
-                        }
 
 
 
@@ -714,6 +812,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
     public void cancel_match()
     {
+        userState = UserState.RESTING;
         ApiDataService apiDataService = new ApiDataService(this.getContext());
 
         apiDataService.cancelMatch(MainActivity.main_token, new ApiDataService.VolleyResponseListener() {
@@ -725,11 +824,23 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
             @Override
             public void onResponse(Object responseObject) {
-
                 try {
+//
+                    userState = UserState.RESTING;
+                    locationEngine.removeLocationUpdates(callback);
+                    System.out.println("cancel response object:");
+                    System.out.println(responseObject.toString());
                     JSONObject responseData = new JSONObject(responseObject.toString());
-                    System.out.println("Ride Cancelled by user");
-                    System.out.println(responseData);
+                    String penalty = ((Integer) responseData.get("penaltyCost")).toString();
+                    String msg = "You have been fined BDT "+penalty+".00\nfor cancelling match";
+                    Intent intent = new Intent(getActivity(), RideRating.class);
+                    intent.putExtra("msg",msg);
+                    String rideID = ((JSONObject) responseData.get("rideInfo")).getString("_id");
+                    System.out.println("rideID:");
+                    System.out.println(rideID);
+                    intent.putExtra("rideID",rideID);
+                    getActivity().finish();
+                    startActivity(intent);
                 } catch (Exception e) {
                     System.out.println(e);
                 }
@@ -965,17 +1076,19 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 }
 
 //                System.out.println("kill meh");
-                System.out.println("userstate: " + fragment.userState);
+                //System.out.println("userstate: " + fragment.userState);
                 if (fragment.userState == UserState.FINDING)
                 {
 
                 }
-                else if(fragment.userState == UserState.PICKING)
+                else if(fragment.userState == UserState.PICKING && fragment.lastResponseReceived)
                 {
+                    fragment.lastResponseReceived = false;
                     fragment.fetchRideDetails();
                 }
                 else if(fragment.userState == UserState.RIDING)
                 {
+                    fragment.lastResponseReceived = false;
                     fragment.fetchRideDetails();
                 }
                 else if(fragment.userState == UserState.RESTING)

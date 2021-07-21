@@ -12,13 +12,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.navigation.NavigationView;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -29,6 +34,7 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
     public static String main_token = "";
-
+    private static final String TAG = "MainActivity";
     private static MainActivity instance;
 
     DrawerLayout drawerLayout;
@@ -59,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MapView mapView;
     private MapboxMap mapboxMap;
     private Marker currentMarker = null;
+    private JSONObject currentResponse;
+    private int currentDriver = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         instance = this;
+
 
         Intent homeintent = new Intent(MainActivity.this, Waiting.class);
         startActivity(homeintent);
@@ -106,6 +115,253 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         navigationView.setNavigationItemSelectedListener(this);
 
+
+        // update realtime driver locations.....
+        final Handler handler = new Handler();
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    Log.i(TAG, "Thread Name 2: " + Thread.currentThread().getName());
+                    synchronized (this) {
+                        try {
+                            wait(10000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    JSONObject newResponse = null;
+//                    JSONObject newResponse = fetchDriverInfo();
+
+                    if (currentResponse != null && newResponse != null) {
+                        updateUIandMap(currentResponse, newResponse);
+                    }
+                    if (newResponse != null) {
+                        currentResponse = newResponse;
+                    }
+
+
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "Download finished...", Toast.LENGTH_SHORT).show();
+//                            drivers.get(0).name = "kill meh";
+//                            int updateIndex = 0;
+//                            recyclerViewAdapter.drivers.set(updateIndex, drivers.get(0));
+//                            recyclerViewAdapter.notifyItemChanged(updateIndex);
+////                            setMarker(new LatLng(23.82792221582292, 90.36122243055756),"kill meh");
+
+                        }
+                    });
+
+                    //                handler.postDelayed(new Runnable() {
+                    //                    @Override
+                    //                    public void run() {
+                    //                        Toast.makeText(MainActivity.this, "10 seconds passed since download was finished...", Toast.LENGTH_SHORT).show();
+                    //                        setMarker(new LatLng(23.82792221582292, 90.36122243055756),"kill meh");
+                    //                    }
+                    //                }, 10000);
+                    //
+                    //                Log.i(TAG, "run: Download finished.");
+                    newResponse = fetchDriverInfo();
+                    updateStatus();
+
+                }
+            }
+        };
+//        runnable.run();
+        Log.i(TAG, "Thread Name 1: " + Thread.currentThread().getName());
+        Thread thread = new Thread(runnable);
+        thread.start();
+
+
+
+    }
+
+    private void updateStatus() {
+        System.out.println("inside updateStatus");
+        System.out.println(drivers.size());
+        for(int i=0;i<drivers.size();i++)
+        {
+            System.out.println(i);
+            System.out.println(drivers.get(i).id);
+            ApiDataService apiDataService = new ApiDataService(MainActivity.this);
+            apiDataService.viewDriver(MainActivity.main_token,vehicles.get(i).vehicle_id,new ApiDataService.VolleyResponseListener() {
+                @Override
+                public void onError(Object message) {
+
+                    System.out.println(message);
+
+                    System.out.println("Error in updateStatus");
+                }
+
+                @Override
+                public void onResponse(Object responseObject) {
+                    try {
+                        System.out.println("response of updateStatus");
+                        System.out.println(responseObject);
+                        JSONObject responseData = new JSONObject(responseObject.toString()) ;
+                        int currentIndex = -1;
+                        System.out.println(responseData.has("vehicleInfo"));
+                        if(responseData.has("vehicleInfo"))
+                        {
+                            JSONObject vehicleInfo = responseData.getJSONObject("vehicleInfo");
+                            int currentRegNo = Integer.parseInt(vehicleInfo.get("regNo").toString());
+
+                            System.out.println("currentRegNo: "+currentRegNo);
+
+                            for(int i=0;i<drivers.size();i++)
+                            {
+                                System.out.println(drivers.get(i).vehicle.reg_no);
+                                if(drivers.get(i).vehicle.reg_no==currentRegNo)
+                                {
+                                    currentIndex = i;
+                                    break;
+                                }
+                            }
+                        }
+
+                        System.out.println(responseData.has("status"));
+//                        System.out.println(responseData.has("status"));
+                        if(responseData.has("status"))
+                        {
+                            String currentStatus = responseData.get("status").toString();
+                            System.out.println(responseData.get("status"));
+
+                            if(currentIndex!=-1)
+                            {
+                                if(!drivers.get(currentIndex).status.equalsIgnoreCase(currentStatus))
+                                {
+                                    drivers.get(currentIndex).status = currentStatus;
+                                    recyclerViewAdapter.drivers.set(currentIndex, drivers.get(currentIndex));
+                                    recyclerViewAdapter.notifyItemChanged(currentIndex);
+                                    System.out.println("status changed! for "+currentIndex+" "+drivers.get(currentIndex).status);
+                                }
+                            }
+
+
+
+                        }
+                        else
+                        {
+                            String currentStatus = "";
+
+                            if(currentIndex!=-1)
+                            {
+                                if(!drivers.get(currentIndex).status.equalsIgnoreCase(currentStatus))
+                                {
+                                    drivers.get(currentIndex).status = currentStatus;
+                                    recyclerViewAdapter.drivers.set(currentIndex, drivers.get(currentIndex));
+                                    recyclerViewAdapter.notifyItemChanged(currentIndex);
+                                    System.out.println("status changed! for "+currentIndex+" "+drivers.get(currentIndex).status);
+                                }
+                            }
+                        }
+
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+    }
+
+    private void updateUIandMap(JSONObject currentResponse, JSONObject newResponse) {
+
+    }
+
+    public void setCurrentDriver(int i)
+    {
+        currentDriver = i;
+    }
+
+    private JSONObject fetchDriverInfo() {
+        ApiDataService apiDataService2 = new ApiDataService(MainActivity.this);
+
+
+
+        apiDataService2.getVehicles(MainActivity.main_token, new ApiDataService.VolleyResponseListener() {
+            @Override
+            public void onError(Object message) {
+
+                System.out.println("Error in fetchDriverInfo");
+            }
+
+            @Override
+            public void onResponse(Object responseObject) {
+                try {
+
+                    JSONArray response = new JSONArray(responseObject.toString());
+                    System.out.println("inside fetchDriverInfo");
+                    System.out.println(response);
+                    System.out.println("current driver:"+currentDriver);
+                    boolean reRender = false;
+                    for(int i=0;i<response.length();i++)
+                    {
+                        JSONObject obj = (JSONObject) response.get(i);
+                        JSONObject loc = (JSONObject) obj.get("location");
+                        JSONArray latLang = loc.getJSONArray("coordinates");
+
+                        System.out.println("hi");
+                        System.out.println(latLang.get(1)+" "+latLang.get(0));
+
+                        boolean changed = Math.abs(drivers.get(i).lat - (double) latLang.get(1)) > 0.01 || Math.abs(drivers.get(i).lang - (double) latLang.get(0)) > 0.01;
+                        if(changed)
+                        {
+                            System.out.println("location changed");
+                            System.out.println(drivers.get(i).lat+" "+drivers.get(i).lang);
+                            drivers.get(i).lat = (double) latLang.get(1);
+                            drivers.get(i).lang = (double) latLang.get(0);
+                            if(currentDriver==i)
+                            {
+                                setMarker(new LatLng((double) latLang.get(1),(double) latLang.get(0)),drivers.get(i).name);
+                            }
+
+                        }
+//                        System.out.println(loc);
+                    }
+
+
+//                    System.out.println("hello");
+//                    System.out.println(responseData[0]);
+//                    for (int i = 0; i < responseData[0].length(); i++) {
+//                        String model = (String)new JSONObject(responseData[0].get(i).toString()).get("model");
+//                        String type = model + " " + (String)new JSONObject(responseData[0].get(i).toString()).get("type");
+//                        String regno = (String) new JSONObject(responseData[0].get(i).toString()).get("regNo");
+//                        String id = (String)new JSONObject(responseData[0].get(i).toString()).get("_id");
+//                        String driver_id = (String)new JSONObject(responseData[0].get(i).toString()).get("driverID");
+//
+//                        JSONObject location = (JSONObject) new JSONObject(responseData[0].get(i).toString()).get("location");
+//                        JSONArray coordinates = (JSONArray) location.get("coordinates");
+//                        double lang = (Double) coordinates.get(0);
+//                        double lat = (Double) coordinates.get(1);
+//                        System.out.println("coordinate: "+coordinates);
+//                        System.out.println("lat :"+lat+" lang: "+lang);
+//                        System.out.println("location: "+location);
+//
+//
+//
+//
+//                        //System.out.println("uiui "+ driver_id);
+//
+//                        api_call_vehicle_info(id, model, type, regno, driver_id,lat,lang,i);
+//                    }
+//                    System.out.println("hello");
+//
+//                    MainActivity.getInstance().update_bottom_slider();
+//
+//
+//
+//                    finish();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        return null;
     }
 
 

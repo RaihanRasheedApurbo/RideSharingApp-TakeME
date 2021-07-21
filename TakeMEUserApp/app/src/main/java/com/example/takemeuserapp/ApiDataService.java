@@ -308,4 +308,81 @@ public class ApiDataService {
 
         VolleyRequestQueue.getInstance(context).addToRequestQueue(request);
     }
+
+    //new codes from here
+    /**
+     * A function to rate ride
+     * @param token String the token retrieved from login
+     * @param rideID String rideID
+     * @param rating Double rating
+     * @param volleyResponseListener Interface
+     * this method should be implemented following the given sample
+     *
+     * <pre>
+     * {@code
+     *  try {
+     *      JSONObject responseData = new JSONObject(responseObject.toString());
+     *      System.out.println(responseData);
+     *      //responseData is just the rideInfo
+     *   } catch (JSONException e) {
+     *      e.printStackTrace();
+     *   }
+     * }</pre>
+     *
+     */
+    public void rateRide(String token, String rideID, double rating, VolleyResponseListener volleyResponseListener) {
+        String url = BASE_URL + "/api/passenger/ride/" + rideID;
+
+        Map<String,String> params = new HashMap<>();
+        params.put("rating", Double.toString(rating));
+        //System.out.println(new JSONObject(params).toString());
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, new JSONObject(params),
+                volleyResponseListener::onResponse,
+                volleyResponseListener::onError){
+            @Override
+            public Map<String, String> getHeaders() {
+                return makeHeaders("auth-token", token);
+            }
+        };
+
+        VolleyRequestQueue.getInstance(context).addToRequestQueue(request);
+    }
+
+    /**
+     * A function to view ride history
+     * @param token String the token retrieved from login
+     * @param duration int duration in days upto how much history is required
+     * @param volleyResponseListener Interface
+     * this method should be implemented following the given sample
+     *
+     * <pre>
+     * {@code
+     *  try {
+     *      JSONObject responseData = new JSONObject(responseObject.toString());
+     *      System.out.println(responseData);
+     *      JSONArray rides = (JSONArray) responseData.get('ride');
+     *      int count = (int) responseData.get('count');
+     *      double total = (double) responseData.get('total');
+     *   } catch (JSONException e) {
+     *      e.printStackTrace();
+     *   }
+     * }</pre>
+     *
+     */
+    public void viewRideHistory(String token, int duration, VolleyResponseListener volleyResponseListener) {
+        String url = BASE_URL + "/api/passenger/rideHistory";
+        if (duration != -1) url = url + "?duration="+ duration;
+
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                volleyResponseListener::onResponse,
+                volleyResponseListener::onError){
+            @Override
+            public Map<String, String> getHeaders() {
+                return makeHeaders("auth-token", token);
+            }
+        };
+
+        VolleyRequestQueue.getInstance(context).addToRequestQueue(request);
+    }
 }

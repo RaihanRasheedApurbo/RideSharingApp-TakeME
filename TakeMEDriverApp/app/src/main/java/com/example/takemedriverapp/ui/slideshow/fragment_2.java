@@ -1,0 +1,73 @@
+package com.example.takemedriverapp.ui.slideshow;
+
+import android.graphics.Color;
+import android.os.Bundle;
+
+import androidx.fragment.app.Fragment;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.example.takemedriverapp.R;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.utils.ColorTemplate;
+
+import java.util.ArrayList;
+
+public class fragment_2 extends Fragment {
+
+    public fragment_2() {
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        //View root = inflater.inflate(R.layout.fragment_2, container, false);
+
+        //fragment_2.this.getView().findViewById(R.id.barchart_seven_days_income22)
+        //root.findViewById(R.id.barchart_seven_days_income22);
+        final Fragment fragment_2 = new fragment_2();
+        
+        //BarChart barChart = root.findViewById(R.id.barchart_seven_days_income22);
+//        if(fragment_2 == null)
+//            System.out.println("this is nulllllll");
+//        else
+//            System.out.println("not nulllllll");
+
+        BarChart barChart = fragment_2.getView().findViewById(R.id.barchart_seven_days_income22);
+
+        //TextView textView = root.findViewById(R.id.frag2_text);
+        //textView.setText("meaw");
+
+        ArrayList<BarEntry> barEntries = new ArrayList<>();
+
+        barEntries.add(new BarEntry(1f, 220));
+        barEntries.add(new BarEntry(2f, 320));
+        barEntries.add(new BarEntry(3f, 420));
+        barEntries.add(new BarEntry(4f, 280));
+        barEntries.add(new BarEntry(5f, 340));
+        barEntries.add(new BarEntry(6f, 400));
+        barEntries.add(new BarEntry(7f, 200));
+
+        BarDataSet barDataSet = new BarDataSet(barEntries, "Income");
+        barDataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        barDataSet.setValueTextColor(Color.BLACK);
+        barDataSet.setValueTextSize(16f);
+
+        BarData barData = new BarData(barDataSet);
+        barChart.setFitBars(true);
+        barChart.setData(barData);
+        barChart.getDescription().setText("Last 7 days' income");
+        barChart.animateY(2000);
+
+        System.out.println("mewaw");
+
+        return inflater.inflate(R.layout.fragment_2, container, false);
+    }
+}

@@ -408,4 +408,41 @@ public class ApiDataService {
 
         VolleyRequestQueue.getInstance(context).addToRequestQueue(request);
     }
+
+    /**
+     * A function to view ride history
+     * @param token String the token retrieved from login
+     * @param duration int duration in days upto how much history is required
+     * @param volleyResponseListener Interface
+     * this method should be implemented following the given sample
+     *
+     * <pre>
+     * {@code
+     *  try {
+     *      JSONObject responseData = new JSONObject(responseObject.toString());
+     *      System.out.println(responseData);
+     *      JSONArray rides = (JSONArray) responseData.get('ride');
+     *      int count = (int) responseData.get('count');
+     *      double total = (double) responseData.get('total');
+     *   } catch (JSONException e) {
+     *      e.printStackTrace();
+     *   }
+     * }</pre>
+     *
+     */
+    public void viewRideHistory(String token, int duration, VolleyResponseListener volleyResponseListener) {
+        String url = BASE_URL + "/api/driver/rideHistory";
+        if (duration != -1) url = url + "?duration="+ duration;
+
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                volleyResponseListener::onResponse,
+                volleyResponseListener::onError){
+            @Override
+            public Map<String, String> getHeaders() {
+                return makeHeaders("auth-token", token);
+            }
+        };
+
+        VolleyRequestQueue.getInstance(context).addToRequestQueue(request);
+    }
 }

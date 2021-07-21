@@ -95,6 +95,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     private NavigationMapRoute navigationMapRoute;
     // variables needed to initialize navigation
     private Button startButton;
+    private boolean lastResponseReceived = true;
 
 
     // boiler plate code of mapbox ended ... Apurbo's code starts from below...
@@ -203,11 +204,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                 // we have to call backend here and update backend so that it knows ride has been canceld by driver
                                 // fahad call backend here..... to cancel the ride....
 
+                                progressDialog = new ProgressDialog(HomeFragment.super.getContext());
+                                progressDialog.show();
+                                progressDialog.setContentView(R.layout.waiting_screen);
+                                progressDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
                                 cancel_ride();
-                                locationEngine.removeLocationUpdates(callback);
-                                Intent intent = getActivity().getIntent();
-                                getActivity().finish();
-                                startActivity(intent);
+//                                locationEngine.removeLocationUpdates(callback);
+//                                Intent intent = getActivity().getIntent();
+//                                getActivity().finish();
+//                                startActivity(intent);
                                 break;
 
                             case DialogInterface.BUTTON_NEGATIVE:
@@ -227,15 +233,33 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         bottom_end_ride.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(),"Ride Ended",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getApplicationContext(),"Ride Ended",Toast.LENGTH_SHORT).show();
                 end_ride();
-                locationEngine.removeLocationUpdates(callback);
-                Intent intent = getActivity().getIntent();
-                getActivity().finish();
-                startActivity(intent);
-//                reset_passenger();
-//                bottom_end_ride.setVisibility(View.INVISIBLE);
-//                bottom_end_ride.setEnabled(false);
+
+                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case DialogInterface.BUTTON_POSITIVE:
+
+                                driverState = DriverState.RESTING;
+                                locationEngine.removeLocationUpdates(callback);
+                                Intent intent = getActivity().getIntent();
+                                getActivity().finish();
+                                startActivity(intent);
+                                break;
+
+                            case DialogInterface.BUTTON_NEGATIVE:
+                                //No button clicked
+                                break;
+                        }
+                    }
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setMessage("Ride ended.\nCollect BDT 270.00 from the passenger")
+                        .setPositiveButton("Ok", dialogClickListener)
+                        .show();
             }
         });
         return root;
@@ -400,21 +424,47 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
     public void cancel_ride()
     {
         ApiDataService apiDataService = new ApiDataService(this.getContext());
-
+        driverState = DriverState.RESTING;
         apiDataService.cancelMatch(MainActivity2.main_token, new ApiDataService.VolleyResponseListener() {
 
             @Override
             public void onError(Object message) {
                 System.out.println("Problem in cancel ride");
+                System.out.println(message);
+                progressDialog.dismiss();
+
             }
 
             @Override
             public void onResponse(Object responseObject) {
-
                 try {
+
+                    progressDialog.dismiss();
+
+                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            switch (which){
+                                case DialogInterface.BUTTON_POSITIVE:
+                                    locationEngine.removeLocationUpdates(callback);
+                                    Intent intent = getActivity().getIntent();
+                                    getActivity().finish();
+                                    startActivity(intent);
+                                    driverState = DriverState.RESTING;
+                                    break;
+                            }
+                        }
+                    };
                     JSONObject responseData = new JSONObject(responseObject.toString());
+                    String penalty = ((Integer) responseData.get("penaltyCost")).toString();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                    builder.setMessage("You have been fined BDT "+penalty+".00\nfor cancelling ride").setPositiveButton("ok", dialogClickListener).show();
+
+
+
                     System.out.println("Ride Cancelled by driver");
                     System.out.println(responseData);
+
                 } catch (Exception e) {
                     System.out.println(e);
                 }
@@ -486,6 +536,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
     public void end_ride()
     {
+        driverState = DriverState.RESTING;
         ApiDataService apiDataService = new ApiDataService(this.getContext());
         double end_lat = locationComponent.getLastKnownLocation().getLatitude();
         double end_long = locationComponent.getLastKnownLocation().getLongitude();
@@ -850,7 +901,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
                 if(fragment.driverState == DriverState.PICKING || fragment.driverState == DriverState.RIDING)
                 {
-                    fragment.fetchRideDetails();
+                    if(fragment.lastResponseReceived)
+                    {
+                        fragment.lastResponseReceived = false;
+                        fragment.fetchRideDetails();
+
+                    }
+
+
                 }
 
 
@@ -886,6 +944,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
                     @Override
                     public void onError(Object message) {
+                        lastResponseReceived = true;
                         System.out.println("fetching ride info");
                         System.out.println("Problem in ride info");
 //                        userState = UserState.RESTING;
@@ -895,7 +954,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                     @Override
                     public void onResponse(Object responseObject)
                     {
-
+                        lastResponseReceived = true;
 
                         try{
 
@@ -908,12 +967,31 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                             if(status.contains("cancelled"))
                             {
                                 System.out.println("ride has been canceled");
+                                driverState = DriverState.RESTING;
                                 //fahad show a popup and restart the whole thing after
                                 // after the user press ok do below stuff....
-                                locationEngine.removeLocationUpdates(callback);
-                                Intent intent = getActivity().getIntent();
-                                getActivity().finish();
-                                startActivity(intent);
+
+                                DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        switch (which){
+                                            case DialogInterface.BUTTON_POSITIVE:
+                                                locationEngine.removeLocationUpdates(callback);
+                                                Intent intent = getActivity().getIntent();
+                                                getActivity().finish();
+                                                startActivity(intent);
+                                                driverState = DriverState.RESTING;
+                                                break;
+                                        }
+                                    }
+                                };
+
+                                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                builder.setMessage("Sorry!\nRide cancelled by passenger").setPositiveButton("ok", dialogClickListener).show();
+
+
+
+
                             }
 
 

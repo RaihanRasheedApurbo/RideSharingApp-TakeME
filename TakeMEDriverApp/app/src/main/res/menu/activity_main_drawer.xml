@@ -20,12 +20,13 @@
             android:id="@+id/nav_sign_out"
             android:title="Signout" />
 
+        <item
+            android:title="version v4.36.69"
+            />
+
     </group>
 
-    <item
-        android:title="version v4.36.69"
-        >
-    </item>
+
 
 </menu>
 

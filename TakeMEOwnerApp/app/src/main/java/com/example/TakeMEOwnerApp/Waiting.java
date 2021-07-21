@@ -196,6 +196,7 @@ public class Waiting extends AppCompatActivity {
                     if(index==0)
                     {
                         MainActivity.getInstance().setMarker(new LatLng(lat,lang),driver_name);
+                        MainActivity.getInstance().setCurrentDriver(0);
                     }
 
                 } catch (JSONException e) {
