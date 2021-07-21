@@ -22,7 +22,7 @@ import com.example.takemedriverapp.R;
 import com.google.android.material.tabs.TabLayout;
 
 public class SlideshowFragment extends Fragment {
-
+    static View root = null;
     private SlideshowViewModel slideshowViewModel;
 
     private TabLayout tabLayout;
@@ -37,9 +37,9 @@ public class SlideshowFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        slideshowViewModel =
-                new ViewModelProvider(this).get(SlideshowViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_slideshow, container, false);
+//        slideshowViewModel =
+//                new ViewModelProvider(this).get(SlideshowViewModel.class);
+        root = inflater.inflate(R.layout.fragment_slideshow, container, false);
 
         FragmentManager fragManager = myContext.getSupportFragmentManager();
 
@@ -53,7 +53,7 @@ public class SlideshowFragment extends Fragment {
 
         vpadapter.add_fragment("Today", new fragment_1());
         vpadapter.add_fragment("Last 7 days", new fragment_2());
-        vpadapter.add_fragment("Last Month", new fragment_3());
+//        vpadapter.add_fragment("Last Month", new fragment_3());
 
         viewPager.setAdapter(vpadapter);
 

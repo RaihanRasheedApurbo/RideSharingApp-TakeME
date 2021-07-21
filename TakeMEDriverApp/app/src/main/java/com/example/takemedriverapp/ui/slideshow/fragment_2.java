@@ -20,19 +20,20 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import java.util.ArrayList;
 
 public class fragment_2 extends Fragment {
-
+    public static View root = null;
     public fragment_2() {
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        //View root = inflater.inflate(R.layout.fragment_2, container, false);
+        root = inflater.inflate(R.layout.fragment_2, container, false);
 
         //fragment_2.this.getView().findViewById(R.id.barchart_seven_days_income22)
         //root.findViewById(R.id.barchart_seven_days_income22);
-        final Fragment fragment_2 = new fragment_2();
+//        final Fragment fragment_2 = new fragment_2();
         
         //BarChart barChart = root.findViewById(R.id.barchart_seven_days_income22);
 //        if(fragment_2 == null)
@@ -40,7 +41,7 @@ public class fragment_2 extends Fragment {
 //        else
 //            System.out.println("not nulllllll");
 
-        BarChart barChart = fragment_2.getView().findViewById(R.id.barchart_seven_days_income22);
+        BarChart barChart = root.findViewById(R.id.barchart_seven_days_income22);
 
         //TextView textView = root.findViewById(R.id.frag2_text);
         //textView.setText("meaw");
@@ -68,6 +69,6 @@ public class fragment_2 extends Fragment {
 
         System.out.println("mewaw");
 
-        return inflater.inflate(R.layout.fragment_2, container, false);
+        return root;
     }
 }
