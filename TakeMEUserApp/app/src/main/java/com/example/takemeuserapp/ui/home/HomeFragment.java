@@ -29,6 +29,7 @@ import androidx.fragment.app.Fragment;
 import com.example.takemeuserapp.ApiDataService;
 import com.example.takemeuserapp.MainActivity;
 import com.example.takemeuserapp.R;
+import com.example.takemeuserapp.RideRating;
 import com.google.android.gms.common.api.Status;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
@@ -691,25 +692,26 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                     System.out.println("ride ended");
                                     // fahad show a popup window where that will say to user that the ride has eneded and he or she
                                     // have to pay 50 tk or something like that.....
+                                    userState = UserState.RESTING;
 
-                                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            switch (which){
-                                                case DialogInterface.BUTTON_POSITIVE:
 
-                                                    locationEngine.removeLocationUpdates(callback); // this should be stoped otherwise two callback will be present after restarting the activity
-                                                    Intent intent = getActivity().getIntent();
-                                                    getActivity().finish();
-                                                    startActivity(intent);
 
-                                                    break;
-                                            }
-                                        }
-                                    };
+                                    System.out.println("ride ended response object:");
+                                    System.out.println(responseObject.toString());
+                                    locationEngine.removeLocationUpdates(callback);
 
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                                    builder.setMessage("Your ride has ended\nPlease pay BDT 270.00 to the driver.").setPositiveButton("ok", dialogClickListener).show();
+                                    Intent intent = new Intent(getActivity(), RideRating.class);
+
+                                    String rideID = ((JSONObject) responseData.get("rideInfo")).getString("_id");
+                                    String fareString = ((JSONObject) responseData.get("rideInfo")).getString("fare");
+                                    float fare = Float.parseFloat(fareString);
+                                    String msg = "Your ride has ended\nPlease pay BDT "+fare+" to the driver.";
+                                    intent.putExtra("msg",msg);
+//                                    System.out.println("rideID:");
+//                                    System.out.println(rideID);
+                                    intent.putExtra("rideID",rideID);
+                                    getActivity().finish();
+                                    startActivity(intent);
 
 
 
@@ -718,25 +720,19 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                                 {
                                     System.out.println("canceling ride after driver canceled");
                                     userState = UserState.RESTING;
-                                    // fahad show a popup here and then do something like below
-                                     // this should be stoped otherwise two callback will be present after restarting the activity
 
-                                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            switch (which){
-                                                case DialogInterface.BUTTON_POSITIVE:
-                                                    locationEngine.removeLocationUpdates(callback);
-                                                    Intent intent = getActivity().getIntent();
-                                                    getActivity().finish();
-                                                    startActivity(intent);
-                                                    break;
-                                            }
-                                        }
-                                    };
 
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                                    builder.setMessage("Sorry!\nRide cancelled by driver").setPositiveButton("ok", dialogClickListener).show();
+                                    locationEngine.removeLocationUpdates(callback);
+                                    String msg = "Sorry!\nRide cancelled by driver";
+                                    Intent intent = new Intent(getActivity(), RideRating.class);
+                                    intent.putExtra("msg",msg);
+                                    String rideID = ((JSONObject) responseData.get("rideInfo")).getString("_id");
+                                    System.out.println("rideID:");
+                                    System.out.println(rideID);
+                                    intent.putExtra("rideID",rideID);
+                                    getActivity().finish();
+                                    startActivity(intent);
+
 
 
                                 }
@@ -829,32 +825,22 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             @Override
             public void onResponse(Object responseObject) {
                 try {
-                    progressDialog.dismiss();
-
-                    DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which){
-                                case DialogInterface.BUTTON_POSITIVE:
-                                    locationEngine.removeLocationUpdates(callback);
-                                    Intent intent = getActivity().getIntent();
-                                    getActivity().finish();
-                                    startActivity(intent);
-                                    userState = UserState.RESTING;
-                                    break;
-                            }
-                        }
-                    };
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+//
+                    userState = UserState.RESTING;
+                    locationEngine.removeLocationUpdates(callback);
+                    System.out.println("cancel response object:");
+                    System.out.println(responseObject.toString());
                     JSONObject responseData = new JSONObject(responseObject.toString());
                     String penalty = ((Integer) responseData.get("penaltyCost")).toString();
-                    builder.setMessage("You have been fined BDT "+penalty+".00\nfor cancelling match").setPositiveButton("ok", dialogClickListener).show();
-
-
-
-                    System.out.println("Ride Cancelled by user");
-                    System.out.println(responseData);
+                    String msg = "You have been fined BDT "+penalty+".00\nfor cancelling match";
+                    Intent intent = new Intent(getActivity(), RideRating.class);
+                    intent.putExtra("msg",msg);
+                    String rideID = ((JSONObject) responseData.get("rideInfo")).getString("_id");
+                    System.out.println("rideID:");
+                    System.out.println(rideID);
+                    intent.putExtra("rideID",rideID);
+                    getActivity().finish();
+                    startActivity(intent);
                 } catch (Exception e) {
                     System.out.println(e);
                 }
