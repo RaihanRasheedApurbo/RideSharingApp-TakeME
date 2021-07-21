@@ -53,7 +53,7 @@ public class SlideshowFragment extends Fragment {
 
         vpadapter.add_fragment("Today", new fragment_1());
         vpadapter.add_fragment("Last 7 days", new fragment_2());
-//        vpadapter.add_fragment("Last Month", new fragment_3());
+        vpadapter.add_fragment("Last Month", new fragment_3());
 
         viewPager.setAdapter(vpadapter);
 

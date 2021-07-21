@@ -21,7 +21,8 @@ import java.util.ArrayList;
 
 public class fragment_2 extends Fragment {
     public static View root = null;
-    public fragment_2() {
+    public fragment_2()
+    {
 
     }
 
