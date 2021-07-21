@@ -5,6 +5,7 @@ const Passenger = require('../model/passenger');
 const DriverPool = require('../model/driverPool');
 
 const mongoose = require('mongoose');
+const Dummy = require('../model/dummy');
 
 
 const MATCHED = "matched";
@@ -20,7 +21,7 @@ const PASSENGER = "passenger";
 const NEAR = "nearest";
 const MOST_RIDE = "most_ride";
 const NEW_RIDE = "new";
-const RATED = "rate";
+const EXP = "experienced";
 
 const BUDGET = "budget";
 const ECONOMY = "economy";
@@ -220,6 +221,11 @@ async function scoreDriver(type, pickUpPoint, choice) {
         } );
     
         console.log(poolDrivers.length);
+        if(poolDrivers.length === 0) {
+            console.log("no driver in the pool");
+            return;
+        }
+        let scoreInfo = [];
         for (let index = 0; index < poolDrivers.length; index++) {
             const driver = poolDrivers[index];
             let driverID = driver.driverID;
@@ -240,8 +246,8 @@ async function scoreDriver(type, pickUpPoint, choice) {
             ]);
 
             rideCount = rideCount.length;
-            rateCount = rideCount === 0? 0 : rateCount[0].total/rideCount;
-            console.log(rating, rateCount, rideCount);
+            recentRating = rideCount === 0? 0 : rateCount[0].total/rideCount;
+            console.log(rating, recentRating, rideCount);
 
             //discuss these weights and scores
             let weights = [0.5, 0.25, 0.25];
@@ -250,14 +256,45 @@ async function scoreDriver(type, pickUpPoint, choice) {
             let rideCountWeight = weights[2];
             
             if (choice === NEAR) {
-                
-            }
+                distWeight = weights[0];
+                ratingWeight = weights[1];
+                rideCountWeight = weights[2];
+            } else if (choice == NEW) {
+                distWeight = weights[2];
+                ratingWeight = weights[1];
+                rideCountWeight = weights[0];
+            } else if (choice == EXP) {
+                distWeight = weights[1];
+                ratingWeight = weights[0];
+                rideCountWeight = weights[2];
+            } 
             
-            let distScore = (dist/1000)*distWeight;
-            let ratingScore = rating*ratingWeight;
-            let lastRatingScore = rateCount*ratingWeight;
-            let rideCountScore  = rideCount*ratingWeight;;
-            let score = distScore+ratingScore+lastRatingScore+rideCountScore;
+            let distScore = dist < 1000? 1 : Math.max(0, 1-(0.2 * Math.ceil((dist-1000)/1000)));
+            let ratingScore = (rating+recentRating)/10.0;
+            let rideCountScore  = rideCount < 5? 1 : Math.max(0, 1-(0.2 * Math.ceil((rideCount-5)/10)));
+
+            console.log(distScore, ratingScore, rideCountScore);
+
+            distScore = distScore*distWeight;
+            ratingScore = ratingScore*ratingWeight;
+            rideCountScore = rideCountScore*rideCountWeight;
+
+            console.log(distScore, ratingScore, rideCountScore);
+
+            let score = distScore+ratingScore+rideCountScore;
+            score = score*100;
+
+            let item = {
+                driverID: driver.driverID,
+                driverName: driver.driverInfo.name,
+                vehicle: driver.vehicleInfo.model + driver.vehicleInfo.type,
+                rating,
+                rideCount,
+                rateCount,
+                dist,
+                score
+            }
+            scoreInfo.push(item);
 
             //calculate the score
             let updateBody = {
@@ -266,11 +303,15 @@ async function scoreDriver(type, pickUpPoint, choice) {
             let updatedEntry = await DriverPool.findOneAndUpdate({driverID: driverID}, updateBody, { useFindAndModify: false, new: true });
             console.log("updated score: ", updatedEntry.score);
         }
+        const dummy = new Dummy({
+            item: scoreInfo
+        });
+        let dummySave = await dummy.save();
         let topDriver = await DriverPool.aggregate([
             { $match : { 'vehicleInfo.type': type, status : SEARCHING } },
             { $sort : { 'score' : -1, '_id': 1} }
         ]);
-        console.log("found driver:\n", topDriver[0].driverInfo);
+        console.log("found driver:\n", topDriver, dummySave);
     } catch (error) {
         console.log(error.message);   
     }
@@ -481,7 +522,36 @@ exports.cancelMatch = async(req, res) => {
 
         if(entity && entryData && Object.keys(entryData).length) {
             //save the ride here
-            res.send({message: "You cancelled the ride", penaltyCost: total, entryData});
+            const ride = new Ride(rideInfo);
+            let savedEntry = await ride.save();
+            console.log(savedEntry);
+
+            let updateBody = {
+                $set: {rideInfo: savedEntry}
+            }
+
+            let updatedEntry = undefined;
+
+            if(entity === DRIVER) {
+                let filter = {
+                    "passengerID": entryData.passengerID
+                }
+                updatedEntry = await DriverPool.findOneAndUpdate(filter, updateBody, { useFindAndModify: false, new: true });
+                console.log(updatedEntry.rideInfo);
+
+            } 
+            if(entity === PASSENGER) {
+                let filter = {
+                    "driverID": entryData.driverID
+                }
+                updatedEntry = await DriverPool.findOneAndUpdate(filter, updateBody, { useFindAndModify: false, new: true });
+                console.log(updatedEntry);
+            }
+
+            if(updatedEntry === undefined)  throw new Error("ride wasn't updated");
+            else res.send({message: "You cancelled the ride", penaltyCost: total, entryData: updatedEntry, rideInfo: updatedEntry.rideInfo});
+
+            
         }else throw new Error("This call was wrongfully made");
     } catch (error) {
         console.log(error);
@@ -587,7 +657,7 @@ exports.lookForDriver = async(req, res) => {
         else if(entry && entry.status === DENIED) {
             console.log("should i delete now?");
             let removedData = await DriverPool.findOneAndDelete({passengerID: passengerID});
-            res.status(200).send({message: "driver denied the ride", status: removedData.status, removedData});
+            res.status(200).send({message: "driver denied the ride", status: removedData.status, removedData, rideInfo: removedData.rideInfo});
         }
         else if(entry && entry.status === ENDED) {
             console.log(entry);
@@ -598,7 +668,6 @@ exports.lookForDriver = async(req, res) => {
             const ride = new Ride(rideInfo);
             let savedEntry = await ride.save();
             console.log(savedEntry);
-            //upadate driver's rating
             
             res.status(200).send({message: "ride was completed", status: removedData.status, rideInfo: savedEntry});
         }
@@ -655,7 +724,7 @@ exports.lookForDriver = async(req, res) => {
                     //res.status(200).send(retBody);
                 }
             }
-            else if (requirement === RATED) {
+            else if (requirement === EXP) {
                 console.log("hello rated");
                 entryData = await getMostRatedDriver(passengerID, pickUpPoint, dropOutPoint, vehicleType);
                     

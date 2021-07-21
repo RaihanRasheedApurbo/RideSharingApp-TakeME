@@ -82,6 +82,8 @@ route.get('/api/driver/pool/clean', driverPoolController.cleanPool); //get reque
 //dummy routes only for test purposes
 route.get('/api/dummy', dummyController.get);
 route.post('/api/dummy', dummyController.set);
+route.get('/api/dummy/getAll', dummyController.getAll);
+route.get('/api/dummy/clean', dummyController.cleanDummy);
 
 route.post('/api/dummy/owner/reqTest', dummyController.reqTest);
 

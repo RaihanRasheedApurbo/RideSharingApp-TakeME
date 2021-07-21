@@ -47,6 +47,28 @@ exports.get = (req, res) => {
     });
 }
 
+exports.getAll = (req, res) => {
+    Dummy.find({})
+    .then( data => {
+        res.send(data);
+    })
+    .catch( err => {
+        res.status(500).send( {message: err.message} );
+    });
+}
+
+//clean
+exports.cleanDummy = (req, res) => {
+    Dummy.deleteMany({})
+    .then(data => {
+        res.status(200).send(data);
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).send(err);
+    });
+}
+
 exports.reqTest = (req, res) => {
     const reqData = {
         "params": req.params,
