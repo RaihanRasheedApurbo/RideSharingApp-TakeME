@@ -241,4 +241,25 @@ public class ApiDataService {
         MySingleton.getInstance(context).addToRequestQueue(request);
     }
 
+    public void viewRideHistory(String token, int duration, VolleyResponseListener volleyResponseListener) {
+        String url = BASE_URL + "/api/owner/rideHistory";
+        if (duration != -1) url = url + "?duration="+ duration;
+
+        StringRequest request = new StringRequest(Request.Method.GET, url,
+                volleyResponseListener::onResponse,
+                volleyResponseListener::onError){
+            @Override
+            public Map<String, String> getHeaders() {
+
+                Map<String, String> params = new HashMap<String, String>();
+
+                params.put("auth-token", token);
+
+                return params;
+            }
+        };
+
+        MySingleton.getInstance(context).addToRequestQueue(request);
+    }
+
 }

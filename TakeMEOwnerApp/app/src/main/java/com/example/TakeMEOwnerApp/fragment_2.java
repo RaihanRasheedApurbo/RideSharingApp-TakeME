@@ -47,10 +47,10 @@ public class fragment_2 extends Fragment {
         //TextView textView = root.findViewById(R.id.frag2_text);
         //textView.setText("meaw");
         ApiDataService apiDataService = new ApiDataService(this.getContext());
-        int vehicleLength = MainActivity.getInstance().vehicles.size();
-        String vechicleID = MainActivity.getInstance().vehicles.get(0).getVehicle_id();
-        System.out.println("vechicle ID :   "+vechicleID+" len: "+vehicleLength);
-        apiDataService.viewRideHistory(MainActivity.main_token, vechicleID, 7, new ApiDataService.VolleyResponseListener() {
+//        int vehicleLength = MainActivity.getInstance().vehicles.size();
+//        String vechicleID = MainActivity.getInstance().vehicles.get(0).getVehicle_id();
+//        System.out.println("vechicle ID :   "+vechicleID+" len: "+vehicleLength);
+        apiDataService.viewRideHistory(MainActivity.main_token, 7, new ApiDataService.VolleyResponseListener() {
 
             @Override
             public void onError(Object message) {
@@ -148,10 +148,12 @@ public class fragment_2 extends Fragment {
                     Arrays.sort(sortedDates);
                     ArrayList<BarEntry> barEntries = new ArrayList<>();
 
-                    for(int i=sortedDates.length-1;i>=0;i--)
+
+
+                    for(int i=0;i<=sortedDates.length-1;i++)
                     {
                         System.out.println(sortedDates[i]);
-                        barEntries.add(new BarEntry((float) i+1,map.get(sortedDates[i])));
+                        barEntries.add(new BarEntry((float) i+1,map.get(sortedDates[sortedDates.length-1-i])));
 
                     }
 

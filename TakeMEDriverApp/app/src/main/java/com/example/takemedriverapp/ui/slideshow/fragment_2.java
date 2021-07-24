@@ -170,10 +170,10 @@ public class fragment_2 extends Fragment {
                     Arrays.sort(sortedDates);
                     ArrayList<BarEntry> barEntries = new ArrayList<>();
 
-                    for(int i=sortedDates.length-1;i>=0;i--)
+                    for(int i=0;i<=sortedDates.length-1;i++)
                     {
                         System.out.println(sortedDates[i]);
-                        barEntries.add(new BarEntry((float) i+1,map.get(sortedDates[i])));
+                        barEntries.add(new BarEntry((float) i+1,map.get(sortedDates[sortedDates.length-1-i])));
 
                     }
 
