@@ -217,3 +217,15 @@ exports.getAllRides = (req, res) => {
         res.status(400).send(err);
     });
 }
+
+exports.cleanDamien = (req, res) => {
+    let driverID = mongoose.Types.ObjectId("607478178c29c1408cfad295");
+    Ride.deleteMany({driverID: driverID})
+    .then(data => {
+        res.status(200).send(data);
+    })
+    .catch(err => {
+        console.log(err);
+        res.status(500).send(err);
+    });
+}

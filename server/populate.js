@@ -407,15 +407,14 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     //console.log(d);
     return d;
 }
-
+let differ = 0;
 function generateRandomDate() {
     let date = new Date();
-    let differ = Math.floor(Math.random() * 30);
     let hour = Math.floor(Math.random() * (23-0)) + 0;
     let minute = Math.floor(Math.random() * 59);
     let second = Math.floor(Math.random() * 59);
     let time = new Date(date.getFullYear(), date.getMonth(), date.getDate()-differ, hour, minute, second);
-    
+    differ++;
     return time;
 }
 
@@ -481,23 +480,41 @@ async function generateRide(driverID, vehicleID, passengerID) {
 async function generatedRideHistory() {
     try {
         let info, drivers = [], passengers = [];
-        let allPassengers = axios.get(base_address+'api/passenger/getAll/');
+        /*let allPassengers = axios.get(base_address+'api/passenger/getAll/');
         let allDrivers = axios.get(base_address+'api/driver/getAll/');
         
         info = await Promise.all([allPassengers, allDrivers]);
         passengers = info[0].data;
-        drivers = info[1].data;
+        drivers = info[1].data;*/
         
-        /*passengers = [
+        passengers = [
             {
                 _id: mongoose.Types.ObjectId('607478178c29c1408cfad290')
             },
             {
                 _id: mongoose.Types.ObjectId('607478178c29c1408cfad292')
+            },
+            {
+                _id: mongoose.Types.ObjectId('607478188c29c1408cfad2a9')
+            },
+            {
+                _id: mongoose.Types.ObjectId('607478188c29c1408cfad2b5')
+            },
+            {
+                _id: mongoose.Types.ObjectId('607478198c29c1408cfad2d5')
+            },
+            {
+                _id: mongoose.Types.ObjectId('607478188c29c1408cfad2ab')
             }
         ];
 
         drivers = [
+            {
+                _id: mongoose.Types.ObjectId('607478178c29c1408cfad295'),
+                vehicleID: mongoose.Types.ObjectId('6074779be70efe2e24c95ce5')
+            }
+        ];
+        /*drivers = [
             {
                 _id: mongoose.Types.ObjectId('607478178c29c1408cfad298'),
                 vehicleID: mongoose.Types.ObjectId('6074779be70efe2e24c95ce8')
@@ -520,7 +537,7 @@ async function generatedRideHistory() {
 
         let passengerIndex, driverIndex;
         let successCount = 0;
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 30; i++) {
             passengerIndex = Math.floor(Math.random() * passengerCount);
             driverIndex = Math.floor(Math.random() * driverCount);
             
@@ -614,6 +631,6 @@ async function rateRides() {
 //vehicleTypeUpdate();
 
 //generateRide(10, 20, 30);
-generatedRideHistory();
-//putDriverOnPool();
+//generatedRideHistory();
+putDriverOnPool();
 //rateRides();

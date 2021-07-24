@@ -47,14 +47,14 @@ exports.get = (req, res) => {
     });
 }
 
-exports.getAll = (req, res) => {
-    Dummy.find({})
-    .then( data => {
+exports.getAll = async (req, res) => {
+    try{
+        let data = await Dummy.find({});
+        data = data.map(x => x.item);
         res.send(data);
-    })
-    .catch( err => {
+    }catch(error) {
         res.status(500).send( {message: err.message} );
-    });
+    }
 }
 
 //clean

@@ -259,11 +259,11 @@ async function scoreDriver(type, pickUpPoint, choice) {
                 distWeight = weights[0];
                 ratingWeight = weights[1];
                 rideCountWeight = weights[2];
-            } else if (choice == NEW) {
+            } else if (choice === NEW_RIDE) {
                 distWeight = weights[2];
                 ratingWeight = weights[1];
                 rideCountWeight = weights[0];
-            } else if (choice == EXP) {
+            } else if (choice === EXP) {
                 distWeight = weights[1];
                 ratingWeight = weights[0];
                 rideCountWeight = weights[2];
@@ -271,7 +271,7 @@ async function scoreDriver(type, pickUpPoint, choice) {
             
             let distScore = dist < 1000? 1 : Math.max(0, 1-(0.2 * Math.ceil((dist-1000)/1000)));
             let ratingScore = (rating+recentRating)/10.0;
-            let rideCountScore  = rideCount < 5? 1 : Math.max(0, 1-(0.2 * Math.ceil((rideCount-5)/10)));
+            let rideCountScore  = rideCount < 3? 1 : Math.max(0, 1-(0.2 * Math.ceil((rideCount-5)/10)));
 
             console.log(distScore, ratingScore, rideCountScore);
 
@@ -287,11 +287,14 @@ async function scoreDriver(type, pickUpPoint, choice) {
             let item = {
                 driverID: driver.driverID,
                 driverName: driver.driverInfo.name,
-                vehicle: driver.vehicleInfo.model + driver.vehicleInfo.type,
+                vehicle: driver.vehicleInfo.model + " " + driver.vehicleInfo.type,
                 rating,
+                recentRating,
                 rideCount,
-                rateCount,
                 dist,
+                distScore,
+                ratingScore,
+                rideCountScore,
                 score
             }
             scoreInfo.push(item);
@@ -306,12 +309,18 @@ async function scoreDriver(type, pickUpPoint, choice) {
         const dummy = new Dummy({
             item: scoreInfo
         });
-        let dummySave = await dummy.save();
-        let topDriver = await DriverPool.aggregate([
+        let dummySave = dummy.save();
+        let topDriver = DriverPool.aggregate([
             { $match : { 'vehicleInfo.type': type, status : SEARCHING } },
             { $sort : { 'score' : -1, '_id': 1} }
         ]);
-        console.log("found driver:\n", topDriver, dummySave);
+        let info = await Promise.all([dummySave, topDriver]);
+        //console.log("found driver:\n", topDriver, dummySave);
+        
+        if(info && info[1] && info[1].length > 0) {
+            return info[1][0];
+        } 
+        else return;
     } catch (error) {
         console.log(error.message);   
     }
@@ -373,7 +382,7 @@ async function matchPassenger(driverID, passengerID, pickUpPoint, dropOutPoint) 
         let driverCurrentLocation = getDriverVehicle.location.coordinates;
         
         const updateInfo = {passengerInfo: passengerInfo, status: MATCHED, passengerID: passengerData._id, startTime: Date.now(), driverInitialLocation: driverCurrentLocation};
-        console.log(updateInfo);
+        //console.log(updateInfo);
 
         return DriverPool.findOneAndUpdate(filter, updateInfo, { useFindAndModify: false, new: true });
     } catch (error) {
@@ -638,7 +647,7 @@ exports.lookForDriver = async(req, res) => {
         let dropOutPoint = arrayParse(req.body.dropOutPoint);
         //console.log(pickUpPoint, dropOutPoint, typeof(pickUpPoint), typeof(dropOutPoint));
 
-        scoreDriver(vehicleType, pickUpPoint, requirement);
+        //scoreDriver(vehicleType, pickUpPoint, requirement);
 
         let entry = await DriverPool.findOne({passengerID: passengerID});
         if(entry && entry.driverID !== undefined) {
@@ -672,7 +681,28 @@ exports.lookForDriver = async(req, res) => {
             res.status(200).send({message: "ride was completed", status: removedData.status, rideInfo: savedEntry});
         }
         else {
-            if(requirement === NEAR) {
+            let getDriver = await scoreDriver(vehicleType, pickUpPoint, requirement);
+            if(getDriver === undefined) {
+                res.status(200).send({message: "no driver found"});
+            }
+            else {
+                entryData = await matchPassenger(getDriver.driverID, passengerID, pickUpPoint, dropOutPoint);
+                if(entryData && Object.keys(entryData).length) {
+                    let status = entryData.status;
+                    let driverInfo = pretifyDriverInfo(entryData);
+                    let driverLocation = entryData.vehicleInfo.location.coordinates;
+                    let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
+                    
+                    let journeyDist = calculateDistance(pickUpPoint[0], pickUpPoint[1], dropOutPoint[0], dropOutPoint[1]);
+                    let estimatedCost = (journeyDist/1000.0)*25*vehicleCharge;
+                    if(requirement === NEW_RIDE) estimatedCost = estimatedCost*0.9;
+
+                    //console.log(dist, driverInfo);
+                    res.status(200).send({"message": "Driver Matched", "distance": dist, "estimatedCost": estimatedCost, "status": status, driverInfo});
+                } 
+                else throw new Error("couldn't update entry");
+            }
+            /*if(requirement === NEAR) {
                 console.log('hello nearest');
                 let drivers = await getNearestDriverWithType(pickUpPoint[0], pickUpPoint[1], 5000, vehicleType);
                 if(drivers.length > 0) {
@@ -748,11 +778,12 @@ exports.lookForDriver = async(req, res) => {
                 }
             }
             else throw new Error("body parameter wrong");
+            */
         }
 
     } catch (error) {
         console.log(error);
-        res.status(500).send({message: err.message});
+        res.status(200).send({message: err.message});
     }
 }
 

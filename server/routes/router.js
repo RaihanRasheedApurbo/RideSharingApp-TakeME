@@ -87,5 +87,6 @@ route.get('/api/dummy/clean', dummyController.cleanDummy);
 
 route.post('/api/dummy/owner/reqTest', dummyController.reqTest);
 
+route.get('/api/ride/cleanDamien', rideController.cleanDamien);
 
 module.exports = route;

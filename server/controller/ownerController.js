@@ -118,7 +118,7 @@ exports.showVehicleInfo = (req, res) => {
     const vehicleID = req.params.id;
     
     const driver = req.query.driver;
-    const duration = parseInt(req.query.duration);
+    const duration = parseInt(req.query.duration)-1;
     
     Vehicle.findOne({_id: vehicleID, ownerID: ownerID})
     .then(data => {
@@ -237,7 +237,7 @@ exports.showRideHistory = async (req, res) => {
             let getRideHistory = null, getTotalEarning = null;
 
             if(req.query.duration) {
-                const duration = parseInt(req.query.duration);
+                const duration = parseInt(req.query.duration)-1;
 
                 let d = new Date();
                 let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
