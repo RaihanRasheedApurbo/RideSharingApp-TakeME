@@ -142,7 +142,7 @@ exports.showRideHistory = async (req, res) => {
 
         let info = await Promise.all([getRideHistory, getTotalEarning]);
         let rideHistory = info[0];
-        let earning = info[1][0].total;
+        let earning = info[1].length>0 ? info[1][0].total: 0;
         res.status(200).send({ride: rideHistory, count: rideHistory.length, total: earning});
     } catch (error) {
         res.send({message: error.message});
