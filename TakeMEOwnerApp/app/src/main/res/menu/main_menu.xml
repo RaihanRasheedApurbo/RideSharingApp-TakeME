@@ -12,10 +12,6 @@
             android:title="Help" />
 
         <item
-            android:id="@+id/nav_wallet"
-            android:title="Wallet" />
-
-        <item
             android:id="@+id/nav_settings"
             android:title="Settings" />
     </group>

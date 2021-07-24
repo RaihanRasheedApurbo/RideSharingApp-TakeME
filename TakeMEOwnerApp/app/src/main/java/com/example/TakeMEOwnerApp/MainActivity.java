@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(MainActivity.this, "Download finished...", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(MainActivity.this, "Download finished...", Toast.LENGTH_SHORT).show();
 //                            drivers.get(0).name = "kill meh";
 //                            int updateIndex = 0;
 //                            recyclerViewAdapter.drivers.set(updateIndex, drivers.get(0));
@@ -428,13 +428,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (item.getItemId()) {
 
             case R.id.nav_stats: {
+                drawerLayout.closeDrawer(GravityCompat.START);
                 Intent intent = new Intent(MainActivity.this, OwnerStats.class);
                 startActivity(intent);
                 break;
             }
         }
         //close navigation drawer
-        drawerLayout.closeDrawer(GravityCompat.START);
+        //drawerLayout.closeDrawer(GravityCompat.START);
 
         return true;
     }
