@@ -26,6 +26,7 @@ route.get('/api/owner/vehicle/id/:id', verify, ownerController.showVehicleInfo);
 route.put('/api/owner/vehicle/id/:id', verify, ownerController.updateVehicleInfo);
 route.get('/api/owner/vehicle/id/:id/status', verify, ownerController.showVehicleStatus);
 route.get('/api/owner/vehicle/id/:id/rideHistory', verify, ownerController.showRideHistory);
+route.get('/api/owner/rideHistory', verify, ownerController.allRideHistory);
 route.post('/api/owner/addDriver', verify, ownerController.addDriverToVehicle); //under construction
 route.get('/api/owner/getAll', ownerController.getAllOwners); //test purpose only
 

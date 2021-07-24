@@ -233,7 +233,7 @@ async function scoreDriver(type, pickUpPoint, choice) {
             let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
             let rating = driver.driverInfo.rating;
             
-            let d = new Date(), duration = 3;
+            let d = new Date(), duration = 1;
             let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
             let end = d.toISOString();
             let rideCount = await Ride.aggregate([
@@ -246,7 +246,7 @@ async function scoreDriver(type, pickUpPoint, choice) {
             ]);
 
             rideCount = rideCount.length;
-            recentRating = rideCount === 0? 0 : rateCount[0].total/rideCount;
+            recentRating = rideCount === 0? 5 : rateCount[0].total/rideCount;
             console.log(rating, recentRating, rideCount);
 
             //discuss these weights and scores

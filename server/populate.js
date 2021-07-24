@@ -329,12 +329,19 @@ async function putDriverOnPool() {
         let pool = info[0].data.pool;
         let drivers = info[1].data;
         let driverCount = drivers.length;
+
+        drivers = [
+            {"email":"onki@jasom.mk","password":"YjQ@C3JiXB", "vehicleID":"6074779ce70efe2e24c95cf7"},
+            {"email":"robin@loa.com","password":"thisisrobin", "vehicleID":"6074779be70efe2e24c95ce5"},
+            {"email":"gumwentis@abu.br","password":"sV02CltBU^zc&d", "vehicleID":"6074779be70efe2e24c95ce6"}
+        ];
+        driverCount = drivers.length;
         
         let successCount = 0;
-        while (true) {
-            let driverIndex = Math.floor(Math.random() * driverCount);
+        for (let driverIndex = 0; driverIndex < drivers.length; driverIndex++) {
+            //let driverIndex = Math.floor(Math.random() * driverCount);
             let driver = drivers[driverIndex];
-            if(driver.vehicleID) console.log("valid ", driver._id);
+            if(driver.vehicleID) console.log("valid ");
             if(driver.vehicleID && pool.filter(d => d.driverID === driver._id).length === 0) {
                 let driverCred = {
                     email: driver.email,
@@ -346,9 +353,10 @@ async function putDriverOnPool() {
         
                 let searchData = await axios.get(address+'driver/search', {headers: header_data});
                 if(searchData.data.message.includes("added to pool")) successCount++;
-                if(successCount == 10) break;
+                //if(successCount == 10) break;
             } 
         }
+            
         console.log(successCount);
     } catch (error) {
         console.log({message: error.message});
@@ -508,10 +516,43 @@ async function generatedRideHistory() {
             }
         ];
 
-        drivers = [
+        //Damian
+        /*drivers = [
             {
                 _id: mongoose.Types.ObjectId('607478178c29c1408cfad295'),
                 vehicleID: mongoose.Types.ObjectId('6074779be70efe2e24c95ce5')
+            }
+        ];
+
+        //Cora dun
+        drivers = [
+            {
+                _id: mongoose.Types.ObjectId('607478178c29c1408cfad298'),
+                vehicleID: mongoose.Types.ObjectId('6074779be70efe2e24c95ce8')
+            }
+        ];
+
+        //Stephen McDonald
+        drivers = [
+            {
+                _id: mongoose.Types.ObjectId('607478188c29c1408cfad2b0'),
+                vehicleID: mongoose.Types.ObjectId('6074779be70efe2e24c95ce6')
+            }
+        ];
+
+        //Miguel Jacobs
+        drivers = [
+            {
+                _id: mongoose.Types.ObjectId('607478198c29c1408cfad2c1'),
+                vehicleID: mongoose.Types.ObjectId('6074779be70efe2e24c95ce7')
+            }
+        ];*/
+
+        //Wayne Marshall
+        drivers = [
+            {
+                _id: mongoose.Types.ObjectId('607478198c29c1408cfad2d8'),
+                vehicleID: mongoose.Types.ObjectId('6074779ce70efe2e24c95cf7')
             }
         ];
         /*drivers = [

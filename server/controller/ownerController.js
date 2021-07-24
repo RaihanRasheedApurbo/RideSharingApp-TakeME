@@ -275,6 +275,68 @@ exports.showRideHistory = async (req, res) => {
     }
 }
 
+//all ride history
+exports.allRideHistory = async (req, res) => {
+    try {
+        let ownerID = mongoose.Types.ObjectId(req.data._id);
+        let ownerDetails = await Owner.findById(ownerID);
+
+        if(ownerDetails && Object.keys(ownerDetails).length) {
+            let vehicleList = ownerDetails.vehicleList;
+            let ride = [], total = 0, count = 0;
+
+            for (let i = 0; i < vehicleList.length; i++) {
+                let vehicle = vehicleList[i];
+                if (vehicle) {
+                    let getRideHistory = null, getTotalEarning = null;
+        
+                    if(req.query.duration) {
+                        const duration = parseInt(req.query.duration)-1;
+        
+                        let d = new Date();
+                        let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
+                        let end = d.toISOString();
+        
+                        getRideHistory = Ride.aggregate([
+                            { $match : { 'vehicleID': vehicle._id, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+                            { $sort : { 'time' : -1, '_id': 1} }
+                        ]);
+                        getTotalEarning = Ride.aggregate([
+                            { $match : { 'vehicleID': vehicle._id, 'time': {$gte: new Date(start), $lte: new Date(end)} } },
+                            { $group: { '_id': '$vehicleID', 'total': {$sum: '$fare'}}}
+                        ]);
+                    }
+                    else {
+                        getRideHistory = Ride.aggregate([
+                            { $match : { 'vehicleID': vehicle._id } },
+                            { $sort : { 'time' : -1, '_id': 1} }
+                        ])
+                        getTotalEarning = Ride.aggregate([
+                            { $match : { 'vehicleID': vehicle._id } },
+                            { $group: { '_id': '$vehicleID', 'total': {$sum: '$fare'}}}
+                        ]);
+                    }
+        
+                    let info = await Promise.all([getRideHistory, getTotalEarning]);
+                    let rideHistory = info[0];
+                    let earning = info[1].length>0 ? info[1][0].total: 0;
+
+                    ride.push(rideHistory);
+                    count = count + rideHistory.length;
+                    total = total + earning;
+                    //res.status(200).send({ride: rideHistory, count: rideHistory.length, total: earning});
+                }else {
+                    throw new Error("vehicle not found");
+                }
+            }
+            res.status(200).send({ride, count, total});
+        }
+        else throw new Error("owner not found");
+    } catch (error) {
+        res.send({message: error.message});
+    }
+}
+
 //driverAddFunction
 exports.addDriverToVehicle = (req, res) => {
     const oid = mongoose.Types.ObjectId(req.data._id);
