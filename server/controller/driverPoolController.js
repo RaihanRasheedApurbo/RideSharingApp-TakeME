@@ -295,7 +295,8 @@ async function scoreDriver(type, pickUpPoint, choice) {
                 distScore: Math.round((distScore + Number.EPSILON) * 1000) / 1000,
                 ratingScore: Math.round((ratingScore + Number.EPSILON) * 100) / 100,
                 rideCountScore: Math.round((rideCountScore + Number.EPSILON) * 100) / 100,
-                score: Math.round((score + Number.EPSILON) * 1000) / 1000
+                score: Math.round((score + Number.EPSILON) * 1000) / 1000,
+                choice
             }
             scoreInfo.push(item);
 

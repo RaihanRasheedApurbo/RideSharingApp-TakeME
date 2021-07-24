@@ -8,10 +8,11 @@
             <p>Table <%= i+1 %></p>
             <table>
                 <tr>
-                    <th>DriveName</th><th>Vehicle</th>
-                    <th>rating</th><th>recentRating</th><th>rideCount</th>
-                    <th>dist</th><th>distScore</th><th>ratingScore</th>
-                    <th>rideCountScore</th><th>Score</th>
+                    <th>Driver Name</th><th>Vehicle</th>
+                    <th>Rating</th><th>Recent Rating</th><th>Ride Count</th>
+                    <th>Dist</th><th>Dist Score</th><th>Rating Score</th>
+                    <th>Ride Count Score</th><th>Score</th>
+                    <th>Choice</th>
                 </tr>
                 <% let entry = data[i] %>
                 <% for (var j = 0; j < entry.length; j++) { %>
@@ -26,6 +27,7 @@
                         <td><%= entry[j].ratingScore %></td>
                         <td><%= entry[j].rideCountScore %></td>
                         <td><%= entry[j].score %></td>
+                        <td><%= entry[j].choice %></td>
                     </tr>    
                 <% } %>
             </table>
