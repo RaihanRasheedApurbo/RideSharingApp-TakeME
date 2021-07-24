@@ -433,7 +433,7 @@ public class ApiDataService {
     public void viewRideHistory(String token, int duration, VolleyResponseListener volleyResponseListener) {
         String url = BASE_URL + "/api/driver/rideHistory";
         if (duration != -1) url = url + "?duration="+ duration;
-
+        System.out.println(url);
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 volleyResponseListener::onResponse,
                 volleyResponseListener::onError){
