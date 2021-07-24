@@ -536,7 +536,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         ApiDataService apiDataService = new ApiDataService(this.getContext());
 
         apiDataService.searchDriver(MainActivity.main_token,  driver_choice,
-                user_lat, user_long, dest_lat, dest_long,
+                user_lat, user_long, dest_lat, dest_long,car_choice,
             new ApiDataService.VolleyResponseListener() {
 
             @Override
@@ -616,7 +616,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
         ApiDataService apiDataService = new ApiDataService(this.getContext());
 
         apiDataService.searchDriver(MainActivity.main_token,  driver_choice,
-                user_lat, user_long, dest_lat, dest_long,
+                user_lat, user_long, dest_lat, dest_long, car_choice,
                 new ApiDataService.VolleyResponseListener() {
 
                     @Override

@@ -185,7 +185,7 @@ public class ApiDataService {
      * }</pre>
      *
      */
-    public void searchDriver(String token, String requirement, double pickUpLat, double pickUpLon, double dropLat, double dropLon, VolleyResponseListener volleyResponseListener) {
+    public void searchDriver(String token, String requirement, double pickUpLat, double pickUpLon, double dropLat, double dropLon, String carChoice, VolleyResponseListener volleyResponseListener) {
 
         // Request a string response from the provided URL.
         //String url = LOCAL_URL + "/api/dummy/owner/reqTest";
@@ -196,6 +196,8 @@ public class ApiDataService {
 
         Map<String,String> params = new HashMap<>();
         params.put("requirement", requirement);
+        params.put("vehicleType", carChoice);
+
 
         try {
             JSONArray pick = new JSONArray(Arrays.toString(pickUpPoint));

@@ -144,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
 
 
+<<<<<<< Updated upstream
                     handler.post(new Runnable() {
                         @Override
                         public void run() {
@@ -156,6 +157,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                         }
                     });
+=======
+//                    handler.post(new Runnable() {
+//                        @Override
+//                        public void run() {
+////                            Toast.makeText(MainActivity.this, "Download finished...", Toast.LENGTH_SHORT).show();
+////                            drivers.get(0).name = "kill meh";
+////                            int updateIndex = 0;
+////                            recyclerViewAdapter.drivers.set(updateIndex, drivers.get(0));
+////                            recyclerViewAdapter.notifyItemChanged(updateIndex);
+//////                            setMarker(new LatLng(23.82792221582292, 90.36122243055756),"kill meh");
+//
+//                        }
+//                    });
+>>>>>>> Stashed changes
 
                     //                handler.postDelayed(new Runnable() {
                     //                    @Override
