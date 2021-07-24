@@ -361,14 +361,26 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 
         //RadioGroup radioGroup = (RadioGroup) findViewById(R.id.yourRadioGroup);
         String temp = "Estimated Fare : ";
+        double farer = 0.0;
 
+
+        double distanceee = calculateDistanceInMeter(user_lat, user_long, dest_lat, dest_long);
+
+        //System.out.println("dissssssssssssss " + distanceee);
+
+        farer = (distanceee/1000.0)*25.0;
+        int fare = (int) Math.round(farer);
+
+        textView_estimated_fare.setText(temp + fare);
+
+        double finalFare = fare;
         driver_selector_group.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
         {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 // checkedId is the RadioButton selected
                 if(checkedId == customView.findViewById(R.id.radioButton3).getId())
-                    textView_estimated_fare.setText(temp + "300");
+                    textView_estimated_fare.setText(temp + (int)Math.round(finalFare*.90));
             }
         });
 
@@ -378,11 +390,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 // checkedId is the RadioButton selected
                 if(checkedId == customView.findViewById(R.id.radioButton_car_1).getId())
-                    textView_estimated_fare.setText(temp + "200");
+                    textView_estimated_fare.setText(temp + finalFare);
                 else if(checkedId == customView.findViewById(R.id.radioButton_car_2).getId())
-                    textView_estimated_fare.setText(temp + "400");
+                    textView_estimated_fare.setText(temp + (int)Math.round(finalFare*1.10));
                 else if(checkedId == customView.findViewById(R.id.radioButton_car_3).getId())
-                    textView_estimated_fare.setText(temp + "600");
+                    textView_estimated_fare.setText(temp + (int)Math.round(finalFare*1.40));
             }
         });
 
@@ -916,22 +928,22 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
 //    }
 //
 //
-//    public int calculateDistanceInMeter(double userLat, double userLng, double venueLat, double venueLng)
-//    {
-//
-//        double AVERAGE_RADIUS_OF_EARTH_KM = 6371;
-//
-//        double latDistance = Math.toRadians(userLat - venueLat);
-//        double lngDistance = Math.toRadians(userLng - venueLng);
-//
-//        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
-//                + Math.cos(Math.toRadians(userLat)) * Math.cos(Math.toRadians(venueLat))
-//                * Math.sin(lngDistance / 2) * Math.sin(lngDistance / 2);
-//
-//        double c = 2 * 1000 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-//
-//        return (int) (Math.round(AVERAGE_RADIUS_OF_EARTH_KM * c));
-//    }
+    public int calculateDistanceInMeter(double userLat, double userLng, double venueLat, double venueLng)
+    {
+
+        double AVERAGE_RADIUS_OF_EARTH_KM = 6371;
+
+        double latDistance = Math.toRadians(userLat - venueLat);
+        double lngDistance = Math.toRadians(userLng - venueLng);
+
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(userLat)) * Math.cos(Math.toRadians(venueLat))
+                * Math.sin(lngDistance / 2) * Math.sin(lngDistance / 2);
+
+        double c = 2 * 1000 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return (int) (Math.round(AVERAGE_RADIUS_OF_EARTH_KM * c));
+    }
 
 
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
