@@ -4,8 +4,8 @@
     <group android:checkableBehavior="single">
 
         <item
-            android:id="@+id/nav_trips"
-            android:title="Your Trips" />
+            android:id="@+id/nav_stats"
+            android:title="Your Stats" />
 
         <item
             android:id="@+id/nav_Help"
@@ -25,9 +25,10 @@
         <item
             android:id="@+id/nav_signout"
             android:title="Sign Out" />
+
+        <item android:title="version v4.36.69"/>
     </group>
 
-    <item android:title="version v4.36.69">
 
-    </item>
+
 </menu>

@@ -12,7 +12,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Demo2">
-        <activity android:name=".DetailRideHistory"></activity>
+        <activity android:name=".OwnerStats"></activity>
+        <activity android:name=".DetailRideHistory" />
         <activity android:name=".Waiting" />
         <activity android:name=".MainActivity">
             <intent-filter>
