@@ -51,7 +51,8 @@ exports.getAll = async (req, res) => {
     try{
         let data = await Dummy.find({});
         data = data.map(x => x.item);
-        res.send(data);
+        //res.send(data);
+        res.render('table', {data});
     }catch(error) {
         res.status(500).send( {message: err.message} );
     }

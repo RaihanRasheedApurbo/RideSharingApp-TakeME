@@ -233,7 +233,7 @@ async function scoreDriver(type, pickUpPoint, choice) {
             let dist = calculateDistance(pickUpPoint[0], pickUpPoint[1], driverLocation[1], driverLocation[0]);
             let rating = driver.driverInfo.rating;
             
-            let d = new Date(), duration = 30;
+            let d = new Date(), duration = 3;
             let start = new Date(d.getFullYear(), d.getMonth(), d.getDate()-duration).toISOString();
             let end = d.toISOString();
             let rideCount = await Ride.aggregate([
@@ -270,7 +270,7 @@ async function scoreDriver(type, pickUpPoint, choice) {
             } 
             
             let distScore = dist < 1000? 1 : Math.max(0, 1-(0.2 * Math.ceil((dist-1000)/1000)));
-            let ratingScore = (rating+recentRating)/10.0;
+            let ratingScore = ((rating/5.0)*0.25 + (recentRating/5.0)*0.75)/2.0;
             let rideCountScore  = rideCount < 3? 1 : Math.max(0, 1-(0.2 * Math.ceil((rideCount-5)/10)));
 
             console.log(distScore, ratingScore, rideCountScore);
@@ -289,13 +289,13 @@ async function scoreDriver(type, pickUpPoint, choice) {
                 driverName: driver.driverInfo.name,
                 vehicle: driver.vehicleInfo.model + " " + driver.vehicleInfo.type,
                 rating,
-                recentRating,
+                recentRating: Math.round((recentRating + Number.EPSILON) * 100) / 100,
                 rideCount,
-                dist,
-                distScore,
-                ratingScore,
-                rideCountScore,
-                score
+                dist: Math.round((dist + Number.EPSILON) * 100) / 100,
+                distScore: Math.round((distScore + Number.EPSILON) * 1000) / 1000,
+                ratingScore: Math.round((ratingScore + Number.EPSILON) * 100) / 100,
+                rideCountScore: Math.round((rideCountScore + Number.EPSILON) * 100) / 100,
+                score: Math.round((score + Number.EPSILON) * 1000) / 1000
             }
             scoreInfo.push(item);
 

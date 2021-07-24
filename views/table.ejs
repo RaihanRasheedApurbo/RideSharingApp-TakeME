@@ -1,0 +1,38 @@
+<!-- include header -->
+<%- include('include/_header') %>
+<!-- /include header -->
+
+<main id="log-view">
+    <div class="container">  
+        <% for (var i = 0; i < data.length; i++) { %>
+            <p>Table <%= i+1 %></p>
+            <table>
+                <tr>
+                    <th>DriveName</th><th>Vehicle</th>
+                    <th>rating</th><th>recentRating</th><th>rideCount</th>
+                    <th>dist</th><th>distScore</th><th>ratingScore</th>
+                    <th>rideCountScore</th><th>Score</th>
+                </tr>
+                <% let entry = data[i] %>
+                <% for (var j = 0; j < entry.length; j++) { %>
+                    <tr>
+                        <td><%= entry[j].driverName %></td>
+                        <td><%= entry[j].vehicle %></td>
+                        <td><%= entry[j].rating %></td>
+                        <td><%= entry[j].recentRating %></td>
+                        <td><%= entry[j].rideCount %></td>
+                        <td><%= entry[j].dist %></td>
+                        <td><%= entry[j].distScore %></td>
+                        <td><%= entry[j].ratingScore %></td>
+                        <td><%= entry[j].rideCountScore %></td>
+                        <td><%= entry[j].score %></td>
+                    </tr>    
+                <% } %>
+            </table>
+        <% } %>      
+    </div>
+</main>
+
+<!-- include footer -->
+<%- include('include/_footer') %>
+<!-- /include footer -->
