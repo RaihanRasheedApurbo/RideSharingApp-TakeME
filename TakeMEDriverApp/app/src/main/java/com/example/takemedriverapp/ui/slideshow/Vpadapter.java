@@ -32,8 +32,11 @@ public class Vpadapter extends FragmentPagerAdapter {
 
     public void add_fragment(String title, Fragment fragment)
     {
+
         fragmentArrayList.add(fragment);
         FragmentTitle.add(title);
+        System.out.println("size of fragmentArraylist :"+fragmentArrayList.size());
+        System.out.println("size of FragmentTitle :"+FragmentTitle.size());
 
     }
 
