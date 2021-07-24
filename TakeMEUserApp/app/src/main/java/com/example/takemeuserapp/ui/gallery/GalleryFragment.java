@@ -37,9 +37,12 @@ public class GalleryFragment extends Fragment {
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        galleryViewModel =
-                new ViewModelProvider(this).get(GalleryViewModel.class);
+
+        context = this.getContext();
+        galleryViewModel = new ViewModelProvider(this).get(GalleryViewModel.class);
+        geocoder = new Geocoder(getContext());
         View root = inflater.inflate(R.layout.fragment_gallery, container, false);
+
 
         listView_ride_history = root.findViewById(R.id.list_ride_history);
 
