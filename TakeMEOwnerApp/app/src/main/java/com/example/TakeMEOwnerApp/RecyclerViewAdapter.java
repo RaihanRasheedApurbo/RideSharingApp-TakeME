@@ -1,9 +1,11 @@
 package com.example.TakeMEOwnerApp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,6 +55,25 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             }
         });
 
+
+        Button btn_details;
+
+        btn_details = view.findViewById(R.id.button_details);
+
+        btn_details.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int itemPosition = recyclerView.getChildLayoutPosition(view);
+                Driver_class driver =  drivers.get(itemPosition);
+                String name = driver.name;
+                System.out.println(name);
+                String code = driver.vehicle.getVehicle_id();
+
+                MainActivity.getInstance().show_details(code);
+
+
+            }
+        });
 
         return new ViewHolder(view);
     }
@@ -104,6 +125,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         TextView textView1, textView2, textView3, textView4, textView5,textView6,textView7;
+
+
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

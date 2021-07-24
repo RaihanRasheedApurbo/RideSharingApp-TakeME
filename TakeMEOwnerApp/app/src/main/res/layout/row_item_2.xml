@@ -127,7 +127,16 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/text_view_car_status"
                 android:padding="5dp"
-                android:text="hi" />
+                android:text="" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Details"
+                android:id="@+id/button_details"
+                android:layout_below="@+id/text_view_driver_earning_value"
+                android:layout_alignParentRight="true"
+                />
 
 
         </RelativeLayout>

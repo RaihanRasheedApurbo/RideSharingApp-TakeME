@@ -16,6 +16,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     BottomSheetBehavior bottomSheetBehavior;
     RecyclerView recyclerView;
     TextView textView_username, textView_email;
+    //Button btn_details;
 
     JSONObject responseData, bodyData, headerData;
 
@@ -85,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mapView.getMapAsync(this);
 
 
-                frameLayout = findViewById(R.id.bottomsheet1);
+        frameLayout = findViewById(R.id.bottomsheet1);
         bottomSheetBehavior = BottomSheetBehavior.from(frameLayout);
         bottomSheetBehavior.setPeekHeight(200);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
@@ -179,13 +181,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+
+    public void show_details(String vID)
+    {
+        Intent intent = new Intent(this, DetailRideHistory.class);
+        intent.putExtra("vehicleID", vID);
+        startActivity(intent);
+    }
+
     private void updateStatus() {
-        System.out.println("inside updateStatus");
-        System.out.println(drivers.size());
+        //System.out.println("inside updateStatus");
+        //System.out.println(drivers.size());
         for(int i=0;i<drivers.size();i++)
         {
-            System.out.println(i);
-            System.out.println(drivers.get(i).id);
+            //System.out.println(i);
+            //System.out.println(drivers.get(i).id);
             ApiDataService apiDataService = new ApiDataService(MainActivity.this);
             apiDataService.viewDriver(MainActivity.main_token,vehicles.get(i).vehicle_id,new ApiDataService.VolleyResponseListener() {
                 @Override
@@ -199,21 +209,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onResponse(Object responseObject) {
                     try {
-                        System.out.println("response of updateStatus");
-                        System.out.println(responseObject);
+                        //System.out.println("response of updateStatus");
+                        //System.out.println(responseObject);
                         JSONObject responseData = new JSONObject(responseObject.toString()) ;
                         int currentIndex = -1;
-                        System.out.println(responseData.has("vehicleInfo"));
+                        //System.out.println(responseData.has("vehicleInfo"));
                         if(responseData.has("vehicleInfo"))
                         {
                             JSONObject vehicleInfo = responseData.getJSONObject("vehicleInfo");
                             int currentRegNo = Integer.parseInt(vehicleInfo.get("regNo").toString());
 
-                            System.out.println("currentRegNo: "+currentRegNo);
+                            //System.out.println("currentRegNo: "+currentRegNo);
 
                             for(int i=0;i<drivers.size();i++)
                             {
-                                System.out.println(drivers.get(i).vehicle.reg_no);
+                                //System.out.println(drivers.get(i).vehicle.reg_no);
                                 if(drivers.get(i).vehicle.reg_no==currentRegNo)
                                 {
                                     currentIndex = i;
@@ -222,12 +232,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             }
                         }
 
-                        System.out.println(responseData.has("status"));
+                        //System.out.println(responseData.has("status"));
 //                        System.out.println(responseData.has("status"));
                         if(responseData.has("status"))
                         {
                             String currentStatus = responseData.get("status").toString();
-                            System.out.println(responseData.get("status"));
+                            //System.out.println(responseData.get("status"));
 
                             if(currentIndex!=-1)
                             {
@@ -236,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     drivers.get(currentIndex).status = currentStatus;
                                     recyclerViewAdapter.drivers.set(currentIndex, drivers.get(currentIndex));
                                     recyclerViewAdapter.notifyItemChanged(currentIndex);
-                                    System.out.println("status changed! for "+currentIndex+" "+drivers.get(currentIndex).status);
+                                    //System.out.println("status changed! for "+currentIndex+" "+drivers.get(currentIndex).status);
                                 }
                             }
 
@@ -254,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     drivers.get(currentIndex).status = currentStatus;
                                     recyclerViewAdapter.drivers.set(currentIndex, drivers.get(currentIndex));
                                     recyclerViewAdapter.notifyItemChanged(currentIndex);
-                                    System.out.println("status changed! for "+currentIndex+" "+drivers.get(currentIndex).status);
+                                    //System.out.println("status changed! for "+currentIndex+" "+drivers.get(currentIndex).status);
                                 }
                             }
                         }
@@ -294,9 +304,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 try {
 
                     JSONArray response = new JSONArray(responseObject.toString());
-                    System.out.println("inside fetchDriverInfo");
-                    System.out.println(response);
-                    System.out.println("current driver:"+currentDriver);
+                    //System.out.println("inside fetchDriverInfo");
+                    //System.out.println(response);
+                    //System.out.println("current driver:"+currentDriver);
                     boolean reRender = false;
                     for(int i=0;i<response.length();i++)
                     {
@@ -304,14 +314,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         JSONObject loc = (JSONObject) obj.get("location");
                         JSONArray latLang = loc.getJSONArray("coordinates");
 
-                        System.out.println("hi");
-                        System.out.println(latLang.get(1)+" "+latLang.get(0));
+                        //System.out.println("hi");
+                        //System.out.println(latLang.get(1)+" "+latLang.get(0));
 
                         boolean changed = Math.abs(drivers.get(i).lat - (double) latLang.get(1)) > 0.01 || Math.abs(drivers.get(i).lang - (double) latLang.get(0)) > 0.01;
                         if(changed)
                         {
-                            System.out.println("location changed");
-                            System.out.println(drivers.get(i).lat+" "+drivers.get(i).lang);
+                            //System.out.println("location changed");
+                            //System.out.println(drivers.get(i).lat+" "+drivers.get(i).lang);
                             drivers.get(i).lat = (double) latLang.get(1);
                             drivers.get(i).lang = (double) latLang.get(0);
                             if(currentDriver==i)
@@ -424,7 +434,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mapboxMap.addOnCameraIdleListener(new MapboxMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
-                System.out.println("sitting idle");
+                //System.out.println("sitting idle");
             }
         });
 
