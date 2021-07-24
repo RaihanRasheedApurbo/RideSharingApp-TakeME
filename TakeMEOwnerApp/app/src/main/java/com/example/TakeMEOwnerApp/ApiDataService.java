@@ -227,13 +227,18 @@ public class ApiDataService {
         StringRequest request = new StringRequest(Request.Method.GET, url,
                 volleyResponseListener::onResponse,
                 volleyResponseListener::onError){
-            @Override
+           @Override
             public Map<String, String> getHeaders() {
-                return makeHeaders("auth-token", token);
+
+                Map<String, String> params = new HashMap<String, String>();
+
+                params.put("auth-token", token);
+
+                return params;
             }
         };
 
-        VolleyRequestQueue.getInstance(context).addToRequestQueue(request);
+        MySingleton.getInstance(context).addToRequestQueue(request);
     }
 
 }
