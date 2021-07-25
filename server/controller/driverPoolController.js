@@ -289,13 +289,13 @@ async function scoreDriver(type, pickUpPoint, choice) {
                 driverName: driver.driverInfo.name,
                 vehicle: driver.vehicleInfo.model + " " + driver.vehicleInfo.type,
                 rating,
-                recentRating: Math.round((recentRating + Number.EPSILON) * 100) / 100,
+                recentRating: Math.round((recentRating + Number.EPSILON) * 1000) / 1000,
                 rideCount,
-                dist: Math.round((dist + Number.EPSILON) * 100) / 100,
+                dist: Math.round((dist + Number.EPSILON) * 1000) / 1000,
                 distScore: Math.round((distScore + Number.EPSILON) * 1000) / 1000,
-                ratingScore: Math.round((ratingScore + Number.EPSILON) * 100) / 100,
-                rideCountScore: Math.round((rideCountScore + Number.EPSILON) * 100) / 100,
-                score: Math.round((score + Number.EPSILON) * 1000) / 1000,
+                ratingScore: Math.round((ratingScore + Number.EPSILON) * 10000) / 10000,
+                rideCountScore: Math.round((rideCountScore + Number.EPSILON) * 10000) / 10000,
+                score: Math.round((score + Number.EPSILON) * 10000) / 10000,
                 choice
             }
             scoreInfo.push(item);
