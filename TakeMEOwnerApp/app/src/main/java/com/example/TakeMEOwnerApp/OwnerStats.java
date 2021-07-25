@@ -32,7 +32,7 @@ public class OwnerStats extends AppCompatActivity {
 
         Vpadapter vpadapter = new Vpadapter(fragManager, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
 
-        vpadapter.add_fragment("Today", new fragment_1());
+//        vpadapter.add_fragment("Today", new fragment_1());
         vpadapter.add_fragment("Last 7 days", new fragment_2());
         vpadapter.add_fragment("Last Month", new fragment_3());
 
