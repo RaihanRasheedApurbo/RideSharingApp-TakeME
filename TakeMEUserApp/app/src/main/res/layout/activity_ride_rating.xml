@@ -40,7 +40,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:text="Very Dissatisfied"
+        android:text="Very Satisfied"
         android:textColor="#000000" />
 
     <LinearLayout

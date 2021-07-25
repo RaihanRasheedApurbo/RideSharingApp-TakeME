@@ -257,7 +257,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback, Mapbox
                 };
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setMessage("Ride ended.\nCollect BDT 270.00 from the passenger")
+                builder.setMessage("Ride ended.\nGo to trips for ride details")
                         .setPositiveButton("Ok", dialogClickListener)
                         .show();
             }
