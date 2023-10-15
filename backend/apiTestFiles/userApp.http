@@ -1,6 +1,6 @@
 //variables
 @baseUrl = https://take-me-backend.herokuapp.com/api/passenger
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTIiLCJpYXQiOjE2MjQ2NzU4Nzd9.hknL1C0-zQZZFmFaOS2qDdVHiIEYc02BqOu2jUEa19E
+@token = GET_TOKEN_FROM_ADMIN
 //user login
 ###
 post {{baseUrl}}/login

@@ -1,6 +1,6 @@
 //variables
 @baseUrl = https://take-me-backend.herokuapp.com/api/driver
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDc0NzgxNzhjMjljMTQwOGNmYWQyOTUiLCJpYXQiOjE2MjQ2NzU3NzJ9.Y8WIEM_pnj3SY5EZR6gYVfQvrkzSAupTU08B38UX-kk
+@token = GET_TOKEN_FROM_ADMIN
 //driver login
 ###
 post {{baseUrl}}/login

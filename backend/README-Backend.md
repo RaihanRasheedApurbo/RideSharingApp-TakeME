@@ -1,8 +1,4 @@
-# take-me-backend
-
-back-end server for Take Me App  
-[Heroku Link](http://take-me-backend.herokuapp.com "Take Me Homepage")
-`http://take-me-backend.herokuapp.com`  
+# take-me-backend 
 
 ## Owner Register
 
@@ -13,7 +9,7 @@ I receive
 {
     name: 'Douglas Berry',
     email: 'ucnovle@fa.bo',
-    password: '#aCcCL5P%Nh6%X',
+    password: 'GET_RIGHT_PASSWORD_FROM_ADMIN',
     phone: '3225711537',
     gender: 'Male',
     address: {
@@ -37,7 +33,7 @@ I receive
 ```javascript
 {
     email: 'ucnovle@fa.bo',
-    password: '#aCcCL5P%Nh6%X'
+    password: 'GET_RIGHT_PASSWORD_FROM_ADMIN'
 }
 ```
 
@@ -64,7 +60,7 @@ You receive
     "_id": "6074779ae70efe2e24c95cd1",
     "name": "Henry McCoy",
     "email": "kevdeh@cebsukhaw.iq",
-    "password": "PxNzO6cv^0jE!mZ@v",
+    "password": "GET_RIGHT_PASSWORD_FROM_ADMIN",
     "phone": "5027884900",
     "gender": "Female",
     "address": {
@@ -218,7 +214,7 @@ the `data` portion of response will contain proper response for each of the quer
             "_id": "607478178c29c1408cfad295",
             "name": "Bryan Bass",
             "email": "bisuca@tuprij.tg",
-            "password": "csbffihS@e53oN^]2",
+            "password": "GET_RIGHT_PASSWORD_FROM_ADMIN",
             "phone": "5374897507",
             "gender": "Male",
             "address": {
@@ -297,7 +293,7 @@ A plain object without `passengerInfo` field
             "_id": "607478178c29c1408cfad290",
             "name": "Rachel Dews",
             "email": "rachel@da.c0m",
-            "password": "bruceisbatman",
+            "password": "GET_RIGHT_PASSWORD_FROM_ADMIN",
             "phone": "4608528544",
             "gender": "Female",
             "address": {
@@ -499,7 +495,7 @@ A sample driver credential
 ```javascript
 {
     "email": "robin@loa.com",
-    "password": "thisisrobin"
+    "password": "GET_RIGHT_PASSWORD_FROM_ADMIN"
 }
 ```  
 
@@ -508,7 +504,7 @@ A sample passenger credential
 ```javascript
 {
     "email": "rachel@da.com",
-    "password": "bruceisbatman"
+    "password": "GET_RIGHT_PASSWORD_FROM_ADMIN"
 }
 ```  
 
@@ -517,7 +513,7 @@ A sample owner credential
 ```javascript
 {
     "email": "bruce@wayne.com",
-    "password": "iAmBatman"
+    "password": "GET_RIGHT_PASSWORD_FROM_ADMIN"
 }
 ```  
 

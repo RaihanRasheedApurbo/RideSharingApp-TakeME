@@ -14,12 +14,12 @@ const base_address = 'https://take-me-backend.herokuapp.com/';
 const address = 'http://localhost:3000/api/';
 
 let header_data = {
-    'auth-token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MDZkZWE5NTg3NDA1NTI0YjhkZjVlMDYiLCJpYXQiOjE2MTgwNzExNTZ9.j81iCN2-GLtL1PpKnZJUcVoLR8HFopCn0TWevP6yWAA'
+    'auth-token': process.env.AUTH_TOKEN
 }
 
 let loginCred = {
-    email: "kevdeh@cebsukhaw.iq",
-    password: "PxNzO6cv^0jE!mZ@v"
+    email: process.env.USER_EMAIL,
+    password: process.env.USER_PASSWORD
 }
 
 let locationData = [
